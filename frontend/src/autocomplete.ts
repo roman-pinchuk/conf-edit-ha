@@ -21,28 +21,20 @@ export function setEntities(entityList: Entity[]): void {
  * Provides entity suggestions based on substring matching
  */
 export function entityCompletions(context: CompletionContext): CompletionResult | null {
-  console.log('[Autocomplete] Function called, entities count:', entities.length);
-
   // Get the word before cursor
   const word = context.matchBefore(/[\w._]+/);
 
-  console.log('[Autocomplete] Word match:', word ? {from: word.from, to: word.to, text: word.text} : 'null');
-
   // Don't show completions if no word is being typed
   if (!word || word.from === word.to) {
-    console.log('[Autocomplete] No word or empty word, returning null');
     return null;
   }
 
   const wordText = word.text.toLowerCase();
-  console.log('[Autocomplete] Searching for:', wordText);
 
   // Filter entities by substring match
   const matches = entities.filter(e =>
     e.toLowerCase().includes(wordText)
   ).slice(0, 50); // Limit to 50 results
-
-  console.log('[Autocomplete] Found matches:', matches.length);
 
   if (matches.length === 0) {
     return null;
