@@ -1,6 +1,7 @@
 # Home Assistant Configuration Editor
 
-[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Froman-pinchuk%2Fconf-edit-ha)
+![Untitled 2](https://github.com/user-attachments/assets/8039c587-de94-4ae9-a3ac-b5f99cab165a)
+<img width="460" height="878" alt="image" src="https://github.com/user-attachments/assets/afb6e303-3b9c-4acb-98a0-c1ce32f1b63c" /><img width="460" height="878" alt="image" src="https://github.com/user-attachments/assets/3e048558-9d0e-400b-97d2-98cfbd926baa" />
 
 A lightweight Home Assistant add-on that provides a simple text editor for configuration files with YAML syntax highlighting and entity autocomplete.
 
