@@ -1,0 +1,78 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with dark modern gradient -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Rounded background -->
+  <rect width="512" height="512" rx="100" fill="url(#grad)"/>
+
+  <!-- VS Code-style window frame -->
+  <rect x="80" y="100" width="352" height="312" rx="12" fill="#1e1e1e" stroke="#0e639c" stroke-width="2"/>
+
+  <!-- Window title bar -->
+  <rect x="80" y="100" width="352" height="35" rx="12" fill="#323233"/>
+  <rect x="80" y="120" width="352" height="15" fill="#323233"/>
+
+  <!-- Traffic lights -->
+  <circle cx="105" cy="117" r="6" fill="#ff5f56"/>
+  <circle cx="125" cy="117" r="6" fill="#ffbd2e"/>
+  <circle cx="145" cy="117" r="6" fill="#27c93f"/>
+
+  <!-- Code editor content with syntax highlighting -->
+  <g filter="url(#glow)">
+    <!-- Line numbers -->
+    <text x="100" y="165" fill="#858585" font-family="monospace" font-size="16">1</text>
+    <text x="100" y="190" fill="#858585" font-family="monospace" font-size="16">2</text>
+    <text x="100" y="215" fill="#858585" font-family="monospace" font-size="16">3</text>
+    <text x="100" y="240" fill="#858585" font-family="monospace" font-size="16">4</text>
+    <text x="100" y="265" fill="#858585" font-family="monospace" font-size="16">5</text>
+    <text x="100" y="290" fill="#858585" font-family="monospace" font-size="16">6</text>
+    <text x="100" y="315" fill="#858585" font-family="monospace" font-size="16">7</text>
+    <text x="100" y="340" fill="#858585" font-family="monospace" font-size="16">8</text>
+    <text x="100" y="365" fill="#858585" font-family="monospace" font-size="16">9</text>
+
+    <!-- YAML code with syntax colors -->
+    <text x="130" y="165" fill="#569cd6" font-family="monospace" font-size="16" font-weight="bold">homeassistant:</text>
+    <text x="145" y="190" fill="#9cdcfe" font-family="monospace" font-size="16">name:</text>
+    <text x="190" y="190" fill="#ce9178" font-family="monospace" font-size="16">"Home"</text>
+
+    <text x="145" y="215" fill="#9cdcfe" font-family="monospace" font-size="16">unit_system:</text>
+    <text x="245" y="215" fill="#ce9178" font-family="monospace" font-size="16">metric</text>
+
+    <text x="130" y="240" fill="#569cd6" font-family="monospace" font-size="16" font-weight="bold">automation:</text>
+    <text x="145" y="265" fill="#c586c0" font-family="monospace" font-size="16">- alias:</text>
+    <text x="210" y="265" fill="#ce9178" font-family="monospace" font-size="16">"Lights"</text>
+
+    <text x="160" y="290" fill="#9cdcfe" font-family="monospace" font-size="16">trigger:</text>
+    <text x="175" y="315" fill="#c586c0" font-family="monospace" font-size="16">- platform:</text>
+    <text x="270" y="315" fill="#ce9178" font-family="monospace" font-size="16">sun</text>
+
+    <text x="190" y="340" fill="#9cdcfe" font-family="monospace" font-size="16">event:</text>
+    <text x="245" y="340" fill="#ce9178" font-family="monospace" font-size="16">sunset</text>
+
+    <text x="160" y="365" fill="#9cdcfe" font-family="monospace" font-size="16">action:</text>
+  </g>
+
+  <!-- Glowing cursor -->
+  <rect x="290" y="350" width="3" height="18" fill="#0e639c" filter="url(#glow)">
+    <animate attributeName="opacity" values="1;0;1" dur="1.5s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Home Assistant logo accent in corner -->
+  <circle cx="390" cy="365" r="35" fill="#03a9f4" opacity="0.9"/>
+  <path d="M 390 340 L 410 360 L 390 370 L 370 360 Z" fill="white"/>
+  <rect x="385" y="360" width="10" height="15" fill="white"/>
+</svg>
