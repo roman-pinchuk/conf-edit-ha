@@ -1,5 +1,7 @@
 # Home Assistant Configuration Editor
 
+[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Froman-pinchuk%2Fconf-edit-ha)
+
 A lightweight Home Assistant add-on that provides a simple text editor for configuration files with YAML syntax highlighting and entity autocomplete.
 
 ## Features
@@ -18,10 +20,20 @@ A lightweight Home Assistant add-on that provides a simple text editor for confi
 
 ## Installation
 
-1. Add this repository to your Home Assistant add-on store
-2. Install the "Configuration Editor" add-on
-3. Start the add-on
-4. Access via the sidebar panel "Config Editor"
+### Quick Install
+
+Click the button below to add this repository to your Home Assistant:
+
+[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Froman-pinchuk%2Fconf-edit-ha)
+
+### Manual Installation
+
+1. In Home Assistant, go to **Settings → Add-ons → Add-on Store**
+2. Click the **three dots menu** (top right) → **Repositories**
+3. Add this repository URL: `https://github.com/roman-pinchuk/conf-edit-ha`
+4. Find "Configuration Editor" in the add-on store and click **Install**
+5. Start the add-on
+6. Access via the sidebar panel "Config Editor"
 
 ## Configuration
 
