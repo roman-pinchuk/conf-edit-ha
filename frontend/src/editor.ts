@@ -3,7 +3,7 @@
  */
 
 import { EditorView, basicSetup } from 'codemirror';
-import { EditorState, Compartment, RangeSetBuilder } from '@codemirror/state';
+import { EditorState, Compartment, RangeSetBuilder, Transaction } from '@codemirror/state';
 import { Decoration, DecorationSet, ViewPlugin, ViewUpdate, keymap } from '@codemirror/view';
 import { yaml } from '@codemirror/lang-yaml';
 import { autocompletion } from '@codemirror/autocomplete';
@@ -310,16 +310,23 @@ export function getEditor(): EditorView | null {
 /**
  * Set editor content
  */
-export function setContent(content: string): void {
+export function setContent(content: string, skipHistory: boolean = false): void {
   if (!editorView) return;
 
-  editorView.dispatch({
+  const transaction: any = {
     changes: {
       from: 0,
       to: editorView.state.doc.length,
       insert: content,
     },
-  });
+  };
+
+  // Don't add to undo history when loading files
+  if (skipHistory) {
+    transaction.annotations = Transaction.addToHistory.of(false);
+  }
+
+  editorView.dispatch(transaction);
 }
 
 /**

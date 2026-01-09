@@ -84,18 +84,36 @@ body {
   gap: 0.5rem;
 }
 
-/* Buttons */
+/* Buttons - Home Assistant styled */
 .btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  justify-content: center;
+  padding: 8px 12px;
+  min-width: 40px;
+  height: 40px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 0.875rem;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+  gap: 6px;
+}
+
+.btn svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.btn-icon-only {
+  padding: 8px;
+  min-width: 40px;
+  font-size: 0;
+  overflow: hidden;
 }
 
 .btn:disabled {
@@ -110,15 +128,24 @@ body {
 
 .btn-primary:hover:not(:disabled) {
   background-color: var(--accent-hover);
+  filter: brightness(1.1);
+}
+
+.btn-primary:active:not(:disabled) {
+  filter: brightness(0.95);
 }
 
 .btn-secondary {
-  background-color: var(--bg-tertiary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  background-color: transparent;
+  color: var(--text-secondary);
 }
 
 .btn-secondary:hover:not(:disabled) {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.btn-secondary:active:not(:disabled) {
   background-color: var(--border-color);
 }
 
@@ -359,18 +386,26 @@ body {
 /* Mobile Menu Toggle Button */
 .mobile-menu-toggle {
   display: none;
-  padding: 0.5rem;
-  background: none;
+  padding: 8px;
+  min-width: 40px;
+  height: 40px;
+  background: transparent;
   border: none;
+  border-radius: 8px;
   color: var(--text-primary);
   cursor: pointer;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.15s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background-color: var(--bg-tertiary);
 }
 
 .mobile-menu-toggle svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
 }
 
 /* Mobile Overlay */
@@ -415,28 +450,34 @@ body {
   }
 
   .header-right {
-    gap: 0.25rem;
+    gap: 0.5rem;
   }
 
-  /* Button text hidden on mobile, show only icons */
+  /* Buttons slightly smaller on mobile */
   .btn {
-    padding: 0.5rem;
-    min-width: 40px;
-    min-height: 40px;
+    padding: 6px 10px;
+    min-width: 36px;
+    height: 36px;
+  }
+
+  .btn-icon-only {
+    padding: 6px;
   }
 
   .btn svg {
-    margin: 0;
+    width: 18px;
+    height: 18px;
   }
 
-  /* Hide button text on mobile */
-  .btn-secondary:not(.mobile-menu-toggle)::after,
-  .btn-primary::after {
-    content: none;
+  .mobile-menu-toggle {
+    padding: 6px;
+    min-width: 36px;
+    height: 36px;
   }
 
-  .btn > svg + * {
-    display: none;
+  .mobile-menu-toggle svg {
+    width: 20px;
+    height: 20px;
   }
 
   /* Sidebar mobile behavior */
@@ -496,9 +537,29 @@ body {
   }
 
   .btn {
-    padding: 0.4rem;
-    min-width: 36px;
-    min-height: 36px;
+    padding: 6px 10px;
+    min-width: 32px;
+    height: 32px;
+  }
+
+  .btn-icon-only {
+    padding: 6px;
+  }
+
+  .btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .mobile-menu-toggle {
+    padding: 6px;
+    min-width: 32px;
+    height: 32px;
+  }
+
+  .mobile-menu-toggle svg {
+    width: 18px;
+    height: 18px;
   }
 
   .sidebar {
