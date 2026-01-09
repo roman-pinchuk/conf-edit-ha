@@ -20,6 +20,11 @@
     <!-- Header -->
     <header class="header">
       <div class="header-left">
+        <button id="mobile-menu-toggle" class="mobile-menu-toggle" title="Toggle file browser">
+          <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M2 3h12v1H2V3zm0 4h12v1H2V7zm0 4h12v1H2v-1z"/>
+          </svg>
+        </button>
         <h1>Configuration Editor</h1>
         <span class="filename" id="current-filename">No file selected</span>
       </div>
@@ -52,8 +57,11 @@
 
     <!-- Main Content -->
     <div class="main-container">
+      <!-- Sidebar Overlay for Mobile -->
+      <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
       <!-- Sidebar -->
-      <aside class="sidebar">
+      <aside id="sidebar" class="sidebar">
         <div class="sidebar-header">
           <h2>Files</h2>
         </div>
