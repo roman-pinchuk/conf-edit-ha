@@ -31,16 +31,15 @@ jobs:
           cd frontend
           npm ci
 
-      - name: Build frontend
+      - name: Build demo
         run: |
           cd frontend
-          npm run build
+          npm run build:demo
 
-      - name: Prepare demo
+      - name: Prepare demo site
         run: |
           mkdir -p _site
-          cp -r demo/* _site/
-          cp -r static _site/
+          cp -r demo-dist/* _site/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
