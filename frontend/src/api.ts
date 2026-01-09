@@ -25,7 +25,7 @@ export interface FileContent {
   modified: string;
 }
 
-const API_BASE = '/api';
+const API_BASE = './api';
 
 /**
  * Fetch all entities from Home Assistant
