@@ -10,6 +10,7 @@ import { setEntities, getEntityCount } from './autocomplete';
 // Application state
 let currentFile: string | null = null;
 let isModified = false;
+let isLoadingFile = false;
 let files: FileInfo[] = [];
 let expandedDirs: Set<string> = new Set();
 
@@ -71,6 +72,11 @@ async function init(): Promise<void> {
 
     // Listen for editor changes
     window.addEventListener('editor-changed', () => {
+      // Ignore changes while loading a file
+      if (isLoadingFile) {
+        return;
+      }
+
       isModified = true;
       saveBtnEl.disabled = false;
       updateStatus('Modified', '');
@@ -163,16 +169,19 @@ async function loadFiles(): Promise<void> {
  */
 async function loadEntities(): Promise<void> {
   try {
+    console.log('[Entities] Fetching entities...');
     const entities = await fetchEntities();
+    console.log('[Entities] Received:', entities.length, 'entities');
+    console.log('[Entities] Sample:', entities.slice(0, 3));
     setEntities(entities);
     const count = getEntityCount();
     if (count > 0) {
-      console.log(`Loaded ${count} entities for autocomplete`);
+      console.log(`[Entities] Loaded ${count} entities for autocomplete`);
     } else {
-      console.log('No entities available (Home Assistant not connected)');
+      console.log('[Entities] No entities available (Home Assistant not connected)');
     }
   } catch (error) {
-    console.error('Error loading entities:', error);
+    console.error('[Entities] Error loading entities:', error);
     // Continue with empty entity list
   }
 }
@@ -307,9 +316,12 @@ async function loadFile(filename: string): Promise<void> {
 
     currentFile = filename;
     isModified = false;
+    isLoadingFile = true;
     saveBtnEl.disabled = true;
 
-    setContent(fileContent.content);
+    setContent(fileContent.content, true); // Skip adding to history
+
+    isLoadingFile = false;
     currentFilenameEl.textContent = filename;
 
     // Update active file in list
