@@ -1,0 +1,36 @@
+# Test YAML file with indentation
+homeassistant:
+  name: Test Home
+  unit_system: metric
+  time_zone: UTC
+
+automation:
+  - alias: "Test Automation"
+    trigger:
+      - platform: time
+        at: "12:00:00"
+    condition:
+      - condition: state
+        entity_id: light.living_room
+        state: "off"
+    action:
+      - service: light.turn_on
+        target:
+          entity_id: light.living_room
+        data:
+          brightness: 255
+          color_temp: 300
+
+script:
+  test_script:
+    alias: "Test Script"
+    sequence:
+      - service: notify.mobile_app
+        data:
+          title: "Hello"
+          message: "World"
+      - delay:
+          seconds: 5
+      - service: light.turn_off
+        target:
+          entity_id: all
