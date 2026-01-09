@@ -1,0 +1,35 @@
+name: "Configuration Editor"
+version: "1.0.0"
+slug: "conf-edit-ha"
+description: "Lightweight YAML editor with syntax highlighting and entity autocomplete"
+url: "https://github.com/yourusername/conf-edit-ha"
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
+init: false
+startup: services
+boot: auto
+ports:
+  8099/tcp: 8099
+ports_description:
+  8099/tcp: "Web interface"
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:file-document-edit
+panel_title: "Config Editor"
+hassio_api: true
+hassio_role: manager
+homeassistant_api: true
+auth_api: true
+map:
+  - config:rw
+  - ssl:ro
+  - addons:ro
+  - backup:ro
+options:
+  theme: "auto"
+schema:
+  theme: list(auto|light|dark)

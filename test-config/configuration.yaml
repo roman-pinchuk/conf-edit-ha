@@ -1,0 +1,13 @@
+# Test Configuration
+homeassistant:
+  name: Test Home
+  unit_system: metric
+
+automation:
+  - alias: Test Automation"
+    trigger:
+      - platform: state
+        entity_id: sensor.temperature
+    action:
+      - service: light.turn_on
+        entity_id: light.living_room

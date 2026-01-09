@@ -1,0 +1,33 @@
+# Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Development
+.DS_Store
+*.log
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Testing
+test-config/*.backup
+
+# Docker
+.dockerignore
+
+# Temporary files
+*.tmp
+.cache/
