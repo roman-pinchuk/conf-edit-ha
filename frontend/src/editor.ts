@@ -149,19 +149,27 @@ const rainbowBracketsTheme = EditorView.baseTheme({
 const rainbowIndentLightTheme = EditorView.theme({
   '.indent-rainbow-0': {
     backgroundColor: 'rgba(255, 215, 0, 0.4)', // Gold - bright for light mode
-    paddingBottom: '1px',
+    borderRadius: '0',
+    display: 'inline-block',
+    minHeight: '1.2em',
   },
   '.indent-rainbow-1': {
     backgroundColor: 'rgba(218, 112, 214, 0.35)', // Purple - bright for light mode
-    paddingBottom: '1px',
+    borderRadius: '0',
+    display: 'inline-block',
+    minHeight: '1.2em',
   },
   '.indent-rainbow-2': {
     backgroundColor: 'rgba(135, 206, 250, 0.45)', // Light Blue - bright for light mode
-    paddingBottom: '1px',
+    borderRadius: '0',
+    display: 'inline-block',
+    minHeight: '1.2em',
   },
   '.indent-rainbow-3': {
     backgroundColor: 'rgba(152, 251, 152, 0.4)', // Light Green - bright for light mode
-    paddingBottom: '1px',
+    borderRadius: '0',
+    display: 'inline-block',
+    minHeight: '1.2em',
   },
 }, { dark: false });
 
@@ -171,19 +179,27 @@ const rainbowIndentLightTheme = EditorView.theme({
 const rainbowIndentDarkTheme = EditorView.theme({
   '.indent-rainbow-0': {
     backgroundColor: 'rgba(255, 215, 0, 0.15)', // Gold - darker
-    paddingBottom: '1px',
+    borderRadius: '0',
+    display: 'inline-block',
+    minHeight: '1.2em',
   },
   '.indent-rainbow-1': {
     backgroundColor: 'rgba(218, 112, 214, 0.12)', // Purple - darker
-    paddingBottom: '1px',
+    borderRadius: '0',
+    display: 'inline-block',
+    minHeight: '1.2em',
   },
   '.indent-rainbow-2': {
     backgroundColor: 'rgba(135, 206, 250, 0.18)', // Light Blue - darker
-    paddingBottom: '1px',
+    borderRadius: '0',
+    display: 'inline-block',
+    minHeight: '1.2em',
   },
   '.indent-rainbow-3': {
     backgroundColor: 'rgba(152, 251, 152, 0.15)', // Light Green - darker
-    paddingBottom: '1px',
+    borderRadius: '0',
+    display: 'inline-block',
+    minHeight: '1.2em',
   },
 }, { dark: true });
 
