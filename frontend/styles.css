@@ -355,3 +355,161 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-tertiary);
 }
+
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+  display: none;
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-menu-toggle svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Mobile Overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  /* Show mobile menu toggle */
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  /* Header adjustments */
+  .header {
+    padding: 0.5rem;
+    height: 50px;
+  }
+
+  .header-left h1 {
+    font-size: 1rem;
+  }
+
+  .header-left {
+    gap: 0.5rem;
+  }
+
+  .filename {
+    display: none; /* Hide on mobile to save space */
+  }
+
+  .header-right {
+    gap: 0.25rem;
+  }
+
+  /* Button text hidden on mobile, show only icons */
+  .btn {
+    padding: 0.5rem;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .btn svg {
+    margin: 0;
+  }
+
+  /* Hide button text on mobile */
+  .btn-secondary:not(.mobile-menu-toggle)::after,
+  .btn-primary::after {
+    content: none;
+  }
+
+  .btn > svg + * {
+    display: none;
+  }
+
+  /* Sidebar mobile behavior */
+  .sidebar {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 100;
+    box-shadow: 2px 0 8px var(--shadow);
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  /* Editor takes full width on mobile */
+  .main-container {
+    width: 100%;
+  }
+
+  .editor-container {
+    width: 100%;
+  }
+
+  /* Status bar adjustments */
+  .status-bar {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+    height: 28px;
+  }
+
+  /* Smaller CodeMirror font on mobile */
+  .cm-editor {
+    font-size: 13px;
+  }
+
+  /* Tree items with better touch targets */
+  .tree-item {
+    height: 32px;
+    line-height: 32px;
+    padding: 4px 8px;
+  }
+
+  .item-name {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screens */
+  .header-left h1 {
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    padding: 0.4rem;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .sidebar {
+    width: 260px;
+  }
+
+  .cm-editor {
+    font-size: 12px;
+  }
+
+  .status-bar {
+    font-size: 0.65rem;
+  }
+}

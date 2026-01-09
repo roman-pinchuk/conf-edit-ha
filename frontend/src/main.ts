@@ -25,6 +25,9 @@ const refreshBtnEl = document.getElementById('refresh-entities-btn') as HTMLButt
 const statusMessageEl = document.getElementById('status-message')!;
 const statusInfoEl = document.getElementById('status-info')!;
 const editorEl = document.getElementById('editor')!;
+const mobileMenuToggleEl = document.getElementById('mobile-menu-toggle') as HTMLButtonElement;
+const sidebarEl = document.getElementById('sidebar')!;
+const sidebarOverlayEl = document.getElementById('sidebar-overlay')!;
 
 /**
  * Save state to localStorage
@@ -76,6 +79,10 @@ async function init(): Promise<void> {
     // Set up button listeners
     saveBtnEl.addEventListener('click', handleSave);
     refreshBtnEl.addEventListener('click', handleRefreshEntities);
+
+    // Mobile menu toggle
+    mobileMenuToggleEl.addEventListener('click', toggleMobileSidebar);
+    sidebarOverlayEl.addEventListener('click', closeMobileSidebar);
 
     // Restore state
     restoreState();
@@ -269,6 +276,8 @@ function renderFileList(): void {
       const path = el.getAttribute('data-path');
       if (path) {
         loadFile(path);
+        // Close mobile sidebar when file is selected
+        closeMobileSidebar();
       }
     });
   });
@@ -368,6 +377,34 @@ function updateStatus(message: string, info: string, isError = false, isSuccess 
   } else if (isSuccess) {
     statusMessageEl.classList.add('success');
   }
+}
+
+/**
+ * Toggle mobile sidebar visibility
+ */
+function toggleMobileSidebar(): void {
+  const isActive = sidebarEl.classList.contains('active');
+  if (isActive) {
+    closeMobileSidebar();
+  } else {
+    openMobileSidebar();
+  }
+}
+
+/**
+ * Open mobile sidebar
+ */
+function openMobileSidebar(): void {
+  sidebarEl.classList.add('active');
+  sidebarOverlayEl.classList.add('active');
+}
+
+/**
+ * Close mobile sidebar
+ */
+function closeMobileSidebar(): void {
+  sidebarEl.classList.remove('active');
+  sidebarOverlayEl.classList.remove('active');
 }
 
 // Start the application
