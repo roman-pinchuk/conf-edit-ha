@@ -1,5 +1,5 @@
 // Demo version with mock API - load the real bundled JS
-import '../static/assets/index-DukJEmev.js';
+import './static/assets/index-DukJEmev.js';
 
 // Mock data
 const mockFiles = [
