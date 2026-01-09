@@ -1,7 +1,7 @@
 # Home Assistant Configuration Editor
 
 ![Untitled 2](https://github.com/user-attachments/assets/8039c587-de94-4ae9-a3ac-b5f99cab165a)
-<img width="460" height="878" alt="image" src="https://github.com/user-attachments/assets/afb6e303-3b9c-4acb-98a0-c1ce32f1b63c" /><img width="460" height="878" alt="image" src="https://github.com/user-attachments/assets/3e048558-9d0e-400b-97d2-98cfbd926baa" />
+<img width="230" height="439" alt="image" src="https://github.com/user-attachments/assets/afb6e303-3b9c-4acb-98a0-c1ce32f1b63c" /><img width="230" height="439" alt="image" src="https://github.com/user-attachments/assets/3e048558-9d0e-400b-97d2-98cfbd926baa" />
 
 A lightweight Home Assistant add-on that provides a simple text editor for configuration files with YAML syntax highlighting and entity autocomplete.
 
