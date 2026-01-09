@@ -2,8 +2,6 @@
 
 A lightweight Home Assistant add-on that provides a simple text editor for configuration files with YAML syntax highlighting and entity autocomplete.
 
-**[🚀 Try Live Demo](https://roman-pinchuk.github.io/conf-edit-ha/)**
-
 ## Features
 
 - **Lightweight CodeMirror 6 editor** (~1MB, 10x smaller than Monaco)

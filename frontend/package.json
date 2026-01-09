@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build:demo": "tsc && vite build --config vite.demo.config.ts",
     "preview": "vite preview"
   },
   "dependencies": {
