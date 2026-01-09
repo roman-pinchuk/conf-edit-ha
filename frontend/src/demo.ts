@@ -155,7 +155,8 @@ const mockEntities = [
 
 // Override fetch before importing anything else
 const originalFetch = window.fetch;
-window.fetch = function(url: string, options?: RequestInit) {
+window.fetch = function(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
   console.log('[Demo] Fetch:', url);
 
   // Mock /api/files
@@ -169,7 +170,7 @@ window.fetch = function(url: string, options?: RequestInit) {
 
   // Mock /api/files/<filename>
   const fileMatch = url.match(/\/api\/files\/(.+)/);
-  if (fileMatch && (!options || options?.method !== 'PUT')) {
+  if (fileMatch && (!init || init?.method !== 'PUT')) {
     const filename = decodeURIComponent(fileMatch[1]);
     const content = mockFileContents[filename] || `# File: ${filename}\n# This is demo content`;
     console.log('[Demo] Returning file:', filename);
@@ -185,7 +186,7 @@ window.fetch = function(url: string, options?: RequestInit) {
   }
 
   // Mock /api/files/<filename> PUT (save)
-  if (fileMatch && options?.method === 'PUT') {
+  if (fileMatch && init?.method === 'PUT') {
     console.log('[Demo] Simulated save for:', fileMatch[1]);
     return Promise.resolve(new Response(JSON.stringify({ success: true }), {
       status: 200,
@@ -203,7 +204,7 @@ window.fetch = function(url: string, options?: RequestInit) {
   }
 
   // Fall back to original fetch
-  return originalFetch.call(this, url, options);
+  return originalFetch.call(this, input, init);
 };
 
 console.log('[Demo] Mock API initialized');
