@@ -47,17 +47,14 @@ def get_entities():
     """Fetch all entities from Home Assistant"""
     try:
         if not TOKEN:
-            print("ERROR: SUPERVISOR_TOKEN is not set - cannot fetch entities")
+            print("WARNING: SUPERVISOR_TOKEN is not set - cannot fetch entities")
             return jsonify([]), 200
 
         headers = {'Authorization': f'Bearer {TOKEN}'}
-        print(f"Fetching entities from {HA_URL}/states")
         response = requests.get(f'{HA_URL}/states', headers=headers, timeout=10)
-        print(f"Response status: {response.status_code}")
         response.raise_for_status()
 
         states = response.json()
-        print(f"Successfully fetched {len(states)} entities from Home Assistant")
 
         # Return simplified entity list
         entities = [
@@ -70,13 +67,11 @@ def get_entities():
             for state in states
         ]
 
+        print(f"Loaded {len(entities)} entities for autocomplete")
         return jsonify(entities), 200
 
     except requests.exceptions.RequestException as e:
-        print(f"ERROR fetching entities: {type(e).__name__}: {e}")
-        if hasattr(e, 'response') and e.response is not None:
-            print(f"Response status: {e.response.status_code}")
-            print(f"Response body: {e.response.text[:200]}")
+        print(f"Error fetching entities: {e}")
         # Return empty list when HA is not available
         return jsonify([]), 200
 

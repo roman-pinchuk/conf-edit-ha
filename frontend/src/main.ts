@@ -169,19 +169,14 @@ async function loadFiles(): Promise<void> {
  */
 async function loadEntities(): Promise<void> {
   try {
-    console.log('[Entities] Fetching entities...');
     const entities = await fetchEntities();
-    console.log('[Entities] Received:', entities.length, 'entities');
-    console.log('[Entities] Sample:', entities.slice(0, 3));
     setEntities(entities);
     const count = getEntityCount();
     if (count > 0) {
-      console.log(`[Entities] Loaded ${count} entities for autocomplete`);
-    } else {
-      console.log('[Entities] No entities available (Home Assistant not connected)');
+      console.log(`Loaded ${count} entities for autocomplete`);
     }
   } catch (error) {
-    console.error('[Entities] Error loading entities:', error);
+    console.error('Error loading entities:', error);
     // Continue with empty entity list
   }
 }

@@ -14,6 +14,10 @@ COPY app.py .
 # Copy built frontend
 COPY static ./static
 
+# Copy run script
+COPY run.sh /
+RUN chmod a+x /run.sh
+
 # Expose port
 EXPOSE 8099
 
@@ -21,5 +25,5 @@ EXPOSE 8099
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8099/health || exit 1
 
-# Run the Flask app
-CMD ["python3", "app.py"]
+# Run via s6 supervisor
+CMD ["/run.sh"]
