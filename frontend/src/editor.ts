@@ -9,7 +9,7 @@ import { yaml } from '@codemirror/lang-yaml';
 import { autocompletion } from '@codemirror/autocomplete';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { linter, Diagnostic } from '@codemirror/lint';
-import { indentWithTab } from '@codemirror/commands';
+import { indentLess, insertTab } from '@codemirror/commands';
 import { parse as parseYAML } from 'yaml';
 import { entityCompletions } from './autocomplete';
 import { isDark } from './theme';
@@ -149,15 +149,19 @@ const rainbowBracketsTheme = EditorView.baseTheme({
 const rainbowIndentLightTheme = EditorView.theme({
   '.indent-rainbow-0': {
     backgroundColor: 'rgba(255, 215, 0, 0.4)', // Gold - bright for light mode
+    boxShadow: 'inset 0 -0.05em 0 rgba(255, 215, 0, 0.2), inset 0 0.05em 0 rgba(255, 215, 0, 0.2)',
   },
   '.indent-rainbow-1': {
     backgroundColor: 'rgba(218, 112, 214, 0.35)', // Purple - bright for light mode
+    boxShadow: 'inset 0 -0.05em 0 rgba(218, 112, 214, 0.2), inset 0 0.05em 0 rgba(218, 112, 214, 0.2)',
   },
   '.indent-rainbow-2': {
     backgroundColor: 'rgba(135, 206, 250, 0.45)', // Light Blue - bright for light mode
+    boxShadow: 'inset 0 -0.05em 0 rgba(135, 206, 250, 0.2), inset 0 0.05em 0 rgba(135, 206, 250, 0.2)',
   },
   '.indent-rainbow-3': {
     backgroundColor: 'rgba(152, 251, 152, 0.4)', // Light Green - bright for light mode
+    boxShadow: 'inset 0 -0.05em 0 rgba(152, 251, 152, 0.2), inset 0 0.05em 0 rgba(152, 251, 152, 0.2)',
   },
 }, { dark: false });
 
@@ -167,15 +171,19 @@ const rainbowIndentLightTheme = EditorView.theme({
 const rainbowIndentDarkTheme = EditorView.theme({
   '.indent-rainbow-0': {
     backgroundColor: 'rgba(255, 215, 0, 0.15)', // Gold - darker
+    boxShadow: 'inset 0 -0.05em 0 rgba(255, 215, 0, 0.1), inset 0 0.05em 0 rgba(255, 215, 0, 0.1)',
   },
   '.indent-rainbow-1': {
     backgroundColor: 'rgba(218, 112, 214, 0.12)', // Purple - darker
+    boxShadow: 'inset 0 -0.05em 0 rgba(218, 112, 214, 0.08), inset 0 0.05em 0 rgba(218, 112, 214, 0.08)',
   },
   '.indent-rainbow-2': {
     backgroundColor: 'rgba(135, 206, 250, 0.18)', // Light Blue - darker
+    boxShadow: 'inset 0 -0.05em 0 rgba(135, 206, 250, 0.1), inset 0 0.05em 0 rgba(135, 206, 250, 0.1)',
   },
   '.indent-rainbow-3': {
     backgroundColor: 'rgba(152, 251, 152, 0.15)', // Light Green - darker
+    boxShadow: 'inset 0 -0.05em 0 rgba(152, 251, 152, 0.1), inset 0 0.05em 0 rgba(152, 251, 152, 0.1)',
   },
 }, { dark: true });
 
@@ -237,8 +245,11 @@ export function createEditor(parent: HTMLElement): EditorView {
         override: [entityCompletions],
         activateOnTyping: true,
       }),
-      // Tab/Shift+Tab for indent/unindent with 2 spaces (YAML standard)
-      keymap.of([indentWithTab]),
+      // Tab inserts 2 spaces, Shift+Tab unindents
+      keymap.of([
+        { key: 'Tab', run: insertTab },
+        { key: 'Shift-Tab', run: indentLess }
+      ]),
       EditorState.tabSize.of(2),
       EditorView.theme({
         '&': {
