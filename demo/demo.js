@@ -1,6 +1,3 @@
-// Demo version with mock API - load the real bundled JS
-import './static/assets/index-DukJEmev.js';
-
 // Mock data
 const mockFiles = [
   {
@@ -152,13 +149,14 @@ const mockEntities = [
   { entity_id: 'media_player.living_room', friendly_name: 'Living Room Speaker', domain: 'media_player', state: 'idle' },
 ];
 
-// Intercept fetch calls and return mock data
+// Intercept fetch calls and return mock data BEFORE loading the app
 const originalFetch = window.fetch;
 window.fetch = function(url, options) {
   console.log('[Demo] Intercepted fetch:', url);
 
   // Mock /api/files
   if (url.includes('/api/files') && !url.match(/\/api\/files\/.+/)) {
+    console.log('[Demo] Returning mock file tree');
     return Promise.resolve({
       ok: true,
       json: () => Promise.resolve(mockFiles)
@@ -167,9 +165,10 @@ window.fetch = function(url, options) {
 
   // Mock /api/files/<filename>
   const fileMatch = url.match(/\/api\/files\/(.+)/);
-  if (fileMatch && options?.method !== 'PUT') {
+  if (fileMatch && (!options || options?.method !== 'PUT')) {
     const filename = decodeURIComponent(fileMatch[1]);
     const content = mockFileContents[filename] || `# File: ${filename}\n# This is demo content`;
+    console.log('[Demo] Returning mock file content for:', filename);
     return Promise.resolve({
       ok: true,
       json: () => Promise.resolve({
@@ -192,6 +191,7 @@ window.fetch = function(url, options) {
 
   // Mock /api/entities
   if (url.includes('/api/entities')) {
+    console.log('[Demo] Returning mock entities');
     return Promise.resolve({
       ok: true,
       json: () => Promise.resolve(mockEntities)
@@ -203,3 +203,6 @@ window.fetch = function(url, options) {
 };
 
 console.log('[Demo] Mock API initialized');
+
+// Now load the real app
+import('./static/assets/index-DukJEmev.js');
