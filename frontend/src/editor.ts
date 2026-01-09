@@ -149,19 +149,23 @@ const rainbowBracketsTheme = EditorView.baseTheme({
 const rainbowIndentLightTheme = EditorView.theme({
   '.indent-rainbow-0': {
     backgroundColor: 'rgba(255, 215, 0, 0.4)', // Gold - bright for light mode
-    boxShadow: 'inset 0 -0.05em 0 rgba(255, 215, 0, 0.2), inset 0 0.05em 0 rgba(255, 215, 0, 0.2)',
+    paddingTop: '2px',
+    paddingBottom: '2px',
   },
   '.indent-rainbow-1': {
     backgroundColor: 'rgba(218, 112, 214, 0.35)', // Purple - bright for light mode
-    boxShadow: 'inset 0 -0.05em 0 rgba(218, 112, 214, 0.2), inset 0 0.05em 0 rgba(218, 112, 214, 0.2)',
+    paddingTop: '2px',
+    paddingBottom: '2px',
   },
   '.indent-rainbow-2': {
     backgroundColor: 'rgba(135, 206, 250, 0.45)', // Light Blue - bright for light mode
-    boxShadow: 'inset 0 -0.05em 0 rgba(135, 206, 250, 0.2), inset 0 0.05em 0 rgba(135, 206, 250, 0.2)',
+    paddingTop: '2px',
+    paddingBottom: '2px',
   },
   '.indent-rainbow-3': {
     backgroundColor: 'rgba(152, 251, 152, 0.4)', // Light Green - bright for light mode
-    boxShadow: 'inset 0 -0.05em 0 rgba(152, 251, 152, 0.2), inset 0 0.05em 0 rgba(152, 251, 152, 0.2)',
+    paddingTop: '2px',
+    paddingBottom: '2px',
   },
 }, { dark: false });
 
@@ -171,19 +175,23 @@ const rainbowIndentLightTheme = EditorView.theme({
 const rainbowIndentDarkTheme = EditorView.theme({
   '.indent-rainbow-0': {
     backgroundColor: 'rgba(255, 215, 0, 0.15)', // Gold - darker
-    boxShadow: 'inset 0 -0.05em 0 rgba(255, 215, 0, 0.1), inset 0 0.05em 0 rgba(255, 215, 0, 0.1)',
+    paddingTop: '2px',
+    paddingBottom: '2px',
   },
   '.indent-rainbow-1': {
     backgroundColor: 'rgba(218, 112, 214, 0.12)', // Purple - darker
-    boxShadow: 'inset 0 -0.05em 0 rgba(218, 112, 214, 0.08), inset 0 0.05em 0 rgba(218, 112, 214, 0.08)',
+    paddingTop: '2px',
+    paddingBottom: '2px',
   },
   '.indent-rainbow-2': {
     backgroundColor: 'rgba(135, 206, 250, 0.18)', // Light Blue - darker
-    boxShadow: 'inset 0 -0.05em 0 rgba(135, 206, 250, 0.1), inset 0 0.05em 0 rgba(135, 206, 250, 0.1)',
+    paddingTop: '2px',
+    paddingBottom: '2px',
   },
   '.indent-rainbow-3': {
     backgroundColor: 'rgba(152, 251, 152, 0.15)', // Light Green - darker
-    boxShadow: 'inset 0 -0.05em 0 rgba(152, 251, 152, 0.1), inset 0 0.05em 0 rgba(152, 251, 152, 0.1)',
+    paddingTop: '2px',
+    paddingBottom: '2px',
   },
 }, { dark: true });
 
