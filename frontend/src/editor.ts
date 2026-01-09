@@ -4,11 +4,12 @@
 
 import { EditorView, basicSetup } from 'codemirror';
 import { EditorState, Compartment, RangeSetBuilder } from '@codemirror/state';
-import { Decoration, DecorationSet, ViewPlugin, ViewUpdate } from '@codemirror/view';
+import { Decoration, DecorationSet, ViewPlugin, ViewUpdate, keymap } from '@codemirror/view';
 import { yaml } from '@codemirror/lang-yaml';
 import { autocompletion } from '@codemirror/autocomplete';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { linter, Diagnostic } from '@codemirror/lint';
+import { indentWithTab } from '@codemirror/commands';
 import { parse as parseYAML } from 'yaml';
 import { entityCompletions } from './autocomplete';
 import { isDark } from './theme';
@@ -267,6 +268,15 @@ export function createEditor(parent: HTMLElement): EditorView {
       autocompletion({
         override: [entityCompletions],
         activateOnTyping: true,
+      }),
+      // Tab/Shift+Tab for indent/unindent with 2 spaces (YAML standard)
+      keymap.of([indentWithTab]),
+      EditorState.tabSize.of(2),
+      EditorView.theme({
+        '&': {
+          // Ensure tab renders as 2 spaces visually
+          tabSize: 2,
+        },
       }),
       themeCompartment.of(isDark() ? oneDark : []),
       rainbowIndentThemeCompartment.of(isDark() ? rainbowIndentDarkTheme : rainbowIndentLightTheme),
