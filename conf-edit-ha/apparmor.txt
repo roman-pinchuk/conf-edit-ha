@@ -1,0 +1,33 @@
+#include <tunables/global>
+
+profile conf-edit-ha flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+  #include <abstractions/python>
+
+  # Capability
+  capability chown,
+  capability dac_override,
+  capability fowner,
+  capability fsetid,
+  capability setgid,
+  capability setuid,
+
+  # Files
+  /app/  r,
+  /app/** r,
+  /config/ r,
+  /config/** rw,
+  /data/ r,
+  /data/** rw,
+  /etc/hosts r,
+  /etc/nsswitch.conf r,
+  /etc/resolv.conf r,
+  /tmp/ rw,
+  /tmp/** rw,
+  /usr/bin/python3 ix,
+  /usr/lib/python3*/** r,
+
+  # Network
+  network inet stream,
+  network inet6 stream,
+}
