@@ -2,7 +2,8 @@ name: "Configuration Editor"
 version: "1.0.12"
 slug: "conf-edit-ha"
 description: "Lightweight YAML editor with syntax highlighting and entity autocomplete"
-url: "https://github.com/yourusername/conf-edit-ha"
+url: "https://github.com/roman-pinchuk/conf-edit-ha"
+image: "ghcr.io/roman-pinchuk/conf-edit-ha-{arch}"
 arch:
   - armhf
   - armv7

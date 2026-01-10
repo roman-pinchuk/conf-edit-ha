@@ -1,0 +1,19 @@
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Run Home Assistant Add-on Lint
+        uses: home-assistant/actions/hassio-addon-lint@master
+        with:
+          path: "./conf-edit-ha"
+          config: "./conf-edit-ha/config.yaml"
