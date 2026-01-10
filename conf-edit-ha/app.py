@@ -16,8 +16,15 @@ app = Flask(__name__, static_folder='static', static_url_path='')
 # Configuration
 HA_URL = 'http://supervisor/core/api'
 TOKEN = os.getenv('SUPERVISOR_TOKEN', '')
-CONFIG_DIR = '/config'
 PORT = 8099
+
+# Determine config directory
+possible_config_dirs = [
+    os.getenv('CONFIG_DIR'),  # explicit override
+    '/config',                # standard HA add-on path
+    '/homeassistant'          # alternative path
+]
+CONFIG_DIR = next((d for d in possible_config_dirs if d and Path(d).exists()), '/config')
 
 # Ensure we have the token
 if not TOKEN:

@@ -1,5 +1,5 @@
 name: "Configuration Editor"
-version: "1.0.16"
+version: "1.0.17"
 slug: "conf-edit-ha"
 description: "Lightweight YAML editor with syntax highlighting and entity autocomplete"
 url: "https://github.com/roman-pinchuk/conf-edit-ha"
