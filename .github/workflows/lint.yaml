@@ -13,7 +13,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Home Assistant Add-on Lint
-        uses: home-assistant/actions/hassio-addon-lint@master
+        uses: frenck/action-addon-lint@v2
         with:
           path: "./conf-edit-ha"
-          config: "./conf-edit-ha/config.yaml"
