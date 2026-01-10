@@ -14,6 +14,6 @@ else
     bashio::log.warning "Cannot connect to supervisor"
 fi
 
-# Start the Flask application
+# Start the Flask application with Gunicorn
 cd /app || bashio::exit.nok "Cannot change to /app directory"
-exec python3 app.py
+exec gunicorn --bind 0.0.0.0:8099 --workers 2 --timeout 120 app:app
