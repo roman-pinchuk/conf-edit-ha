@@ -2,7 +2,7 @@
 
 [![GitHub Release](https://img.shields.io/github/v/release/roman-pinchuk/conf-edit-ha?style=flat-square)](https://github.com/roman-pinchuk/conf-edit-ha/releases)
 [![Builder](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml/badge.svg)](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml)
-[![License](https://img.shields.io/github/license/roman-pinchuk/conf-edit-ha?style=flat-square)](https://github.com/roman-pinchuk/conf-edit-ha/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/roman-pinchuk/conf-edit-ha?style=flat-square)](../LICENSE.md)
 [![Home Assistant Ingress](https://img.shields.io/badge/Home%20Assistant-Ingress-blue?style=flat-square)](https://www.home-assistant.io/docs/addons/ingress/)
 ![Supports amd64](https://img.shields.io/badge/amd64-yes-green?style=flat-square)
 ![Supports aarch64](https://img.shields.io/badge/aarch64-yes-green?style=flat-square)
@@ -125,4 +125,4 @@ For issues and feature requests, visit: [GitHub Issues](https://github.com/roman
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](../LICENSE.md).
