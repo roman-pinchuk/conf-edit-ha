@@ -48,7 +48,11 @@ jobs:
         uses: home-assistant/builder@master
         with:
           args: |
-            --all \
+            --amd64 \
+            --aarch64 \
+            --armv7 \
+            --armhf \
+            --i386 \
             --target /data/conf-edit-ha \
             --image "${{ github.repository_owner }}/conf-edit-ha-{arch}" \
             --docker-hub "ghcr.io/${{ github.repository_owner }}" \
