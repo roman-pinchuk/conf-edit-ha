@@ -1,4 +1,4 @@
-# Home Assistant Configuration Editor
+# <img src="icon.png" width="32" height="32" style="vertical-align: middle;"> Home Assistant Configuration Editor
 
 [![GitHub Release](https://img.shields.io/github/v/release/roman-pinchuk/conf-edit-ha?style=flat-square)](https://github.com/roman-pinchuk/conf-edit-ha/releases)
 [![Builder](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml/badge.svg)](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml)
