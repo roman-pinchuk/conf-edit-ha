@@ -16,4 +16,4 @@ fi
 
 # Start the Flask application with Gunicorn
 cd /app || bashio::exit.nok "Cannot change to /app directory"
-exec gunicorn --bind 0.0.0.0:8099 --workers 2 --timeout 120 app:app
+exec gunicorn --bind 0.0.0.0:8099 --workers 1 --threads 2 --timeout 120 --preload app:app
