@@ -122,3 +122,7 @@ conf-edit-ha/
 ## Support
 
 For issues and feature requests, visit: [GitHub Issues](https://github.com/roman-pinchuk/conf-edit-ha/issues)
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
