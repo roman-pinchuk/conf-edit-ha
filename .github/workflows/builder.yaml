@@ -6,10 +6,26 @@ on:
       - main
     tags:
       - 'v*.*.*'
+  pull_request:
+    branches:
+      - main
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Run Home Assistant Add-on Lint
+        uses: frenck/action-addon-linter@v2
+        with:
+          path: "./conf-edit-ha"
+
   build:
     name: Build
+    needs: lint
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -50,9 +66,6 @@ jobs:
           args: |
             --amd64 \
             --aarch64 \
-            --armv7 \
-            --armhf \
-            --i386 \
             --target /data/conf-edit-ha \
             --image "${{ github.repository_owner }}/conf-edit-ha-{arch}" \
             --docker-hub "ghcr.io/${{ github.repository_owner }}" \

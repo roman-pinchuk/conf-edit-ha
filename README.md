@@ -6,7 +6,6 @@
 [![Home Assistant Ingress](https://img.shields.io/badge/Home%20Assistant-Ingress-blue?style=flat-square)](https://www.home-assistant.io/docs/addons/ingress/)
 ![Supports amd64](https://img.shields.io/badge/amd64-yes-green?style=flat-square)
 ![Supports aarch64](https://img.shields.io/badge/aarch64-yes-green?style=flat-square)
-![Supports armv7](https://img.shields.io/badge/armv7-yes-green?style=flat-square)
 
 ![Untitled 2](https://github.com/user-attachments/assets/8039c587-de94-4ae9-a3ac-b5f99cab165a)
 <img width="230" height="439" alt="image" src="https://github.com/user-attachments/assets/afb6e303-3b9c-4acb-98a0-c1ce32f1b63c" /><img width="230" height="439" alt="image" src="https://github.com/user-attachments/assets/3e048558-9d0e-400b-97d2-98cfbd926baa" />
