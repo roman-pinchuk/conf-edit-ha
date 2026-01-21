@@ -8,6 +8,7 @@ const STORAGE_KEY = 'ha-editor-theme';
 
 let currentTheme: Theme = 'auto';
 let mediaQuery: MediaQueryList;
+let systemThemeDark = false;
 
 /**
  * Initialize theme system
@@ -21,6 +22,7 @@ export function initTheme(): void {
 
   // Set up media query for system theme
   mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  systemThemeDark = mediaQuery.matches;
   mediaQuery.addEventListener('change', applyTheme);
 
   // Set up toggle button
@@ -36,7 +38,14 @@ export function initTheme(): void {
 /**
  * Apply the current theme
  */
-function applyTheme(): void {
+function applyTheme(e?: MediaQueryListEvent | Event): void {
+  // Update system theme state if event provides it
+  if (e && 'matches' in e) {
+    systemThemeDark = (e as MediaQueryListEvent).matches;
+  } else if (mediaQuery) {
+    systemThemeDark = mediaQuery.matches;
+  }
+
   const root = document.documentElement;
   const lightIcon = document.getElementById('theme-icon-light');
   const darkIcon = document.getElementById('theme-icon-dark');
@@ -44,7 +53,7 @@ function applyTheme(): void {
   let isDark = false;
 
   if (currentTheme === 'auto') {
-    isDark = mediaQuery.matches;
+    isDark = systemThemeDark;
   } else {
     isDark = currentTheme === 'dark';
   }
@@ -80,7 +89,7 @@ function applyTheme(): void {
 function toggleTheme(): void {
   if (currentTheme === 'auto') {
     // If auto, switch to opposite of current system theme
-    currentTheme = mediaQuery.matches ? 'light' : 'dark';
+    currentTheme = systemThemeDark ? 'light' : 'dark';
   } else if (currentTheme === 'light') {
     currentTheme = 'dark';
   } else {
@@ -96,7 +105,7 @@ function toggleTheme(): void {
  */
 export function getCurrentTheme(): 'light' | 'dark' {
   if (currentTheme === 'auto') {
-    return mediaQuery.matches ? 'dark' : 'light';
+    return systemThemeDark ? 'dark' : 'light';
   }
   return currentTheme;
 }
