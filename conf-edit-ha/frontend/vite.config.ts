@@ -7,6 +7,24 @@ export default defineConfig({
     emptyOutDir: true,
     minify: 'esbuild',
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          codemirror: [
+            'codemirror',
+            '@codemirror/autocomplete',
+            '@codemirror/commands',
+            '@codemirror/lang-yaml',
+            '@codemirror/lint',
+            '@codemirror/search',
+            '@codemirror/state',
+            '@codemirror/theme-one-dark',
+            '@codemirror/view'
+          ],
+          yaml: ['yaml'],
+        },
+      },
+    },
   },
   server: {
     port: 3000,
