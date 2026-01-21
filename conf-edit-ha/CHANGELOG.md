@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.22] - 2026-01-21
+
+### Fixed
+- **Theme Sync:** Improved system theme detection to ensure the editor correctly synchronizes when the OS theme changes.
+
 ## [1.0.18] - 2026-01-10
 
 ### Added
