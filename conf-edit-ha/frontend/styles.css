@@ -336,42 +336,31 @@ body {
   overflow: auto;
 }
 
-/* Mobile Editor Toolbar - Modern Design */
+/* Mobile Editor Toolbar - VS Code Style */
 .mobile-editor-toolbar {
   display: none;
-  gap: 0.75rem;
+  gap: 0.5rem;
   align-items: center;
-  padding: 0.75rem;
-  background: linear-gradient(
-    135deg,
-    var(--bg-secondary) 0%,
-    var(--bg-tertiary) 100%
-  );
+  padding: 0.5rem;
+  background: var(--bg-secondary);
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
   height: auto;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(10px);
 }
 
 .toolbar-group {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.25rem;
   align-items: center;
-  padding: 0 0.25rem;
+  padding: 0;
 }
 
 .toolbar-divider {
-  width: 2px;
-  height: 28px;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    var(--border-color) 50%,
-    transparent 100%
-  );
-  margin: 0 0.5rem;
-  border-radius: 1px;
+  width: 1px;
+  height: 24px;
+  background: var(--border-color);
+  margin: 0 0.25rem;
+  opacity: 0.5;
 }
 
 .btn-toolbar {
@@ -379,104 +368,68 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px 12px;
-  min-width: 48px;
-  height: 44px;
-  background: var(--bg-secondary);
+  padding: 8px 10px;
+  width: 40px;
+  height: 40px;
+  background: transparent;
   color: var(--text-primary);
-  border: 1.5px solid var(--border-color);
-  border-radius: 10px;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.15s ease;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 500;
   position: relative;
   overflow: hidden;
 }
 
-/* Toolbar button hover state with smooth transition */
+/* Toolbar button hover state - subtle background only */
 .btn-toolbar:hover:not(:disabled) {
   background: var(--bg-tertiary);
-  border-color: var(--accent-color);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(3, 169, 244, 0.2);
 }
 
 /* Toolbar button active/pressed state */
 .btn-toolbar:active:not(:disabled) {
-  transform: translateY(0px);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--border-color);
 }
 
 /* Disabled button styling */
 .btn-toolbar:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
-  background-color: var(--bg-secondary);
 }
 
-/* Icon with label layout */
+/* Icon with label layout - VS Code style */
 .btn-icon-with-label {
   flex-direction: column;
-  padding: 8px 10px;
-  width: 56px;
-  height: 52px;
-  gap: 3px;
+  padding: 6px 8px;
+  width: 44px;
+  height: 44px;
+  gap: 2px;
 }
 
 .btn-icon-with-label svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
-  transition: transform 0.2s ease;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
-}
-
-.btn-toolbar:hover:not(:disabled) .btn-icon-with-label svg {
-  transform: scale(1.1);
 }
 
 .btn-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0px;
   white-space: nowrap;
   text-align: center;
-  opacity: 0.9;
-  transition: opacity 0.2s ease;
+  opacity: 0.85;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
 }
 
-.btn-toolbar:hover:not(:disabled) .btn-label {
-  opacity: 1;
-}
-
 /* Focus state for accessibility */
 .btn-toolbar:focus-visible {
-  outline: 2px solid var(--accent-color);
-  outline-offset: 2px;
-}
-
-/* Ripple effect on click */
-.btn-toolbar::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(3, 169, 244, 0.15);
-  transform: translate(-50%, -50%);
-  transition: width 0.3s ease, height 0.3s ease;
-  pointer-events: none;
-}
-
-.btn-toolbar:active:not(:disabled)::before {
-  width: 100%;
-  height: 100%;
+  outline: 1px solid var(--accent-color);
+  outline-offset: -1px;
 }
 
 /* Status Bar */
@@ -677,36 +630,36 @@ body {
      font-size: 14px;
    }
 
-   /* Mobile toolbar responsive adjustments */
-   .mobile-editor-toolbar {
-     padding: 0.65rem 0.5rem;
-     gap: 0.6rem;
-   }
-
-   .toolbar-group {
-     gap: 0.4rem;
-   }
-
-   .btn-toolbar {
-     padding: 8px 10px;
-     height: 42px;
-     min-width: 46px;
-   }
-
-    .btn-icon-with-label {
-      height: 50px;
-      width: 54px;
-      padding: 7px 9px;
+    /* Mobile toolbar responsive adjustments */
+    .mobile-editor-toolbar {
+      padding: 0.5rem;
+      gap: 0.25rem;
     }
 
-   .btn-icon-with-label svg {
-     width: 18px;
-     height: 18px;
-   }
+    .toolbar-group {
+      gap: 0.2rem;
+    }
 
-   .btn-label {
-     font-size: 0.65rem;
-   }
+    .btn-toolbar {
+      padding: 6px 8px;
+      height: 36px;
+      width: 36px;
+    }
+
+     .btn-icon-with-label {
+       height: 40px;
+       width: 40px;
+       padding: 6px;
+     }
+
+    .btn-icon-with-label svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .btn-label {
+      font-size: 0.6rem;
+    }
  }
  
  /* Extra small screens (480px and below) */
@@ -769,30 +722,29 @@ body {
      margin: 0 0.35rem;
    }
 
-   /* Maintain touch target for toolbar buttons on very small screens */
-   .btn-toolbar {
-     padding: 8px 10px;
-     min-width: 44px;
-     height: 44px;
-     border-radius: 8px;
-   }
-
-    .btn-icon-with-label {
-      width: 52px;
-      height: 48px;
-      padding: 6px 8px;
-      gap: 2px;
+    /* Maintain touch target for toolbar buttons on very small screens */
+    .btn-toolbar {
+      padding: 6px;
+      height: 40px;
+      width: 40px;
+      border-radius: 4px;
     }
 
-   .btn-icon-with-label svg {
-     width: 16px;
-     height: 16px;
-   }
+     .btn-icon-with-label {
+       width: 40px;
+       height: 40px;
+       padding: 6px;
+       gap: 1px;
+     }
 
-   .btn-label {
-     font-size: 0.6rem;
-     letter-spacing: 0.2px;
-   }
+    .btn-icon-with-label svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .btn-label {
+      font-size: 0.55rem;
+    }
 }
 
 @media (max-width: 480px) {
