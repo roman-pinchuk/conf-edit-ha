@@ -9,7 +9,7 @@ import { yaml } from '@codemirror/lang-yaml';
 import { autocompletion } from '@codemirror/autocomplete';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { linter, Diagnostic } from '@codemirror/lint';
-import { indentLess, insertTab, undo, redo } from '@codemirror/commands';
+import { indentLess, insertTab, undo, redo, undoDepth, redoDepth } from '@codemirror/commands';
 import { parse as parseYAML } from 'yaml';
 import { entityCompletions } from './autocomplete';
 import { isDark } from './theme';
@@ -439,22 +439,20 @@ export function editorDedent(): boolean {
  * Check if undo is available
  */
 export function canEditorUndo(): boolean {
-  if (!editorView) return false;
-  
-  // Check if there's any undo history
-  // CodeMirror state.history exists and has undo transactions
-  const history = (editorView.state as any).history;
-  return history && history.done && history.done.length > 0;
+   if (!editorView) return false;
+   
+   // Use CodeMirror's built-in undoDepth function
+   // Returns the number of undo events in the history
+   return undoDepth(editorView.state) > 0;
 }
 
 /**
  * Check if redo is available
  */
 export function canEditorRedo(): boolean {
-  if (!editorView) return false;
-  
-  // Check if there's any redo history
-  // CodeMirror state.history exists and has redo transactions
-  const history = (editorView.state as any).history;
-  return history && history.undone && history.undone.length > 0;
+   if (!editorView) return false;
+   
+   // Use CodeMirror's built-in redoDepth function
+   // Returns the number of redo events in the history
+   return redoDepth(editorView.state) > 0;
 }
