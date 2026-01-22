@@ -399,31 +399,18 @@ body {
   cursor: not-allowed;
 }
 
-/* Icon with label layout - VS Code style */
-.btn-icon-with-label {
-  flex-direction: column;
-  padding: 6px 8px;
-  width: 44px;
-  height: 44px;
-  gap: 2px;
+/* Icon-only buttons (no labels) */
+.btn-icon-only {
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  flex-direction: row;
 }
 
-.btn-icon-with-label svg {
+.btn-icon-only svg {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-}
-
-.btn-label {
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0px;
-  white-space: nowrap;
-  text-align: center;
-  opacity: 0.85;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
 }
 
 /* Focus state for accessibility */
@@ -632,33 +619,29 @@ body {
 
     /* Mobile toolbar responsive adjustments */
     .mobile-editor-toolbar {
-      padding: 0.5rem;
-      gap: 0.25rem;
-    }
-
-    .toolbar-group {
+      padding: 0.4rem;
       gap: 0.2rem;
     }
 
-    .btn-toolbar {
-      padding: 6px 8px;
-      height: 36px;
-      width: 36px;
+    .toolbar-group {
+      gap: 0.15rem;
     }
 
-     .btn-icon-with-label {
-       height: 40px;
-       width: 40px;
-       padding: 6px;
-     }
+    .btn-toolbar {
+      padding: 6px;
+      height: 32px;
+      width: 32px;
+    }
 
-    .btn-icon-with-label svg {
+    .btn-icon-only {
+      height: 32px;
+      width: 32px;
+      padding: 6px;
+    }
+
+    .btn-icon-only svg {
       width: 16px;
       height: 16px;
-    }
-
-    .btn-label {
-      font-size: 0.6rem;
     }
  }
  
@@ -725,25 +708,20 @@ body {
     /* Maintain touch target for toolbar buttons on very small screens */
     .btn-toolbar {
       padding: 6px;
-      height: 40px;
-      width: 40px;
+      height: 32px;
+      width: 32px;
       border-radius: 4px;
     }
 
-     .btn-icon-with-label {
-       width: 40px;
-       height: 40px;
-       padding: 6px;
-       gap: 1px;
-     }
-
-    .btn-icon-with-label svg {
-      width: 16px;
-      height: 16px;
+    .btn-icon-only {
+      width: 32px;
+      height: 32px;
+      padding: 6px;
     }
 
-    .btn-label {
-      font-size: 0.55rem;
+    .btn-icon-only svg {
+      width: 16px;
+      height: 16px;
     }
 }
 
