@@ -2,6 +2,23 @@
 
 All notable changes to the Configuration Editor project are documented in this file.
 
+## [1.1.1] - 2026-01-23
+
+### Fixed
+- **iOS Theme Switching**: Fixed theme not updating when switching system theme in Home Assistant iOS app
+  - Added visibility change listener to detect theme switches when app returns to foreground
+  - Added periodic theme check (every 5 seconds) for iOS Safari/WebView compatibility
+  - iOS WebView may not reliably trigger media query change events
+  - Theme now updates within 5 seconds or immediately when app becomes visible
+- Improved theme detection logging with `[Theme]` prefixed console messages
+
+### Technical Details
+- Added `checkAndApplyTheme()` helper function for iOS compatibility
+- Only performs periodic checks when in 'auto' mode to minimize overhead
+- Prevents unnecessary DOM updates by comparing theme state before applying changes
+
+---
+
 ## [1.1.0] - 2026-01-23
 
 ### Added
