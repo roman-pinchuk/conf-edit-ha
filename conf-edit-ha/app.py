@@ -8,8 +8,16 @@ from flask import Flask, jsonify, request, send_from_directory, send_file
 import requests
 import os
 import shutil
+import logging
 from pathlib import Path
 from datetime import datetime
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_folder='static', static_url_path='')
 
@@ -28,7 +36,34 @@ CONFIG_DIR = next((d for d in possible_config_dirs if d and Path(d).exists()), '
 
 # Ensure we have the token
 if not TOKEN:
-    print("WARNING: SUPERVISOR_TOKEN not found in environment")
+    logger.warning("SUPERVISOR_TOKEN not found in environment")
+
+
+def validate_file_path(filename):
+    """
+    Validate that a filename is safe and doesn't attempt path traversal.
+    
+    Prevents directory traversal attacks by checking for '..' and absolute paths.
+    Returns the absolute path if valid, None if invalid.
+    """
+    if '..' in filename or filename.startswith('/'):
+        return None
+    
+    file_path = Path(CONFIG_DIR) / filename
+    
+    # Ensure the resolved path is within CONFIG_DIR
+    try:
+        # Resolve both paths to their absolute forms for comparison
+        resolved_path = file_path.resolve()
+        config_path = Path(CONFIG_DIR).resolve()
+        
+        # Check if the file is within the config directory
+        if not str(resolved_path).startswith(str(config_path)):
+            return None
+        
+        return file_path
+    except (OSError, RuntimeError):
+        return None
 
 
 @app.route('/')
@@ -54,7 +89,7 @@ def get_entities():
     """Fetch all entities from Home Assistant"""
     try:
         if not TOKEN:
-            print("WARNING: SUPERVISOR_TOKEN is not set - cannot fetch entities")
+            logger.warning("SUPERVISOR_TOKEN is not set - cannot fetch entities")
             return jsonify([]), 200
 
         headers = {'Authorization': f'Bearer {TOKEN}'}
@@ -74,11 +109,11 @@ def get_entities():
             for state in states
         ]
 
-        print(f"Loaded {len(entities)} entities for autocomplete")
+        logger.info(f"Loaded {len(entities)} entities for autocomplete")
         return jsonify(entities), 200
 
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching entities: {e}")
+        logger.error(f"Error fetching entities: {e}")
         # Return empty list when HA is not available
         return jsonify([]), 200
 
@@ -94,7 +129,7 @@ def get_services():
         return jsonify(response.json()), 200
 
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching services: {e}")
+        logger.error(f"Error fetching services: {e}")
         # Return empty dict when HA is not available
         return jsonify({}), 200
 
@@ -153,23 +188,21 @@ def list_files():
         tree = build_file_tree(config_path)
         return jsonify(tree), 200
 
-    except Exception as e:
-        print(f"Error listing files: {e}")
-        return jsonify({'error': str(e)}), 500
+    except PermissionError as e:
+        logger.error(f"Permission denied listing files: {e}")
+        return jsonify({'error': 'Permission denied'}), 403
+    except OSError as e:
+        logger.error(f"Error listing files: {e}")
+        return jsonify({'error': 'Failed to list files'}), 500
 
 
 @app.route('/api/files/<path:filename>')
 def read_file(filename):
     """Read the content of a specific file"""
     try:
-        # Security: prevent path traversal with '..'
-        if '..' in filename or filename.startswith('/'):
-            return jsonify({'error': 'Access denied'}), 403
-
-        file_path = Path(CONFIG_DIR) / filename
-
-        # Ensure the file is within CONFIG_DIR
-        if not str(file_path.resolve()).startswith(CONFIG_DIR):
+        # Validate file path for security
+        file_path = validate_file_path(filename)
+        if file_path is None:
             return jsonify({'error': 'Access denied'}), 403
 
         if not file_path.exists():
@@ -186,25 +219,25 @@ def read_file(filename):
             'modified': datetime.fromtimestamp(file_path.stat().st_mtime).isoformat()
         }), 200
 
+    except FileNotFoundError:
+        return jsonify({'error': 'File not found'}), 404
+    except PermissionError:
+        logger.error(f"Permission denied reading file {filename}")
+        return jsonify({'error': 'Permission denied'}), 403
     except UnicodeDecodeError:
         return jsonify({'error': 'File is not a text file'}), 400
-    except Exception as e:
-        print(f"Error reading file {filename}: {e}")
-        return jsonify({'error': str(e)}), 500
+    except (OSError, IOError) as e:
+        logger.error(f"Error reading file {filename}: {e}")
+        return jsonify({'error': 'Failed to read file'}), 500
 
 
 @app.route('/api/files/<path:filename>', methods=['PUT'])
 def write_file(filename):
     """Write content to a specific file (creates backup first)"""
     try:
-        # Security: prevent path traversal with '..'
-        if '..' in filename or filename.startswith('/'):
-            return jsonify({'error': 'Access denied'}), 403
-
-        file_path = Path(CONFIG_DIR) / filename
-
-        # Ensure the file is within CONFIG_DIR
-        if not str(file_path.resolve()).startswith(CONFIG_DIR):
+        # Validate file path for security
+        file_path = validate_file_path(filename)
+        if file_path is None:
             return jsonify({'error': 'Access denied'}), 403
 
         # Get content from request
@@ -216,15 +249,19 @@ def write_file(filename):
 
         # Create backup if file exists
         if file_path.exists():
-            backup_path = file_path.with_suffix(file_path.suffix + '.backup')
-            shutil.copy2(file_path, backup_path)
-            print(f"Created backup: {backup_path}")
+            try:
+                backup_path = file_path.with_suffix(file_path.suffix + '.backup')
+                shutil.copy2(file_path, backup_path)
+                logger.info(f"Created backup: {backup_path}")
+            except (OSError, IOError) as e:
+                logger.warning(f"Failed to create backup for {filename}: {e}")
+                # Continue without backup
 
         # Write new content
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
 
-        print(f"Saved file: {file_path}")
+        logger.info(f"Saved file: {file_path}")
 
         return jsonify({
             'success': True,
@@ -232,9 +269,12 @@ def write_file(filename):
             'size': file_path.stat().st_size
         }), 200
 
-    except Exception as e:
-        print(f"Error writing file {filename}: {e}")
-        return jsonify({'error': str(e)}), 500
+    except PermissionError:
+        logger.error(f"Permission denied writing to file {filename}")
+        return jsonify({'error': 'Permission denied'}), 403
+    except (OSError, IOError) as e:
+        logger.error(f"Error writing file {filename}: {e}")
+        return jsonify({'error': 'Failed to write file'}), 500
 
 
 @app.errorhandler(404)
@@ -244,9 +284,9 @@ def not_found(e):
 
 
 if __name__ == '__main__':
-    print(f"Starting Configuration Editor on port {PORT}")
-    print(f"Config directory: {CONFIG_DIR}")
-    print(f"Token configured: {'Yes' if TOKEN else 'No'}")
+    logger.info(f"Starting Configuration Editor on port {PORT}")
+    logger.info(f"Config directory: {CONFIG_DIR}")
+    logger.info(f"Token configured: {'Yes' if TOKEN else 'No'}")
 
     app.run(
         host='0.0.0.0',

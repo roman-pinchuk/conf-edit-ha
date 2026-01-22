@@ -17,120 +17,130 @@ import { isDark } from './theme';
 let editorView: EditorView | null = null;
 const themeCompartment = new Compartment();
 const rainbowIndentThemeCompartment = new Compartment();
+let themeChangeHandler: ((e: Event) => void) | null = null;
+let saveShortcutHandler: ((e: KeyboardEvent) => void) | null = null;
 
 /**
  * Rainbow brackets extension
  * Colors matching brackets with different colors based on nesting level
  */
+interface RainbowBracketsValue {
+  decorations: DecorationSet;
+}
+
 const rainbowBrackets = ViewPlugin.fromClass(
-  class {
-    decorations: DecorationSet;
+   class {
+     decorations: DecorationSet;
 
-    constructor(view: EditorView) {
-      this.decorations = this.buildDecorations(view);
-    }
+     constructor(view: EditorView) {
+       this.decorations = this.buildDecorations(view);
+     }
 
-    update(update: ViewUpdate) {
-      if (update.docChanged || update.viewportChanged) {
-        this.decorations = this.buildDecorations(update.view);
-      }
-    }
+     update(update: ViewUpdate) {
+       if (update.docChanged || update.viewportChanged) {
+         this.decorations = this.buildDecorations(update.view);
+       }
+     }
 
-    buildDecorations(view: EditorView): DecorationSet {
-      const builder = new RangeSetBuilder<Decoration>();
-      const brackets = '[]{}()';
-      const colors = ['rainbow-bracket-1', 'rainbow-bracket-2', 'rainbow-bracket-3', 'rainbow-bracket-4'];
-      const stack: number[] = [];
+     buildDecorations(view: EditorView): DecorationSet {
+       const builder = new RangeSetBuilder<Decoration>();
+       const brackets = '[]{}()';
+       const colors = ['rainbow-bracket-1', 'rainbow-bracket-2', 'rainbow-bracket-3', 'rainbow-bracket-4'];
+       const stack: number[] = [];
 
-      for (const { from, to } of view.visibleRanges) {
-        const text = view.state.doc.sliceString(from, to);
+       for (const { from, to } of view.visibleRanges) {
+         const text = view.state.doc.sliceString(from, to);
 
-        for (let i = 0; i < text.length; i++) {
-          const char = text[i];
-          const pos = from + i;
+         for (let i = 0; i < text.length; i++) {
+           const char = text[i];
+           const pos = from + i;
 
-          if (char === '[' || char === '{' || char === '(') {
-            const level = stack.length % colors.length;
-            builder.add(pos, pos + 1, Decoration.mark({ class: colors[level] }));
-            stack.push(brackets.indexOf(char));
-          } else if (char === ']' || char === '}' || char === ')') {
-            stack.pop();
-            const level = stack.length % colors.length;
-            builder.add(pos, pos + 1, Decoration.mark({ class: colors[level] }));
-          }
-        }
-      }
+           if (char === '[' || char === '{' || char === '(') {
+             const level = stack.length % colors.length;
+             builder.add(pos, pos + 1, Decoration.mark({ class: colors[level] }));
+             stack.push(brackets.indexOf(char));
+           } else if (char === ']' || char === '}' || char === ')') {
+             stack.pop();
+             const level = stack.length % colors.length;
+             builder.add(pos, pos + 1, Decoration.mark({ class: colors[level] }));
+           }
+         }
+       }
 
-      return builder.finish();
-    }
-  },
-  {
-    decorations: (v: any) => v.decorations,
-  }
+       return builder.finish();
+     }
+   },
+   {
+     decorations: (v: RainbowBracketsValue) => v.decorations,
+   }
 );
+
+interface IndentationGuidesValue {
+  decorations: DecorationSet;
+}
 
 /**
  * Rainbow indentation - colors the background of indentation spaces
  */
 const indentationGuides = ViewPlugin.fromClass(
-  class {
-    decorations: DecorationSet;
+   class {
+     decorations: DecorationSet;
 
-    constructor(view: EditorView) {
-      this.decorations = this.buildDecorations(view);
-    }
+     constructor(view: EditorView) {
+       this.decorations = this.buildDecorations(view);
+     }
 
-    update(update: ViewUpdate) {
-      if (update.docChanged || update.viewportChanged) {
-        this.decorations = this.buildDecorations(update.view);
-      }
-    }
+     update(update: ViewUpdate) {
+       if (update.docChanged || update.viewportChanged) {
+         this.decorations = this.buildDecorations(update.view);
+       }
+     }
 
-    buildDecorations(view: EditorView): DecorationSet {
-      const builder = new RangeSetBuilder<Decoration>();
+     buildDecorations(view: EditorView): DecorationSet {
+       const builder = new RangeSetBuilder<Decoration>();
 
-      for (const { from, to } of view.visibleRanges) {
-        for (let pos = from; pos <= to; ) {
-          const line = view.state.doc.lineAt(pos);
-          const text = line.text;
+       for (const { from, to } of view.visibleRanges) {
+         for (let pos = from; pos <= to; ) {
+           const line = view.state.doc.lineAt(pos);
+           const text = line.text;
 
-          // Count leading spaces
-          let spaces = 0;
-          for (let i = 0; i < text.length; i++) {
-            if (text[i] === ' ') {
-              spaces++;
-            } else {
-              break;
-            }
-          }
+           // Count leading spaces
+           let spaces = 0;
+           for (let i = 0; i < text.length; i++) {
+             if (text[i] === ' ') {
+               spaces++;
+             } else {
+               break;
+             }
+           }
 
-          // Color each pair of spaces (2-space indent levels)
-          if (spaces > 0) {
-            for (let i = 0; i < spaces; i += 2) {
-              const level = Math.floor(i / 2) % 4; // 4 colors cycling
-              const from = line.from + i;
-              const to = line.from + Math.min(i + 2, spaces);
+           // Color each pair of spaces (2-space indent levels)
+           if (spaces > 0) {
+             for (let i = 0; i < spaces; i += 2) {
+               const level = Math.floor(i / 2) % 4; // 4 colors cycling
+               const from = line.from + i;
+               const to = line.from + Math.min(i + 2, spaces);
 
-              builder.add(
-                from,
-                to,
-                Decoration.mark({
-                  class: `indent-rainbow-${level}`,
-                })
-              );
-            }
-          }
+               builder.add(
+                 from,
+                 to,
+                 Decoration.mark({
+                   class: `indent-rainbow-${level}`,
+                 })
+               );
+             }
+           }
 
-          pos = line.to + 1;
-        }
-      }
+           pos = line.to + 1;
+         }
+       }
 
-      return builder.finish();
-    }
-  },
-  {
-    decorations: (v: any) => v.decorations,
-  }
+       return builder.finish();
+     }
+   },
+   {
+     decorations: (v: IndentationGuidesValue) => v.decorations,
+   }
 );
 
 /**
@@ -203,45 +213,52 @@ const rainbowIndentDarkTheme = EditorView.theme({
   },
 }, { dark: true });
 
+interface YAMLError {
+  linePos?: Array<{ line: number; col: number }>;
+  message?: string;
+}
+
 /**
  * YAML linter that validates YAML syntax
  */
 function yamlLinter(view: EditorView): Diagnostic[] {
-  const diagnostics: Diagnostic[] = [];
-  const doc = view.state.doc.toString();
+   const diagnostics: Diagnostic[] = [];
+   const doc = view.state.doc.toString();
 
-  try {
-    // Try to parse the YAML
-    parseYAML(doc, { strict: true });
-  } catch (error: any) {
-    // YAML parsing error found
-    if (error && error.linePos) {
-      // Calculate position in the document
-      const line = error.linePos[0].line - 1; // linePos is 1-indexed
-      const col = error.linePos[0].col - 1;
+   try {
+     // Try to parse the YAML
+     parseYAML(doc, { strict: true });
+   } catch (error) {
+     // YAML parsing error found
+     const yamlError = error as YAMLError;
+     if (yamlError && yamlError.linePos) {
+       // Calculate position in the document
+       const line = yamlError.linePos[0].line - 1; // linePos is 1-indexed
+       const col = yamlError.linePos[0].col - 1;
 
-      const lineInfo = view.state.doc.line(line + 1);
-      const from = lineInfo.from + col;
-      const to = Math.min(from + 10, lineInfo.to); // Highlight ~10 chars or to end of line
+       const lineInfo = view.state.doc.line(line + 1);
+       const from = lineInfo.from + col;
+       const to = Math.min(from + 10, lineInfo.to); // Highlight ~10 chars or to end of line
 
-      diagnostics.push({
-        from,
-        to,
-        severity: 'error',
-        message: error.message || 'YAML syntax error',
-      });
-    } else {
-      // Generic error without position info
-      diagnostics.push({
-        from: 0,
-        to: Math.min(10, doc.length),
-        severity: 'error',
-        message: error.message || 'YAML syntax error',
-      });
-    }
-  }
+       diagnostics.push({
+         from,
+         to,
+         severity: 'error',
+         message: yamlError.message || 'YAML syntax error',
+       });
+     } else {
+       // Generic error without position info
+       const errorMessage = error instanceof Error ? error.message : 'YAML syntax error';
+       diagnostics.push({
+         from: 0,
+         to: Math.min(10, doc.length),
+         severity: 'error',
+         message: errorMessage,
+       });
+     }
+   }
 
-  return diagnostics;
+   return diagnostics;
 }
 
 /**
@@ -285,19 +302,20 @@ export function createEditor(parent: HTMLElement): EditorView {
     ],
   });
 
-  editorView = new EditorView({
-    state: startState,
-    parent,
-  });
+   editorView = new EditorView({
+     state: startState,
+     parent,
+   });
 
-  // Listen for theme changes
-  window.addEventListener('theme-changed', () => {
-    if (editorView) {
-      updateTheme();
-    }
-  });
+   // Listen for theme changes (store handler for cleanup)
+   themeChangeHandler = () => {
+     if (editorView) {
+       updateTheme();
+     }
+   };
+   window.addEventListener('theme-changed', themeChangeHandler);
 
-  return editorView;
+   return editorView;
 }
 
 /**
@@ -311,22 +329,25 @@ export function getEditor(): EditorView | null {
  * Set editor content
  */
 export function setContent(content: string, skipHistory: boolean = false): void {
-  if (!editorView) return;
+   if (!editorView) return;
 
-  const transaction: any = {
-    changes: {
-      from: 0,
-      to: editorView.state.doc.length,
-      insert: content,
-    },
-  };
+   const changeSpec = {
+     changes: {
+       from: 0,
+       to: editorView.state.doc.length,
+       insert: content,
+     },
+   };
 
-  // Don't add to undo history when loading files
-  if (skipHistory) {
-    transaction.annotations = Transaction.addToHistory.of(false);
-  }
-
-  editorView.dispatch(transaction);
+   // Don't add to undo history when loading files
+   if (skipHistory) {
+     editorView.dispatch({
+       ...changeSpec,
+       annotations: Transaction.addToHistory.of(false),
+     });
+   } else {
+     editorView.dispatch(changeSpec);
+   }
 }
 
 /**
@@ -364,12 +385,20 @@ export function focusEditor(): void {
  * Register save shortcut (Ctrl+S / Cmd+S)
  */
 export function registerSaveShortcut(callback: () => void): void {
-  if (!editorView) return;
+   if (!editorView) return;
 
-  editorView.dom.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-      e.preventDefault();
-      callback();
-    }
-  });
+   // Remove old handler if it exists
+   if (saveShortcutHandler) {
+     editorView.dom.removeEventListener('keydown', saveShortcutHandler);
+   }
+
+   // Store handler for cleanup and prevent duplicate listeners
+   saveShortcutHandler = (e: KeyboardEvent) => {
+     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+       e.preventDefault();
+       callback();
+     }
+   };
+
+   editorView.dom.addEventListener('keydown', saveShortcutHandler);
 }

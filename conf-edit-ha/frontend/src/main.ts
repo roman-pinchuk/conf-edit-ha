@@ -14,6 +14,14 @@ let isLoadingFile = false;
 let files: FileInfo[] = [];
 let expandedDirs: Set<string> = new Set();
 
+// Event listener references for cleanup
+let fileListClickHandler: ((e: Event) => void) | null = null;
+let editorChangeHandler: ((e: Event) => void) | null = null;
+let saveButtonHandler: (() => void) | null = null;
+let refreshButtonHandler: (() => void) | null = null;
+let mobileMenuHandler: (() => void) | null = null;
+let sidebarOverlayHandler: (() => void) | null = null;
+
 // LocalStorage keys
 const STORAGE_KEY_CURRENT_FILE = 'conf-edit-ha:current-file';
 const STORAGE_KEY_EXPANDED_DIRS = 'conf-edit-ha:expanded-dirs';
@@ -60,35 +68,41 @@ function restoreState(): void {
  * Initialize the application
  */
 async function init(): Promise<void> {
-  try {
-    // Initialize theme
-    initTheme();
+   try {
+     // Initialize theme
+     initTheme();
 
-    // Create editor
-    createEditor(editorEl);
+     // Create editor
+     createEditor(editorEl);
 
-    // Register save shortcut
-    registerSaveShortcut(handleSave);
+     // Register save shortcut
+     registerSaveShortcut(handleSave);
 
-    // Listen for editor changes
-    window.addEventListener('editor-changed', () => {
-      // Ignore changes while loading a file
-      if (isLoadingFile) {
-        return;
-      }
+     // Listen for editor changes (store handler for potential cleanup)
+     editorChangeHandler = () => {
+       // Ignore changes while loading a file
+       if (isLoadingFile) {
+         return;
+       }
 
-      isModified = true;
-      saveBtnEl.disabled = false;
-      updateStatus('Modified', '');
-    });
+       isModified = true;
+       saveBtnEl.disabled = false;
+       updateStatus('Modified', '');
+     };
+     window.addEventListener('editor-changed', editorChangeHandler);
 
-    // Set up button listeners
-    saveBtnEl.addEventListener('click', handleSave);
-    refreshBtnEl.addEventListener('click', handleRefreshEntities);
+     // Set up button listeners (store handlers for cleanup)
+     saveButtonHandler = handleSave;
+     refreshButtonHandler = handleRefreshEntities;
+     mobileMenuHandler = toggleMobileSidebar;
+     sidebarOverlayHandler = closeMobileSidebar;
 
-    // Mobile menu toggle
-    mobileMenuToggleEl.addEventListener('click', toggleMobileSidebar);
-    sidebarOverlayEl.addEventListener('click', closeMobileSidebar);
+     saveBtnEl.addEventListener('click', saveButtonHandler);
+     refreshBtnEl.addEventListener('click', refreshButtonHandler);
+
+     // Mobile menu toggle
+     mobileMenuToggleEl.addEventListener('click', mobileMenuHandler);
+     sidebarOverlayEl.addEventListener('click', sidebarOverlayHandler);
 
     // Restore state
     restoreState();
@@ -168,21 +182,18 @@ async function loadFiles(): Promise<void> {
  * Load entities
  */
 async function loadEntities(): Promise<void> {
-  try {
-    const entities = await fetchEntities();
-    setEntities(entities);
-    const count = getEntityCount();
-    if (count > 0) {
-      console.log(`Loaded ${count} entities for autocomplete`);
-    }
-  } catch (error) {
-    console.error('Error loading entities:', error);
-    // Continue with empty entity list
-  }
+   try {
+     const entities = await fetchEntities();
+     setEntities(entities);
+   } catch (error) {
+     console.error('Error loading entities:', error);
+     // Continue with empty entity list
+   }
 }
 
 /**
- * Refresh entities
+ * Refresh entities from Home Assistant
+ * Fetches latest entity list and updates autocomplete suggestions
  */
 async function handleRefreshEntities(): Promise<void> {
   refreshBtnEl.disabled = true;
@@ -205,7 +216,10 @@ async function handleRefreshEntities(): Promise<void> {
 }
 
 /**
- * Render a file tree node recursively
+ * Render a file tree node as HTML (recursively for directories)
+ * @param node The FileInfo node to render
+ * @param level The nesting level for indentation (0 = root)
+ * @returns HTML string for the node and its children
  */
 function renderTreeNode(node: FileInfo, level: number = 0): string {
   const indent = 8 + (level * 16); // VS Code style: 8px base + 16px per level
@@ -218,90 +232,219 @@ function renderTreeNode(node: FileInfo, level: number = 0): string {
       ? '<svg class="folder-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M.54 3.87.5 3h2.672a.5.5 0 0 1 .4.2l.77 1.026h9.159a1 1 0 0 1 1 1v9.5a1 1 0 0 1-1 1H1.5a1 1 0 0 1-1-1V4.887a1 1 0 0 1 .04-.277z"/></svg>'
       : '<svg class="folder-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M.54 3.87.5 3h2.672a.5.5 0 0 1 .4.2l.77 1.026H14.5a.5.5 0 0 1 .5.5v9.5a.5.5 0 0 1-.5.5H1.5a.5.5 0 0 1-.5-.5V4.22a.5.5 0 0 1 .04-.277z"/></svg>';
 
-    let html = `
-      <div class="tree-item directory" data-path="${node.path}" data-level="${level}" style="padding-left: ${indent}px">
-        ${chevronIcon}
-        ${folderIcon}
-        <span class="item-name">${node.name}</span>
-      </div>
-    `;
+     let html = `
+       <div class="tree-item directory" data-path="${node.path}" data-level="${level}" style="padding-left: ${indent}px" role="treeitem" aria-expanded="${isExpanded}">
+         ${chevronIcon}
+         ${folderIcon}
+         <span class="item-name">${node.name}</span>
+       </div>
+     `;
 
-    if (isExpanded && node.children && node.children.length > 0) {
-      for (const child of node.children) {
-        html += renderTreeNode(child, level + 1);
-      }
-    }
+     if (isExpanded && node.children && node.children.length > 0) {
+       for (const child of node.children) {
+         html += renderTreeNode(child, level + 1);
+       }
+     }
 
-    return html;
-  } else {
-    // File node - no chevron, so add spacing
-    const fileIndent = indent + 20; // Extra space where chevron would be
-    return `
-      <div class="tree-item file" data-path="${node.path}" data-level="${level}" style="padding-left: ${fileIndent}px">
-        <svg class="file-icon" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0H4z"/>
-          <path d="M9 1v3a1 1 0 0 0 1 1h3L9 1z"/>
-        </svg>
-        <span class="item-name">${node.name}</span>
-      </div>
-    `;
-  }
+     return html;
+   } else {
+     // File node - no chevron, so add spacing
+     const fileIndent = indent + 20; // Extra space where chevron would be
+     return `
+       <div class="tree-item file" data-path="${node.path}" data-level="${level}" style="padding-left: ${fileIndent}px" role="treeitem">
+         <svg class="file-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+           <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0H4z"/>
+           <path d="M9 1v3a1 1 0 0 0 1 1h3L9 1z"/>
+         </svg>
+         <span class="item-name">${node.name}</span>
+       </div>
+     `;
+   }
 }
 
 /**
  * Render file list
  */
 function renderFileList(): void {
-  if (files.length === 0) {
-    fileListEl.innerHTML = '<div class="loading">No YAML files found</div>';
-    return;
-  }
+   if (files.length === 0) {
+     fileListEl.innerHTML = '<div class="loading">No YAML files found</div>';
+     return;
+   }
 
-  let html = '';
-  for (const node of files) {
-    html += renderTreeNode(node, 0);
-  }
-  fileListEl.innerHTML = html;
+   let html = '';
+   for (const node of files) {
+     html += renderTreeNode(node, 0);
+   }
+   fileListEl.innerHTML = html;
 
-  // Add click handlers for directories
-  fileListEl.querySelectorAll('.tree-item.directory').forEach((el) => {
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const path = el.getAttribute('data-path');
-      if (path) {
-        toggleDirectory(path);
-      }
-    });
-  });
+   // Add click handlers for directories using event delegation
+   attachFileListListeners();
+}
 
-  // Add click handlers for files
-  fileListEl.querySelectorAll('.tree-item.file').forEach((el) => {
-    el.addEventListener('click', () => {
-      const path = el.getAttribute('data-path');
-      if (path) {
-        loadFile(path);
-        // Close mobile sidebar when file is selected
-        closeMobileSidebar();
-      }
-    });
-  });
+/**
+ * Attach event listeners to file list using event delegation
+ * This prevents memory leaks from re-attaching listeners on every render
+ */
+function attachFileListListeners(): void {
+   // Remove old handler if it exists
+   if (fileListClickHandler) {
+     fileListEl.removeEventListener('click', fileListClickHandler);
+   }
+
+   // Use event delegation on the parent container
+   fileListClickHandler = handleFileListClick;
+   fileListEl.addEventListener('click', fileListClickHandler);
+}
+
+/**
+ * Handle clicks on file list items using event delegation
+ * Routes clicks to appropriate handlers (directory toggle or file load)
+ * @param e Click event
+ */
+function handleFileListClick(e: Event): void {
+   const target = e.target as HTMLElement;
+   const treeItem = target.closest('.tree-item') as HTMLElement;
+
+   if (!treeItem) {
+     return;
+   }
+
+   const path = treeItem.getAttribute('data-path');
+   if (!path) {
+     return;
+   }
+
+   if (treeItem.classList.contains('directory')) {
+     e.stopPropagation();
+     toggleDirectory(path);
+   } else if (treeItem.classList.contains('file')) {
+     loadFile(path);
+     // Close mobile sidebar when file is selected
+     closeMobileSidebar();
+   }
 }
 
 /**
  * Toggle directory expanded/collapsed state
  */
 function toggleDirectory(path: string): void {
-  if (expandedDirs.has(path)) {
-    expandedDirs.delete(path);
-  } else {
-    expandedDirs.add(path);
-  }
-  saveState();
-  renderFileList();
+   const wasExpanded = expandedDirs.has(path);
+   
+   if (wasExpanded) {
+     expandedDirs.delete(path);
+   } else {
+     expandedDirs.add(path);
+   }
+   saveState();
+   
+   // Update incrementally instead of full re-render
+   updateDirectoryToggle(path, !wasExpanded);
+}
+
+/**
+ * Update a single directory's expand/collapse state without full re-render
+ */
+function updateDirectoryToggle(path: string, isExpanded: boolean): void {
+   const treeItem = fileListEl.querySelector(`[data-path="${path}"]`);
+   if (!treeItem) return;
+   
+   // Update aria-expanded for accessibility
+   treeItem.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+   
+   const chevronIcon = treeItem.querySelector('.chevron-icon') as SVGElement;
+   if (chevronIcon) {
+     if (isExpanded) {
+       chevronIcon.classList.add('expanded');
+     } else {
+       chevronIcon.classList.remove('expanded');
+     }
+   }
+   
+   const folderIcon = treeItem.querySelector('.folder-icon') as SVGElement;
+   if (folderIcon) {
+     // Find the directory node in the tree
+     const dirNode = findNodeByPath(files, path);
+     if (dirNode && dirNode.type === 'directory') {
+       if (isExpanded && dirNode.children && dirNode.children.length > 0) {
+         // Insert children elements after the directory
+         const existingChildren = treeItem.nextElementSibling;
+         if (!existingChildren || !existingChildren.classList.contains('tree-item-group')) {
+           const childrenHtml = dirNode.children.map((child) => 
+             renderTreeNode(child, getNodeLevel(path) + 1)
+           ).join('');
+           
+           const fragment = document.createElement('div');
+           fragment.innerHTML = childrenHtml;
+           
+           let nextSibling = treeItem.nextElementSibling;
+           while (nextSibling && isChildOf(nextSibling as HTMLElement, path)) {
+             const toRemove = nextSibling;
+             nextSibling = nextSibling.nextElementSibling;
+             toRemove.remove();
+           }
+           
+           if (nextSibling) {
+             nextSibling.parentNode?.insertBefore(fragment, nextSibling);
+           } else {
+             fileListEl.appendChild(fragment);
+           }
+         }
+       } else {
+         // Remove children from DOM
+         let nextSibling = treeItem.nextElementSibling;
+         while (nextSibling && isChildOf(nextSibling as HTMLElement, path)) {
+           const toRemove = nextSibling;
+           nextSibling = nextSibling.nextElementSibling;
+           toRemove.remove();
+         }
+       }
+     }
+   }
+}
+
+/**
+ * Find a node by path in the file tree
+ */
+function findNodeByPath(nodes: FileInfo[], targetPath: string): FileInfo | null {
+   for (const node of nodes) {
+     if (node.path === targetPath) {
+       return node;
+     }
+     if (node.children) {
+       const found = findNodeByPath(node.children, targetPath);
+       if (found) return found;
+     }
+   }
+   return null;
+}
+
+/**
+ * Get nesting level of a path
+ */
+function getNodeLevel(path: string): number {
+   return path.split('/').length - 1;
+}
+
+/**
+ * Check if an element is a child of a directory path
+ */
+function isChildOf(element: HTMLElement, dirPath: string): boolean {
+   const level = getNodeLevel(dirPath);
+   const elementLevel = parseInt(element.getAttribute('data-level') || '0');
+   
+   if (elementLevel <= level) {
+     return false;
+   }
+   
+   // Check if this element is a descendant by checking its path
+   const elementPath = element.getAttribute('data-path') || '';
+   return elementPath.startsWith(dirPath + '/');
 }
 
 /**
  * Load a file into the editor
+ * Fetches file content, updates UI, and marks as active
+ * @param filename Path to the file to load
  */
 async function loadFile(filename: string): Promise<void> {
   try {
@@ -337,6 +480,7 @@ async function loadFile(filename: string): Promise<void> {
 
 /**
  * Save the current file
+ * Sends file content to backend, creates backup, and updates UI
  */
 async function handleSave(): Promise<void> {
   if (!currentFile) {
@@ -402,16 +546,18 @@ function toggleMobileSidebar(): void {
  * Open mobile sidebar
  */
 function openMobileSidebar(): void {
-  sidebarEl.classList.add('active');
-  sidebarOverlayEl.classList.add('active');
+   sidebarEl.classList.add('active');
+   sidebarOverlayEl.classList.add('active');
+   mobileMenuToggleEl.setAttribute('aria-expanded', 'true');
 }
 
 /**
  * Close mobile sidebar
  */
 function closeMobileSidebar(): void {
-  sidebarEl.classList.remove('active');
-  sidebarOverlayEl.classList.remove('active');
+   sidebarEl.classList.remove('active');
+   sidebarOverlayEl.classList.remove('active');
+   mobileMenuToggleEl.setAttribute('aria-expanded', 'false');
 }
 
 // Start the application
