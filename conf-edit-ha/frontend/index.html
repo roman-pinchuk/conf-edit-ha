@@ -104,24 +104,34 @@
              <!-- Indent/Dedent Group -->
              <div class="toolbar-group">
                <button 
-                 id="indent-btn" 
-                 class="btn btn-toolbar btn-icon-only" 
-                 title="Increase indentation (Tab)" 
-                 aria-label="Increase indentation">
-                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                   <path d="M3 12h14M12 5l7 7-7 7"/>
-                 </svg>
-               </button>
-               
-               <button 
-                 id="dedent-btn" 
-                 class="btn btn-toolbar btn-icon-only" 
-                 title="Decrease indentation (Shift+Tab)" 
-                 aria-label="Decrease indentation">
-                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                   <path d="M21 12H7M12 5l-7 7 7 7"/>
-                 </svg>
-               </button>
+                  id="indent-btn" 
+                  class="btn btn-toolbar btn-icon-only" 
+                  title="Increase indentation (Tab)" 
+                  aria-label="Increase indentation">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <!-- Bracket |< with right arrow -->
+                    <path d="M4 5v14"/>
+                    <path d="M4 5l4 4"/>
+                    <path d="M4 19l4-4"/>
+                    <path d="M10 12h8"/>
+                    <path d="M16 9l3 3-3 3"/>
+                  </svg>
+                </button>
+                
+                <button 
+                  id="dedent-btn" 
+                  class="btn btn-toolbar btn-icon-only" 
+                  title="Decrease indentation (Shift+Tab)" 
+                  aria-label="Decrease indentation">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <!-- Bracket >| with left arrow -->
+                    <path d="M20 5v14"/>
+                    <path d="M20 5l-4 4"/>
+                    <path d="M20 19l-4-4"/>
+                    <path d="M14 12H6"/>
+                    <path d="M8 9l-3 3 3 3"/>
+                  </svg>
+                </button>
              </div>
            </nav>
 
