@@ -9,6 +9,8 @@ const STORAGE_KEY = 'ha-editor-theme';
 let currentTheme: Theme = 'auto';
 let mediaQuery: MediaQueryList;
 let systemThemeDark = false;
+let lastObservedDarkState: boolean | null = null;
+let domMutationObserver: MutationObserver | null = null;
 
 /**
  * Initialize theme system
@@ -45,6 +47,14 @@ export function initTheme(): void {
     }
   });
   
+  // Listen for Home Assistant Ingress theme-update messages (iOS WebView)
+  // Home Assistant sends this when theme changes via Ingress protocol
+  window.addEventListener('message', (event) => {
+    if (event.data?.type === 'theme-update') {
+      checkAndApplyTheme();
+    }
+  });
+  
   // Periodic check for iOS compatibility (every 5 seconds while in auto mode)
   // This helps detect theme changes that media query listener might miss
   setInterval(() => {
@@ -52,6 +62,11 @@ export function initTheme(): void {
       checkAndApplyTheme();
     }
   }, 5000);
+
+  // MutationObserver to detect .dark class changes on html element
+  // This is a fallback for iOS WebView where events might not fire
+  // Watch the html element for any attribute changes
+  setupDOMMutationObserver();
 
   // Set up toggle button
   const toggleBtn = document.getElementById('theme-toggle-btn');
@@ -61,6 +76,32 @@ export function initTheme(): void {
 
   // Apply initial theme
   applyTheme();
+}
+
+/**
+ * Set up DOM mutation observer to detect theme changes
+ * iOS WebView may apply theme without firing proper events
+ */
+function setupDOMMutationObserver(): void {
+  const root = document.documentElement;
+  
+  domMutationObserver = new MutationObserver(() => {
+    // Check if the .dark class changed
+    const isDarkNow = root.classList.contains('dark');
+    
+    // Only trigger update if we actually detected a change
+    if (isDarkNow !== lastObservedDarkState) {
+      lastObservedDarkState = isDarkNow;
+      // Notify editor of the actual DOM state
+      window.dispatchEvent(new CustomEvent('theme-changed', { detail: { dark: isDarkNow } }));
+    }
+  });
+  
+  // Observe class attribute changes
+  domMutationObserver.observe(root, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
 }
 
 /**
@@ -100,15 +141,17 @@ function applyTheme(e?: MediaQueryListEvent | Event): void {
      isDark = currentTheme === 'dark';
    }
 
-     // Only modify DOM if theme actually changed
-     const currentlyDark = root.classList.contains('dark');
-     if (isDark !== currentlyDark) {
-       if (isDark) {
-         root.classList.add('dark');
-       } else {
-         root.classList.remove('dark');
-       }
-     }
+      // Only modify DOM if theme actually changed
+      const currentlyDark = root.classList.contains('dark');
+      if (isDark !== currentlyDark) {
+        if (isDark) {
+          root.classList.add('dark');
+        } else {
+          root.classList.remove('dark');
+        }
+        // Update mutation observer state after DOM change
+        lastObservedDarkState = isDark;
+      }
 
    // Update icons - ensure they're always synchronized
    if (lightIcon && darkIcon) {
