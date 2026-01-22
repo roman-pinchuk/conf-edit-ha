@@ -2,6 +2,31 @@
 
 All notable changes to the Configuration Editor project are documented in this file.
 
+## [1.1.3] - 2026-01-23
+
+### Fixed
+- **iOS Theme Switching - Improved Reliability**: Further improved editor theme switching on Home Assistant iOS app
+  - Added DOM MutationObserver to detect actual `.dark` class changes on HTML element
+  - Listens for Home Assistant Ingress `theme-update` messages (official HA protocol)
+  - More robust detection when events don't fire or fire at unexpected times
+  
+### Added
+- Window message listener for HA Ingress theme-update events
+  - Aligns with how Home Assistant communicates theme changes to Ingress add-ons
+  - Provides immediate notification when global theme changes
+  
+- DOM MutationObserver for class attribute monitoring
+  - Watches for actual `.dark` class changes rather than relying on events
+  - Tracks observed state to prevent duplicate updates
+  - Works even when event handlers don't fire properly
+
+### Technical Details
+- Implements official HA Ingress communication pattern for theme updates
+- Mutation observer provides fallback detection for WebView edge cases
+- Syncs observer state with DOM state in `applyTheme()` function
+
+---
+
 ## [1.1.2] - 2026-01-23
 
 ### Fixed
