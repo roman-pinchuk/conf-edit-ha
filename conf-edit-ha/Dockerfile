@@ -23,7 +23,7 @@ EXPOSE 8099
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8099/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:8099/health || exit 1
 
 # Run via s6 supervisor
 CMD ["/run.sh"]

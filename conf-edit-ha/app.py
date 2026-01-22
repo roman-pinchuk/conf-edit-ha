@@ -289,7 +289,7 @@ if __name__ == '__main__':
     logger.info(f"Token configured: {'Yes' if TOKEN else 'No'}")
 
     app.run(
-        host='0.0.0.0',
+        host='::',
         port=PORT,
         debug=False
     )
