@@ -3,7 +3,7 @@
  */
 
 import { initTheme } from './theme';
-import { createEditor, setContent, getContent, registerSaveShortcut } from './editor';
+import { createEditor, setContent, getContent, registerSaveShortcut, editorUndo, editorRedo, editorIndent, editorDedent, canEditorUndo, canEditorRedo } from './editor';
 import { fetchEntities, fetchFiles, readFile, saveFile, type FileInfo } from './api';
 import { setEntities, getEntityCount } from './autocomplete';
 
@@ -21,6 +21,10 @@ let saveButtonHandler: (() => void) | null = null;
 let refreshButtonHandler: (() => void) | null = null;
 let mobileMenuHandler: (() => void) | null = null;
 let sidebarOverlayHandler: (() => void) | null = null;
+let undoButtonHandler: (() => void) | null = null;
+let redoButtonHandler: (() => void) | null = null;
+let indentButtonHandler: (() => void) | null = null;
+let dedentButtonHandler: (() => void) | null = null;
 
 // LocalStorage keys
 const STORAGE_KEY_CURRENT_FILE = 'conf-edit-ha:current-file';
@@ -37,6 +41,56 @@ const editorEl = document.getElementById('editor')!;
 const mobileMenuToggleEl = document.getElementById('mobile-menu-toggle') as HTMLButtonElement;
 const sidebarEl = document.getElementById('sidebar')!;
 const sidebarOverlayEl = document.getElementById('sidebar-overlay')!;
+
+// Mobile toolbar elements
+const undoBtnEl = document.getElementById('undo-btn') as HTMLButtonElement;
+const redoBtnEl = document.getElementById('redo-btn') as HTMLButtonElement;
+const indentBtnEl = document.getElementById('indent-btn') as HTMLButtonElement;
+const dedentBtnEl = document.getElementById('dedent-btn') as HTMLButtonElement;
+
+/**
+ * Update mobile toolbar button states based on undo/redo availability
+ */
+function updateToolbarButtonStates(): void {
+  const canUndo = canEditorUndo();
+  const canRedo = canEditorRedo();
+
+  undoBtnEl.disabled = !canUndo;
+  undoBtnEl.setAttribute('aria-disabled', canUndo ? 'false' : 'true');
+  
+  redoBtnEl.disabled = !canRedo;
+  redoBtnEl.setAttribute('aria-disabled', canRedo ? 'false' : 'true');
+}
+
+/**
+ * Handle undo button click
+ */
+function handleUndo(): void {
+  editorUndo();
+  updateToolbarButtonStates();
+}
+
+/**
+ * Handle redo button click
+ */
+function handleRedo(): void {
+  editorRedo();
+  updateToolbarButtonStates();
+}
+
+/**
+ * Handle indent button click
+ */
+function handleIndent(): void {
+  editorIndent();
+}
+
+/**
+ * Handle dedent button click
+ */
+function handleDedent(): void {
+  editorDedent();
+}
 
 /**
  * Save state to localStorage
@@ -78,31 +132,47 @@ async function init(): Promise<void> {
      // Register save shortcut
      registerSaveShortcut(handleSave);
 
-     // Listen for editor changes (store handler for potential cleanup)
-     editorChangeHandler = () => {
-       // Ignore changes while loading a file
-       if (isLoadingFile) {
-         return;
-       }
+      // Listen for editor changes (store handler for potential cleanup)
+      editorChangeHandler = () => {
+        // Ignore changes while loading a file
+        if (isLoadingFile) {
+          return;
+        }
 
-       isModified = true;
-       saveBtnEl.disabled = false;
-       updateStatus('Modified', '');
-     };
-     window.addEventListener('editor-changed', editorChangeHandler);
+        isModified = true;
+        saveBtnEl.disabled = false;
+        updateStatus('Modified', '');
+        
+        // Update toolbar button states after content changes
+        updateToolbarButtonStates();
+      };
+      window.addEventListener('editor-changed', editorChangeHandler);
 
-     // Set up button listeners (store handlers for cleanup)
-     saveButtonHandler = handleSave;
-     refreshButtonHandler = handleRefreshEntities;
-     mobileMenuHandler = toggleMobileSidebar;
-     sidebarOverlayHandler = closeMobileSidebar;
+      // Set up button listeners (store handlers for cleanup)
+      saveButtonHandler = handleSave;
+      refreshButtonHandler = handleRefreshEntities;
+      mobileMenuHandler = toggleMobileSidebar;
+      sidebarOverlayHandler = closeMobileSidebar;
+      undoButtonHandler = handleUndo;
+      redoButtonHandler = handleRedo;
+      indentButtonHandler = handleIndent;
+      dedentButtonHandler = handleDedent;
 
-     saveBtnEl.addEventListener('click', saveButtonHandler);
-     refreshBtnEl.addEventListener('click', refreshButtonHandler);
+      saveBtnEl.addEventListener('click', saveButtonHandler);
+      refreshBtnEl.addEventListener('click', refreshButtonHandler);
 
-     // Mobile menu toggle
-     mobileMenuToggleEl.addEventListener('click', mobileMenuHandler);
-     sidebarOverlayEl.addEventListener('click', sidebarOverlayHandler);
+      // Mobile menu toggle
+      mobileMenuToggleEl.addEventListener('click', mobileMenuHandler);
+      sidebarOverlayEl.addEventListener('click', sidebarOverlayHandler);
+
+      // Mobile toolbar buttons
+      undoBtnEl.addEventListener('click', undoButtonHandler);
+      redoBtnEl.addEventListener('click', redoButtonHandler);
+      indentBtnEl.addEventListener('click', indentButtonHandler);
+      dedentBtnEl.addEventListener('click', dedentButtonHandler);
+      
+      // Initialize toolbar button states
+      updateToolbarButtonStates();
 
     // Restore state
     restoreState();
