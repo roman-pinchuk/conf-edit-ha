@@ -2,6 +2,30 @@
 
 All notable changes to the Configuration Editor project are documented in this file.
 
+## [1.1.2] - 2026-01-23
+
+### Fixed
+- **iOS Theme Switching Race Condition**: Fixed editor theme not updating when toggling theme in Home Assistant iOS app
+  - Root cause: Editor was recalculating theme state after toggle, potentially getting stale value
+  - Solution: Editor now uses theme value from event detail to eliminate race condition
+  - Specifically addresses WebView timing issues where event handler runs before theme state settles
+- Improved localStorage reliability with verification and retry mechanism
+  - Added try/catch error handling for iOS Safari localStorage issues
+  - Implements write verification and automatic retry for failed saves
+  - Graceful fallback if localStorage is unavailable
+
+### Changed
+- Removed debug console logs for cleaner browser console output
+- Reduced JavaScript bundle size by ~700 bytes
+- Updated `updateTheme()` function to accept optional `isDarkMode` parameter for better WebView compatibility
+
+### Technical Details
+- Event handler now extracts `dark` value from `CustomEvent.detail` instead of calling `isDark()` again
+- Added optional parameter to `updateTheme(isDarkMode?: boolean)` for direct value passing
+- Prevents race conditions by using pre-calculated theme value from event dispatcher
+
+---
+
 ## [1.1.1] - 2026-01-23
 
 ### Fixed
