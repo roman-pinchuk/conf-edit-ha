@@ -55,11 +55,15 @@ function updateToolbarButtonStates(): void {
   const canUndo = canEditorUndo();
   const canRedo = canEditorRedo();
 
-  undoBtnEl.disabled = !canUndo;
-  undoBtnEl.setAttribute('aria-disabled', canUndo ? 'false' : 'true');
+  if (undoBtnEl) {
+    undoBtnEl.disabled = !canUndo;
+    undoBtnEl.setAttribute('aria-disabled', canUndo ? 'false' : 'true');
+  }
   
-  redoBtnEl.disabled = !canRedo;
-  redoBtnEl.setAttribute('aria-disabled', canRedo ? 'false' : 'true');
+  if (redoBtnEl) {
+    redoBtnEl.disabled = !canRedo;
+    redoBtnEl.setAttribute('aria-disabled', canRedo ? 'false' : 'true');
+  }
 }
 
 /**
@@ -165,11 +169,11 @@ async function init(): Promise<void> {
       mobileMenuToggleEl.addEventListener('click', mobileMenuHandler);
       sidebarOverlayEl.addEventListener('click', sidebarOverlayHandler);
 
-      // Mobile toolbar buttons
-      undoBtnEl.addEventListener('click', undoButtonHandler);
-      redoBtnEl.addEventListener('click', redoButtonHandler);
-      indentBtnEl.addEventListener('click', indentButtonHandler);
-      dedentBtnEl.addEventListener('click', dedentButtonHandler);
+       // Mobile toolbar buttons
+       if (undoBtnEl) undoBtnEl.addEventListener('click', undoButtonHandler);
+       if (redoBtnEl) redoBtnEl.addEventListener('click', redoButtonHandler);
+       if (indentBtnEl) indentBtnEl.addEventListener('click', indentButtonHandler);
+       if (dedentBtnEl) dedentBtnEl.addEventListener('click', dedentButtonHandler);
       
       // Initialize toolbar button states
       updateToolbarButtonStates();
