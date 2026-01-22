@@ -307,15 +307,18 @@ export function createEditor(parent: HTMLElement): EditorView {
      parent,
    });
 
-   // Listen for theme changes (store handler for cleanup)
-   themeChangeHandler = () => {
-     if (editorView) {
-       updateTheme();
-     }
-   };
-   window.addEventListener('theme-changed', themeChangeHandler);
+    // Listen for theme changes (store handler for cleanup)
+    themeChangeHandler = (e: Event) => {
+      if (editorView) {
+        // Use the theme value from the event to avoid race conditions in WebView
+        const customEvent = e as CustomEvent<{ dark: boolean }>;
+        const isDarkMode = customEvent.detail?.dark ?? isDark();
+        updateTheme(isDarkMode);
+      }
+    };
+    window.addEventListener('theme-changed', themeChangeHandler);
 
-   return editorView;
+    return editorView;
 }
 
 /**
@@ -360,16 +363,23 @@ export function getContent(): string {
 
 /**
  * Update editor theme
+ * @param isDarkMode - Optional theme state to use. If not provided, uses isDark() function.
+ *                     Accepting parameter avoids race conditions in WebView environments.
  */
-function updateTheme(): void {
-  if (!editorView) return;
+function updateTheme(isDarkMode?: boolean): void {
+   if (!editorView) {
+     return;
+   }
 
-  editorView.dispatch({
-    effects: [
-      themeCompartment.reconfigure(isDark() ? oneDark : []),
-      rainbowIndentThemeCompartment.reconfigure(isDark() ? rainbowIndentDarkTheme : rainbowIndentLightTheme),
-    ],
-  });
+   // Use provided value or fall back to isDark() function
+   const dark = isDarkMode !== undefined ? isDarkMode : isDark();
+   
+   editorView.dispatch({
+     effects: [
+       themeCompartment.reconfigure(dark ? oneDark : []),
+       rainbowIndentThemeCompartment.reconfigure(dark ? rainbowIndentDarkTheme : rainbowIndentLightTheme),
+     ],
+   });
 }
 
 /**
