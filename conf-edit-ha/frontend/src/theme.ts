@@ -23,7 +23,26 @@ export function initTheme(): void {
   // Set up media query for system theme
   mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
   systemThemeDark = mediaQuery.matches;
+  
+  // Add listener for media query changes (standard browsers)
   mediaQuery.addEventListener('change', applyTheme);
+  
+  // iOS Safari/WebView may not reliably trigger media query change events
+  // Check for visibility changes to detect theme switches when app returns to foreground
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      // App became visible - check if system theme changed
+      checkAndApplyTheme();
+    }
+  });
+  
+  // Periodic check for iOS compatibility (every 5 seconds while in auto mode)
+  // This helps detect theme changes that media query listener might miss
+  setInterval(() => {
+    if (currentTheme === 'auto') {
+      checkAndApplyTheme();
+    }
+  }, 5000);
 
   // Set up toggle button
   const toggleBtn = document.getElementById('theme-toggle-btn');
@@ -33,6 +52,21 @@ export function initTheme(): void {
 
   // Apply initial theme
   applyTheme();
+}
+
+/**
+ * Check if system theme changed and apply if needed
+ * Used for iOS compatibility
+ */
+function checkAndApplyTheme(): void {
+  const newSystemThemeDark = mediaQuery.matches;
+  
+  // Only apply if system theme actually changed
+  if (newSystemThemeDark !== systemThemeDark) {
+    console.log('[Theme] System theme changed detected:', newSystemThemeDark ? 'dark' : 'light');
+    systemThemeDark = newSystemThemeDark;
+    applyTheme();
+  }
 }
 
 /**
@@ -58,15 +92,16 @@ function applyTheme(e?: MediaQueryListEvent | Event): void {
     isDark = currentTheme === 'dark';
   }
 
-  // Only modify DOM if theme actually changed
-  const currentlyDark = root.classList.contains('dark');
-  if (isDark !== currentlyDark) {
-    if (isDark) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-  }
+   // Only modify DOM if theme actually changed
+   const currentlyDark = root.classList.contains('dark');
+   if (isDark !== currentlyDark) {
+     console.log('[Theme] Applying theme:', isDark ? 'dark' : 'light', '(mode:', currentTheme, ')');
+     if (isDark) {
+       root.classList.add('dark');
+     } else {
+       root.classList.remove('dark');
+     }
+   }
 
   // Update icons
   if (lightIcon && darkIcon) {
