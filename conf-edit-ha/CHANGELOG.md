@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.25] - 2026-01-22
+
+### Fixed
+- **Healthcheck:** Fixed Docker healthcheck failing due to IPv4/IPv6 mismatch
+  - Changed Flask app to bind to IPv6 (dual-stack `::`) instead of IPv4-only (`0.0.0.0`)
+  - Updated Docker healthcheck to explicitly use IPv4 address (127.0.0.1) to avoid hostname resolution issues
+  - Resolves container being marked "unhealthy" in Docker despite working correctly
+  - Container now passes health checks consistently
+
 ## [1.0.23] - 2026-01-22
 
 ### Refactored
