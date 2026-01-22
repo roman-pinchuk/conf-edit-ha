@@ -336,80 +336,144 @@ body {
   overflow: auto;
 }
 
-/* Mobile Editor Toolbar */
+/* Mobile Editor Toolbar - Modern Design */
 .mobile-editor-toolbar {
   display: none;
-  gap: 0.5rem;
+  gap: 0.75rem;
   align-items: center;
-  padding: 0.5rem 0.5rem;
-  background-color: var(--bg-secondary);
+  padding: 0.75rem;
+  background: linear-gradient(
+    135deg,
+    var(--bg-secondary) 0%,
+    var(--bg-tertiary) 100%
+  );
   border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
   height: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
 }
 
 .toolbar-group {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.5rem;
   align-items: center;
+  padding: 0 0.25rem;
 }
 
 .toolbar-divider {
-  width: 1px;
-  height: 24px;
-  background-color: var(--border-color);
-  margin: 0 0.25rem;
+  width: 2px;
+  height: 28px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--border-color) 50%,
+    transparent 100%
+  );
+  margin: 0 0.5rem;
+  border-radius: 1px;
 }
 
 .btn-toolbar {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 8px 10px;
-  min-width: 44px;
-  height: 40px;
-  background-color: var(--bg-secondary);
+  gap: 6px;
+  padding: 10px 12px;
+  min-width: 48px;
+  height: 44px;
+  background: var(--bg-secondary);
   color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Toolbar button hover state with smooth transition */
 .btn-toolbar:hover:not(:disabled) {
-  background-color: var(--bg-tertiary);
+  background: var(--bg-tertiary);
   border-color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(3, 169, 244, 0.2);
 }
 
+/* Toolbar button active/pressed state */
 .btn-toolbar:active:not(:disabled) {
-  background-color: var(--border-color);
+  transform: translateY(0px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Disabled button styling */
 .btn-toolbar:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
+  background-color: var(--bg-secondary);
 }
 
+/* Icon with label layout */
 .btn-icon-with-label {
   flex-direction: column;
-  padding: 6px 8px;
-  min-width: 48px;
-  height: 48px;
-  gap: 2px;
+  padding: 8px 10px;
+  min-width: 52px;
+  height: 52px;
+  gap: 3px;
 }
 
 .btn-icon-with-label svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
+  transition: transform 0.2s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
+}
+
+.btn-toolbar:hover:not(:disabled) .btn-icon-with-label svg {
+  transform: scale(1.1);
 }
 
 .btn-label {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
   white-space: nowrap;
   text-align: center;
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+}
+
+.btn-toolbar:hover:not(:disabled) .btn-label {
+  opacity: 1;
+}
+
+/* Focus state for accessibility */
+.btn-toolbar:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Ripple effect on click */
+.btn-toolbar::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(3, 169, 244, 0.15);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+  pointer-events: none;
+}
+
+.btn-toolbar:active:not(:disabled)::before {
+  width: 100%;
+  height: 100%;
 }
 
 /* Status Bar */
@@ -606,13 +670,44 @@ body {
     padding: 4px 8px;
   }
 
-  .item-name {
-    font-size: 14px;
-  }
-}
+   .item-name {
+     font-size: 14px;
+   }
 
-/* Extra small screens (480px and below) */
-@media (max-width: 480px) {
+   /* Mobile toolbar responsive adjustments */
+   .mobile-editor-toolbar {
+     padding: 0.65rem 0.5rem;
+     gap: 0.6rem;
+   }
+
+   .toolbar-group {
+     gap: 0.4rem;
+   }
+
+   .btn-toolbar {
+     padding: 8px 10px;
+     height: 42px;
+     min-width: 46px;
+   }
+
+   .btn-icon-with-label {
+     height: 50px;
+     min-width: 50px;
+     padding: 7px 9px;
+   }
+
+   .btn-icon-with-label svg {
+     width: 18px;
+     height: 18px;
+   }
+
+   .btn-label {
+     font-size: 0.65rem;
+   }
+ }
+ 
+ /* Extra small screens (480px and below) */
+ @media (max-width: 480px) {
   /* Extra small screens */
   .header-left h1 {
     font-size: 0.9rem;
@@ -656,27 +751,45 @@ body {
     font-size: 0.65rem;
   }
 
-  /* Maintain touch target for toolbar buttons on very small screens */
-  .btn-toolbar {
-    padding: 6px 8px;
-    min-width: 44px;
-    height: 44px;
-  }
+   /* Mobile toolbar for very small screens */
+   .mobile-editor-toolbar {
+     padding: 0.6rem 0.5rem;
+     gap: 0.5rem;
+   }
 
-  .btn-icon-with-label {
-    min-width: 44px;
-    height: 44px;
-    padding: 4px 6px;
-  }
+   .toolbar-group {
+     gap: 0.35rem;
+   }
 
-  .btn-icon-with-label svg {
-    width: 16px;
-    height: 16px;
-  }
+   .toolbar-divider {
+     height: 24px;
+     margin: 0 0.35rem;
+   }
 
-  .btn-label {
-    font-size: 0.6rem;
-  }
+   /* Maintain touch target for toolbar buttons on very small screens */
+   .btn-toolbar {
+     padding: 8px 10px;
+     min-width: 44px;
+     height: 44px;
+     border-radius: 8px;
+   }
+
+   .btn-icon-with-label {
+     min-width: 48px;
+     height: 48px;
+     padding: 6px 8px;
+     gap: 2px;
+   }
+
+   .btn-icon-with-label svg {
+     width: 16px;
+     height: 16px;
+   }
+
+   .btn-label {
+     font-size: 0.6rem;
+     letter-spacing: 0.2px;
+   }
 }
 
 @media (max-width: 480px) {
