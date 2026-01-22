@@ -9,7 +9,7 @@ import { yaml } from '@codemirror/lang-yaml';
 import { autocompletion } from '@codemirror/autocomplete';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { linter, Diagnostic } from '@codemirror/lint';
-import { indentLess, insertTab } from '@codemirror/commands';
+import { indentLess, insertTab, undo, redo } from '@codemirror/commands';
 import { parse as parseYAML } from 'yaml';
 import { entityCompletions } from './autocomplete';
 import { isDark } from './theme';
@@ -385,20 +385,76 @@ export function focusEditor(): void {
  * Register save shortcut (Ctrl+S / Cmd+S)
  */
 export function registerSaveShortcut(callback: () => void): void {
-   if (!editorView) return;
+    if (!editorView) return;
 
-   // Remove old handler if it exists
-   if (saveShortcutHandler) {
-     editorView.dom.removeEventListener('keydown', saveShortcutHandler);
-   }
+    // Remove old handler if it exists
+    if (saveShortcutHandler) {
+      editorView.dom.removeEventListener('keydown', saveShortcutHandler);
+    }
 
-   // Store handler for cleanup and prevent duplicate listeners
-   saveShortcutHandler = (e: KeyboardEvent) => {
-     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-       e.preventDefault();
-       callback();
-     }
-   };
+    // Store handler for cleanup and prevent duplicate listeners
+    saveShortcutHandler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        callback();
+      }
+    };
 
-   editorView.dom.addEventListener('keydown', saveShortcutHandler);
+    editorView.dom.addEventListener('keydown', saveShortcutHandler);
+}
+
+/**
+ * Execute undo command
+ */
+export function editorUndo(): boolean {
+  if (!editorView) return false;
+  return undo(editorView);
+}
+
+/**
+ * Execute redo command
+ */
+export function editorRedo(): boolean {
+  if (!editorView) return false;
+  return redo(editorView);
+}
+
+/**
+ * Execute indent command
+ */
+export function editorIndent(): boolean {
+  if (!editorView) return false;
+  return insertTab(editorView);
+}
+
+/**
+ * Execute dedent command
+ */
+export function editorDedent(): boolean {
+  if (!editorView) return false;
+  return indentLess(editorView);
+}
+
+/**
+ * Check if undo is available
+ */
+export function canEditorUndo(): boolean {
+  if (!editorView) return false;
+  
+  // Check if there's any undo history
+  // CodeMirror state.history exists and has undo transactions
+  const history = (editorView.state as any).history;
+  return history && history.done && history.done.length > 0;
+}
+
+/**
+ * Check if redo is available
+ */
+export function canEditorRedo(): boolean {
+  if (!editorView) return false;
+  
+  // Check if there's any redo history
+  // CodeMirror state.history exists and has redo transactions
+  const history = (editorView.state as any).history;
+  return history && history.undone && history.undone.length > 0;
 }

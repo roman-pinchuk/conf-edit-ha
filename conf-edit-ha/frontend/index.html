@@ -65,14 +65,75 @@
          </div>
        </aside>
 
-       <!-- Editor Container -->
-       <main class="editor-container" aria-label="Code editor">
-         <div id="editor" class="editor" role="textbox" aria-label="YAML file editor" aria-multiline="true"></div>
-         <div id="status-bar" class="status-bar" aria-live="polite" aria-atomic="true">
-           <span id="status-message" aria-label="Editor status">Ready</span>
-           <span id="status-info" aria-label="Editor info"></span>
-         </div>
-       </main>
+        <!-- Editor Container -->
+        <main class="editor-container" aria-label="Code editor">
+          <div id="editor" class="editor" role="textbox" aria-label="YAML file editor" aria-multiline="true"></div>
+          
+          <!-- Mobile Editor Toolbar (visible only on mobile) -->
+          <nav class="mobile-editor-toolbar" aria-label="Editor editing tools">
+            <!-- Undo/Redo Group -->
+            <div class="toolbar-group">
+              <button 
+                id="undo-btn" 
+                class="btn btn-toolbar btn-icon-with-label" 
+                title="Undo changes (Ctrl+Z)" 
+                aria-label="Undo changes"
+                aria-disabled="true"
+                disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M3 7v6h6M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/>
+                </svg>
+                <span class="btn-label">Undo</span>
+              </button>
+              
+              <button 
+                id="redo-btn" 
+                class="btn btn-toolbar btn-icon-with-label" 
+                title="Redo changes (Ctrl+Shift+Z)" 
+                aria-label="Redo changes"
+                aria-disabled="true"
+                disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M21 7v6h-6M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"/>
+                </svg>
+                <span class="btn-label">Redo</span>
+              </button>
+            </div>
+
+            <!-- Divider -->
+            <div class="toolbar-divider"></div>
+
+            <!-- Indent/Dedent Group -->
+            <div class="toolbar-group">
+              <button 
+                id="indent-btn" 
+                class="btn btn-toolbar btn-icon-with-label" 
+                title="Increase indentation (Tab)" 
+                aria-label="Increase indentation">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M3 12h14M12 5l7 7-7 7"/>
+                </svg>
+                <span class="btn-label">Tab</span>
+              </button>
+              
+              <button 
+                id="dedent-btn" 
+                class="btn btn-toolbar btn-icon-with-label" 
+                title="Decrease indentation (Shift+Tab)" 
+                aria-label="Decrease indentation">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M21 12H7M12 5l-7 7 7 7"/>
+                </svg>
+                <span class="btn-label">Dedent</span>
+              </button>
+            </div>
+          </nav>
+
+          <div id="status-bar" class="status-bar" aria-live="polite" aria-atomic="true">
+            <span id="status-message" aria-label="Editor status">Ready</span>
+            <span id="status-info" aria-label="Editor info"></span>
+          </div>
+        </main>
      </div>
   </div>
 

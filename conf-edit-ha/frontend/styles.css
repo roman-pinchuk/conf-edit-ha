@@ -336,6 +336,82 @@ body {
   overflow: auto;
 }
 
+/* Mobile Editor Toolbar */
+.mobile-editor-toolbar {
+  display: none;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0.5rem;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  height: auto;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-color);
+  margin: 0 0.25rem;
+}
+
+.btn-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 10px;
+  min-width: 44px;
+  height: 40px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.btn-toolbar:hover:not(:disabled) {
+  background-color: var(--bg-tertiary);
+  border-color: var(--accent-color);
+}
+
+.btn-toolbar:active:not(:disabled) {
+  background-color: var(--border-color);
+}
+
+.btn-toolbar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-icon-with-label {
+  flex-direction: column;
+  padding: 6px 8px;
+  min-width: 48px;
+  height: 48px;
+  gap: 2px;
+}
+
+.btn-icon-with-label svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.btn-label {
+  font-size: 0.65rem;
+  white-space: nowrap;
+  text-align: center;
+}
+
 /* Status Bar */
 .status-bar {
   display: flex;
@@ -428,6 +504,11 @@ body {
 @media (max-width: 768px) {
   /* Show mobile menu toggle */
   .mobile-menu-toggle {
+    display: flex;
+  }
+
+  /* Show mobile editor toolbar on mobile */
+  .mobile-editor-toolbar {
     display: flex;
   }
 
@@ -527,6 +608,74 @@ body {
 
   .item-name {
     font-size: 14px;
+  }
+}
+
+/* Extra small screens (480px and below) */
+@media (max-width: 480px) {
+  /* Extra small screens */
+  .header-left h1 {
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    padding: 6px 10px;
+    min-width: 32px;
+    height: 32px;
+  }
+
+  .btn-icon-only {
+    padding: 6px;
+  }
+
+  .btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .mobile-menu-toggle {
+    padding: 6px;
+    min-width: 32px;
+    height: 32px;
+  }
+
+  .mobile-menu-toggle svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .sidebar {
+    width: 260px;
+  }
+
+  .cm-editor {
+    font-size: 12px;
+  }
+
+  .status-bar {
+    font-size: 0.65rem;
+  }
+
+  /* Maintain touch target for toolbar buttons on very small screens */
+  .btn-toolbar {
+    padding: 6px 8px;
+    min-width: 44px;
+    height: 44px;
+  }
+
+  .btn-icon-with-label {
+    min-width: 44px;
+    height: 44px;
+    padding: 4px 6px;
+  }
+
+  .btn-icon-with-label svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .btn-label {
+    font-size: 0.6rem;
   }
 }
 
