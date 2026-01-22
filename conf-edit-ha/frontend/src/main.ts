@@ -64,15 +64,15 @@ function updateToolbarButtonStates(): void {
   const canRedo = canEditorRedo();
 
   if (undoBtnEl) {
+    // Remove pointer-events, let buttons be clickable always
     undoBtnEl.style.opacity = canUndo ? '1' : '0.4';
-    undoBtnEl.style.pointerEvents = canUndo ? 'auto' : 'none';
     undoBtnEl.setAttribute('aria-disabled', canUndo ? 'false' : 'true');
     console.log('[Toolbar] Undo state:', canUndo);
   }
   
   if (redoBtnEl) {
+    // Remove pointer-events, let buttons be clickable always
     redoBtnEl.style.opacity = canRedo ? '1' : '0.4';
-    redoBtnEl.style.pointerEvents = canRedo ? 'auto' : 'none';
     redoBtnEl.setAttribute('aria-disabled', canRedo ? 'false' : 'true');
     console.log('[Toolbar] Redo state:', canRedo);
   }
@@ -83,9 +83,14 @@ function updateToolbarButtonStates(): void {
  */
 function handleUndo(): void {
   console.log('[Toolbar] Undo clicked');
-  const result = editorUndo();
-  console.log('[Toolbar] Undo result:', result);
-  updateToolbarButtonStates();
+  // Only perform undo if it's available
+  if (canEditorUndo()) {
+    const result = editorUndo();
+    console.log('[Toolbar] Undo result:', result);
+    updateToolbarButtonStates();
+  } else {
+    console.log('[Toolbar] Undo not available');
+  }
 }
 
 /**
@@ -93,9 +98,14 @@ function handleUndo(): void {
  */
 function handleRedo(): void {
   console.log('[Toolbar] Redo clicked');
-  const result = editorRedo();
-  console.log('[Toolbar] Redo result:', result);
-  updateToolbarButtonStates();
+  // Only perform redo if it's available
+  if (canEditorRedo()) {
+    const result = editorRedo();
+    console.log('[Toolbar] Redo result:', result);
+    updateToolbarButtonStates();
+  } else {
+    console.log('[Toolbar] Redo not available');
+  }
 }
 
 /**
