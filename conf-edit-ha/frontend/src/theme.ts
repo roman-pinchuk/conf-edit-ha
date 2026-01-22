@@ -14,15 +14,24 @@ let systemThemeDark = false;
  * Initialize theme system
  */
 export function initTheme(): void {
-  // Load saved preference
-  const saved = localStorage.getItem(STORAGE_KEY) as Theme | null;
-  if (saved && ['light', 'dark', 'auto'].includes(saved)) {
-    currentTheme = saved;
-  }
+   // Load saved preference with fallback
+   let saved: Theme | null = null;
+   try {
+     const storedValue = localStorage.getItem(STORAGE_KEY);
+     if (storedValue && ['light', 'dark', 'auto'].includes(storedValue)) {
+       saved = storedValue as Theme;
+     }
+    } catch (e) {
+      // Silently fail - fall back to default theme
+    }
+   
+   if (saved) {
+     currentTheme = saved;
+   }
 
-  // Set up media query for system theme
-  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  systemThemeDark = mediaQuery.matches;
+   // Set up media query for system theme
+   mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+   systemThemeDark = mediaQuery.matches;
   
   // Add listener for media query changes (standard browsers)
   mediaQuery.addEventListener('change', applyTheme);
@@ -61,78 +70,92 @@ export function initTheme(): void {
 function checkAndApplyTheme(): void {
   const newSystemThemeDark = mediaQuery.matches;
   
-  // Only apply if system theme actually changed
-  if (newSystemThemeDark !== systemThemeDark) {
-    console.log('[Theme] System theme changed detected:', newSystemThemeDark ? 'dark' : 'light');
-    systemThemeDark = newSystemThemeDark;
-    applyTheme();
-  }
+   // Only apply if system theme actually changed
+   if (newSystemThemeDark !== systemThemeDark) {
+     systemThemeDark = newSystemThemeDark;
+     applyTheme();
+   }
 }
 
 /**
  * Apply the current theme
  */
 function applyTheme(e?: MediaQueryListEvent | Event): void {
-  // Update system theme state if event provides it
-  if (e && 'matches' in e) {
-    systemThemeDark = (e as MediaQueryListEvent).matches;
-  } else if (mediaQuery) {
-    systemThemeDark = mediaQuery.matches;
-  }
+   // Update system theme state if event provides it
+   if (e && 'matches' in e) {
+     systemThemeDark = (e as MediaQueryListEvent).matches;
+   } else if (mediaQuery) {
+     systemThemeDark = mediaQuery.matches;
+   }
 
-  const root = document.documentElement;
-  const lightIcon = document.getElementById('theme-icon-light');
-  const darkIcon = document.getElementById('theme-icon-dark');
+   const root = document.documentElement;
+   const lightIcon = document.getElementById('theme-icon-light');
+   const darkIcon = document.getElementById('theme-icon-dark');
 
-  let isDark = false;
+   let isDark = false;
 
-  if (currentTheme === 'auto') {
-    isDark = systemThemeDark;
-  } else {
-    isDark = currentTheme === 'dark';
-  }
+   if (currentTheme === 'auto') {
+     isDark = systemThemeDark;
+   } else {
+     isDark = currentTheme === 'dark';
+   }
 
-   // Only modify DOM if theme actually changed
-   const currentlyDark = root.classList.contains('dark');
-   if (isDark !== currentlyDark) {
-     console.log('[Theme] Applying theme:', isDark ? 'dark' : 'light', '(mode:', currentTheme, ')');
-     if (isDark) {
-       root.classList.add('dark');
-     } else {
-       root.classList.remove('dark');
+     // Only modify DOM if theme actually changed
+     const currentlyDark = root.classList.contains('dark');
+     if (isDark !== currentlyDark) {
+       if (isDark) {
+         root.classList.add('dark');
+       } else {
+         root.classList.remove('dark');
+       }
+     }
+
+   // Update icons - ensure they're always synchronized
+   if (lightIcon && darkIcon) {
+     const newLightDisplay = isDark ? 'none' : 'block';
+     const newDarkDisplay = isDark ? 'block' : 'none';
+     
+     if (lightIcon.style.display !== newLightDisplay) {
+       lightIcon.style.display = newLightDisplay;
+     }
+     if (darkIcon.style.display !== newDarkDisplay) {
+       darkIcon.style.display = newDarkDisplay;
      }
    }
 
-  // Update icons
-  if (lightIcon && darkIcon) {
-    if (isDark) {
-      lightIcon.style.display = 'none';
-      darkIcon.style.display = 'block';
-    } else {
-      lightIcon.style.display = 'block';
-      darkIcon.style.display = 'none';
-    }
-  }
-
-  // Notify editor to update theme
-  window.dispatchEvent(new CustomEvent('theme-changed', { detail: { dark: isDark } }));
+   // Notify editor to update theme
+   window.dispatchEvent(new CustomEvent('theme-changed', { detail: { dark: isDark } }));
 }
 
 /**
  * Toggle between light and dark themes
  */
 function toggleTheme(): void {
-  if (currentTheme === 'auto') {
-    // If auto, switch to opposite of current system theme
-    currentTheme = systemThemeDark ? 'light' : 'dark';
-  } else if (currentTheme === 'light') {
-    currentTheme = 'dark';
-  } else {
-    currentTheme = 'light';
-  }
+   if (currentTheme === 'auto') {
+     // If auto, switch to opposite of current system theme
+     currentTheme = systemThemeDark ? 'light' : 'dark';
+   } else if (currentTheme === 'light') {
+     currentTheme = 'dark';
+   } else {
+     currentTheme = 'light';
+   }
 
-  localStorage.setItem(STORAGE_KEY, currentTheme);
-  applyTheme();
+    // Save with verification - iOS Safari has issues with localStorage reliability
+    try {
+      localStorage.setItem(STORAGE_KEY, currentTheme);
+      // Verify it was actually saved
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved !== currentTheme) {
+        // Retry with small delay if verification failed
+        setTimeout(() => {
+          localStorage.setItem(STORAGE_KEY, currentTheme);
+        }, 10);
+      }
+    } catch (e) {
+      // Silently fail - theme will be in 'auto' mode on next load
+    }
+   
+   applyTheme();
 }
 
 /**
