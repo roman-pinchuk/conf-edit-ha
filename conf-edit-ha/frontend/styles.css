@@ -419,7 +419,7 @@ body {
 .btn-icon-with-label {
   flex-direction: column;
   padding: 8px 10px;
-  min-width: 52px;
+  width: 56px;
   height: 52px;
   gap: 3px;
 }
@@ -444,6 +444,9 @@ body {
   text-align: center;
   opacity: 0.9;
   transition: opacity 0.2s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .btn-toolbar:hover:not(:disabled) .btn-label {
@@ -690,11 +693,11 @@ body {
      min-width: 46px;
    }
 
-   .btn-icon-with-label {
-     height: 50px;
-     min-width: 50px;
-     padding: 7px 9px;
-   }
+    .btn-icon-with-label {
+      height: 50px;
+      width: 54px;
+      padding: 7px 9px;
+    }
 
    .btn-icon-with-label svg {
      width: 18px;
@@ -774,12 +777,12 @@ body {
      border-radius: 8px;
    }
 
-   .btn-icon-with-label {
-     min-width: 48px;
-     height: 48px;
-     padding: 6px 8px;
-     gap: 2px;
-   }
+    .btn-icon-with-label {
+      width: 52px;
+      height: 48px;
+      padding: 6px 8px;
+      gap: 2px;
+    }
 
    .btn-icon-with-label svg {
      width: 16px;
