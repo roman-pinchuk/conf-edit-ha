@@ -2,6 +2,22 @@
 
 All notable changes to the Configuration Editor project are documented in this file.
 
+## [1.1.5] - 2026-01-24
+
+### Fixed
+- **File Tree DOM Fragment Issue**: Fixed file tree folder duplication by improving DOM element extraction
+  - Root cause: `tempDiv.firstChild` was including text nodes (whitespace) that interfered with DOM structure
+  - Solution: Changed to `tempDiv.firstElementChild` to only extract element nodes
+  - Prevents text node contamination and ensures clean DOM insertion during folder toggle
+  - Maintains proper tree structure without duplicate elements
+
+### Technical Details
+- Updated `updateDirectoryToggle()` function to use `firstElementChild` instead of `firstChild`
+- Ensures only HTML elements (not text nodes) are inserted into the file tree DOM
+- Improves reliability of incremental directory updates without full re-render
+
+---
+
 ## [1.1.4] - 2026-01-24
 
 ### Fixed

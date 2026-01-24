@@ -504,11 +504,12 @@ function updateDirectoryToggle(path: string, isExpanded: boolean): void {
           
           nextSibling = treeItem.nextElementSibling;
           // Insert all children from tempDiv into the DOM
-          while (tempDiv.firstChild) {
+          while (tempDiv.firstElementChild) {
+            const childElement = tempDiv.firstElementChild;
             if (nextSibling) {
-              nextSibling.parentNode?.insertBefore(tempDiv.firstChild, nextSibling);
+              nextSibling.parentNode?.insertBefore(childElement, nextSibling);
             } else {
-              fileListEl.appendChild(tempDiv.firstChild);
+              fileListEl.appendChild(childElement);
             }
           }
         }
