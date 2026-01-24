@@ -499,14 +499,17 @@ function updateDirectoryToggle(path: string, isExpanded: boolean): void {
             renderTreeNode(child, getNodeLevel(path) + 1)
           ).join('');
           
-          const fragment = document.createElement('div');
-          fragment.innerHTML = childrenHtml;
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = childrenHtml;
           
           nextSibling = treeItem.nextElementSibling;
-          if (nextSibling) {
-            nextSibling.parentNode?.insertBefore(fragment, nextSibling);
-          } else {
-            fileListEl.appendChild(fragment);
+          // Insert all children from tempDiv into the DOM
+          while (tempDiv.firstChild) {
+            if (nextSibling) {
+              nextSibling.parentNode?.insertBefore(tempDiv.firstChild, nextSibling);
+            } else {
+              fileListEl.appendChild(tempDiv.firstChild);
+            }
           }
         }
       }
