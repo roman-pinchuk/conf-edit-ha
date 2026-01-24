@@ -2,6 +2,22 @@
 
 All notable changes to the Configuration Editor project are documented in this file.
 
+## [1.1.4] - 2026-01-24
+
+### Fixed
+- **File Tree Folder Duplication**: Fixed folders in file tree duplicating when expanded multiple times
+  - Root cause: Unreliable check for existing children elements during tree updates
+  - Solution: Always remove existing children before re-adding them during folder toggle
+  - Improved DOM fragment insertion to extract and place individual child elements correctly
+  - Ensures clean state with exactly one set of children on every toggle
+
+### Technical Details
+- Simplified `updateDirectoryToggle()` logic to unconditionally remove children first
+- Improved fragment insertion by extracting child elements individually instead of inserting wrapper div
+- Prevents DOM duplication issues and ensures predictable tree behavior
+
+---
+
 ## [1.1.3] - 2026-01-23
 
 ### Fixed
