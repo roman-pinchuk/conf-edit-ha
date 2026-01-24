@@ -482,43 +482,34 @@ function updateDirectoryToggle(path: string, isExpanded: boolean): void {
    
    const folderIcon = treeItem.querySelector('.folder-icon') as SVGElement;
    if (folderIcon) {
-     // Find the directory node in the tree
-     const dirNode = findNodeByPath(files, path);
-     if (dirNode && dirNode.type === 'directory') {
-       if (isExpanded && dirNode.children && dirNode.children.length > 0) {
-         // Insert children elements after the directory
-         const existingChildren = treeItem.nextElementSibling;
-         if (!existingChildren || !existingChildren.classList.contains('tree-item-group')) {
-           const childrenHtml = dirNode.children.map((child) => 
-             renderTreeNode(child, getNodeLevel(path) + 1)
-           ).join('');
-           
-           const fragment = document.createElement('div');
-           fragment.innerHTML = childrenHtml;
-           
-           let nextSibling = treeItem.nextElementSibling;
-           while (nextSibling && isChildOf(nextSibling as HTMLElement, path)) {
-             const toRemove = nextSibling;
-             nextSibling = nextSibling.nextElementSibling;
-             toRemove.remove();
-           }
-           
-           if (nextSibling) {
-             nextSibling.parentNode?.insertBefore(fragment, nextSibling);
-           } else {
-             fileListEl.appendChild(fragment);
-           }
-         }
-       } else {
-         // Remove children from DOM
-         let nextSibling = treeItem.nextElementSibling;
-         while (nextSibling && isChildOf(nextSibling as HTMLElement, path)) {
-           const toRemove = nextSibling;
-           nextSibling = nextSibling.nextElementSibling;
-           toRemove.remove();
-         }
-       }
-     }
+      // Find the directory node in the tree
+      const dirNode = findNodeByPath(files, path);
+      if (dirNode && dirNode.type === 'directory') {
+        // Always remove existing children first
+        let nextSibling = treeItem.nextElementSibling;
+        while (nextSibling && isChildOf(nextSibling as HTMLElement, path)) {
+          const toRemove = nextSibling;
+          nextSibling = nextSibling.nextElementSibling;
+          toRemove.remove();
+        }
+        
+        // If expanding, add children back
+        if (isExpanded && dirNode.children && dirNode.children.length > 0) {
+          const childrenHtml = dirNode.children.map((child) => 
+            renderTreeNode(child, getNodeLevel(path) + 1)
+          ).join('');
+          
+          const fragment = document.createElement('div');
+          fragment.innerHTML = childrenHtml;
+          
+          nextSibling = treeItem.nextElementSibling;
+          if (nextSibling) {
+            nextSibling.parentNode?.insertBefore(fragment, nextSibling);
+          } else {
+            fileListEl.appendChild(fragment);
+          }
+        }
+      }
    }
 }
 
