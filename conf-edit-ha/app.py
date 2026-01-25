@@ -202,12 +202,14 @@ def read_file(filename):
     try:
         # Validate file path for security
         file_path = validate_file_path(filename)
+        
         if file_path is None:
+            logger.warning(f"Path validation failed for: {filename}")
             return jsonify({'error': 'Access denied'}), 403
 
         if not file_path.exists():
             return jsonify({'error': 'File not found'}), 404
-
+        
         # Read file content
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
