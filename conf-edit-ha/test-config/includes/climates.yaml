@@ -1,0 +1,25 @@
+# Climate Configurations
+# Test file for iOS debugging - v1.1.6 Release
+
+climate:
+  - platform: generic_thermostat
+    name: Living Room Thermostat
+    heater: switch.living_room_heater
+    target_sensor: sensor.living_room_temperature
+    min_temp: 15
+    max_temp: 25
+    ac_mode: false
+    target_temp: 21
+
+  - platform: generic_thermostat
+    name: Bedroom Thermostat  
+    heater: switch.bedroom_heater
+    target_sensor: sensor.bedroom_temperature
+    min_temp: 16
+    max_temp: 26
+    ac_mode: false
+    target_temp: 20
+
+# Include other climate configs
+# include: 
+#   - includes/climates/advanced.yaml
