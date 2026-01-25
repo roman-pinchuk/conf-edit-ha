@@ -25,15 +25,9 @@ export interface FileContent {
   modified: string;
 }
 
-// Dynamic API base detection for iOS compatibility
-const getApiBase = (): string => {
-  // For iOS WebView and other environments, ensure we have proper base URL
-  if (window.location.origin) {
-    return `${window.location.origin}/api`;
-  }
-  // Fallback to relative path
-  return './api';
-};
+// API base uses relative path for Home Assistant add-on compatibility
+// Works correctly in iOS WebView and all other environments
+const API_BASE = './api';
 
 /**
  * Encode file path for URL with proper handling of slashes
@@ -45,7 +39,7 @@ const encodeFilePath = (filename: string): string => {
   return filename.split('/').map(segment => encodeURIComponent(segment)).join('/');
 };
 
-const API_BASE = getApiBase();
+
 
 /**
  * Fetch all entities from Home Assistant
