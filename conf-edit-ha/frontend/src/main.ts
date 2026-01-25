@@ -48,13 +48,7 @@ const redoBtnEl = document.getElementById('redo-btn') as HTMLButtonElement;
 const indentBtnEl = document.getElementById('indent-btn') as HTMLButtonElement;
 const dedentBtnEl = document.getElementById('dedent-btn') as HTMLButtonElement;
 
-// Debug logging
-if (typeof window !== 'undefined') {
-  console.log('[Toolbar] undo button found:', !!undoBtnEl, undoBtnEl);
-  console.log('[Toolbar] redo button found:', !!redoBtnEl, redoBtnEl);
-  console.log('[Toolbar] indent button found:', !!indentBtnEl, indentBtnEl);
-  console.log('[Toolbar] dedent button found:', !!dedentBtnEl, dedentBtnEl);
-}
+
 
 /**
  * Update mobile toolbar button states based on undo/redo availability
@@ -67,14 +61,12 @@ function updateToolbarButtonStates(): void {
     // Remove pointer-events, let buttons be clickable always
     undoBtnEl.style.opacity = canUndo ? '1' : '0.4';
     undoBtnEl.setAttribute('aria-disabled', canUndo ? 'false' : 'true');
-    console.log('[Toolbar] Undo state:', canUndo);
   }
   
   if (redoBtnEl) {
     // Remove pointer-events, let buttons be clickable always
     redoBtnEl.style.opacity = canRedo ? '1' : '0.4';
     redoBtnEl.setAttribute('aria-disabled', canRedo ? 'false' : 'true');
-    console.log('[Toolbar] Redo state:', canRedo);
   }
 }
 
@@ -82,14 +74,10 @@ function updateToolbarButtonStates(): void {
  * Handle undo button click
  */
 function handleUndo(): void {
-  console.log('[Toolbar] Undo clicked');
   // Only perform undo if it's available
   if (canEditorUndo()) {
-    const result = editorUndo();
-    console.log('[Toolbar] Undo result:', result);
+    editorUndo();
     updateToolbarButtonStates();
-  } else {
-    console.log('[Toolbar] Undo not available');
   }
 }
 
@@ -97,14 +85,10 @@ function handleUndo(): void {
  * Handle redo button click
  */
 function handleRedo(): void {
-  console.log('[Toolbar] Redo clicked');
   // Only perform redo if it's available
   if (canEditorRedo()) {
-    const result = editorRedo();
-    console.log('[Toolbar] Redo result:', result);
+    editorRedo();
     updateToolbarButtonStates();
-  } else {
-    console.log('[Toolbar] Redo not available');
   }
 }
 
@@ -195,31 +179,19 @@ async function init(): Promise<void> {
       mobileMenuToggleEl.addEventListener('click', mobileMenuHandler);
       sidebarOverlayEl.addEventListener('click', sidebarOverlayHandler);
 
-       // Mobile toolbar buttons
-       if (undoBtnEl) {
-         undoBtnEl.addEventListener('click', undoButtonHandler);
-         console.log('[Toolbar] Undo handler attached');
-       } else {
-         console.log('[Toolbar] Undo button not found!');
-       }
-       if (redoBtnEl) {
-         redoBtnEl.addEventListener('click', redoButtonHandler);
-         console.log('[Toolbar] Redo handler attached');
-       } else {
-         console.log('[Toolbar] Redo button not found!');
-       }
-       if (indentBtnEl) {
-         indentBtnEl.addEventListener('click', indentButtonHandler);
-         console.log('[Toolbar] Indent handler attached');
-       } else {
-         console.log('[Toolbar] Indent button not found!');
-       }
-       if (dedentBtnEl) {
-         dedentBtnEl.addEventListener('click', dedentButtonHandler);
-         console.log('[Toolbar] Dedent handler attached');
-       } else {
-         console.log('[Toolbar] Dedent button not found!');
-       }
+// Mobile toolbar buttons
+        if (undoBtnEl) {
+          undoBtnEl.addEventListener('click', undoButtonHandler);
+        }
+        if (redoBtnEl) {
+          redoBtnEl.addEventListener('click', redoButtonHandler);
+        }
+        if (indentBtnEl) {
+          indentBtnEl.addEventListener('click', indentButtonHandler);
+        }
+        if (dedentBtnEl) {
+          dedentBtnEl.addEventListener('click', dedentButtonHandler);
+        }
       
       // Initialize toolbar button states
       updateToolbarButtonStates();
