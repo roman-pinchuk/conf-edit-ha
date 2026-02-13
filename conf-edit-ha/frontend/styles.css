@@ -116,6 +116,19 @@ body {
   overflow: hidden;
 }
 
+/* Theme Toggle Icons */
+#theme-icon-dark {
+  display: none;
+}
+
+:root.dark #theme-icon-dark {
+  display: block;
+}
+
+:root.dark #theme-icon-light {
+  display: none;
+}
+
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
