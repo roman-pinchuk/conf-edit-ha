@@ -140,16 +140,27 @@ function setupKeyboardAwareToolbar(): void {
     const offset = height - viewport.height - viewport.offsetTop;
     
     if (offset > 20) {
-      // Keyboard is open - pin exactly above keyboard
-      // Use calc to subtract safe area from offset since CSS has bottom: safe-area
-      toolbar.style.bottom = `calc(${offset}px - env(safe-area-inset-bottom))`;
-      toolbar.style.transform = 'translateY(-4px)';
-      toolbar.style.margin = '0 auto';
+      // Keyboard is open - Dock it to the top of the keyboard/accessory bar
+      toolbar.style.bottom = `${offset}px`;
+      toolbar.style.transform = 'translateY(0)';
+      toolbar.style.margin = '0';
+      toolbar.style.width = '100%';
+      toolbar.style.maxWidth = '100%';
+      toolbar.style.borderRadius = '0'; // Square bottom to dock perfectly
+      toolbar.style.boxShadow = 'none';
+      toolbar.style.borderLeft = 'none';
+      toolbar.style.borderRight = 'none';
     } else {
-      // Keyboard is closed - return to default safe zone position
+      // Keyboard is closed - Return to floating "Energy card" style
       toolbar.style.bottom = 'env(safe-area-inset-bottom)';
       toolbar.style.transform = 'translateY(-8px)';
       toolbar.style.margin = '0 auto';
+      toolbar.style.width = ''; // Restore from CSS
+      toolbar.style.maxWidth = 'calc(100% - 16px)';
+      toolbar.style.borderRadius = '20px';
+      toolbar.style.boxShadow = ''; // Restore from CSS
+      toolbar.style.borderLeft = '';
+      toolbar.style.borderRight = '';
     }
   };
 
