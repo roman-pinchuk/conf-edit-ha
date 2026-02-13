@@ -2,6 +2,12 @@
 
 All notable changes to Configuration Editor project are documented in this file.
 
+## [1.1.16] - 2026-02-13
+
+### Fixed
+- **iOS Keyboard**: Added `autocomplete="new-password"` and `inputmode="text"` to editor to further discourage the iOS "Form Assistant" bar and autofill icons
+- **Mobile UI**: Refined floating toolbar positioning logic to ensure perfectly consistent vertical spacing regardless of keyboard state
+
 ## [1.1.15] - 2026-02-13
 
 ### Fixed

@@ -377,7 +377,7 @@ body {
   height: 56px;
   z-index: 100;
   box-sizing: border-box;
-  /* transition removed to prevent keyboard lag */
+  transition: bottom 0.1s ease-out, transform 0.1s ease-out, border-radius 0.2s ease, width 0.2s ease, margin 0.2s ease;
   transform: translateY(-8px); 
 }
 

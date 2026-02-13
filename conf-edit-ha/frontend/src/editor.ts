@@ -294,7 +294,9 @@ export function createEditor(parent: HTMLElement): EditorView {
         autocorrect: "off",
         autocapitalize: "off",
         spellcheck: "false",
-        enterkeyhint: "enter"
+        enterkeyhint: "enter",
+        inputmode: "text",
+        autocomplete: "new-password" // More aggressive way to hide iOS autofill bar
       }),
       themeCompartment.of(isDark() ? oneDark : []),
       rainbowIndentThemeCompartment.of(isDark() ? rainbowIndentDarkTheme : rainbowIndentLightTheme),
