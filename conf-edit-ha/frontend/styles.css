@@ -131,9 +131,11 @@ body {
   display: none;
 }
 
-.btn:disabled {
+.btn:disabled,
+.btn[aria-disabled="true"] {
   opacity: 0.5;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 .btn-primary {
@@ -357,10 +359,10 @@ body {
   display: none;
   position: fixed;
   bottom: 0;
-  left: 12px;
-  right: 12px;
+  left: 8px;
+  right: 8px;
   margin: 0 auto;
-  max-width: calc(100% - 24px);
+  max-width: calc(100% - 16px);
   background: var(--bg-primary);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
@@ -376,7 +378,7 @@ body {
   z-index: 100;
   box-sizing: border-box;
   /* transition removed to prevent keyboard lag */
-  transform: translateY(-12px); /* Default margin when keyboard is closed */
+  transform: translateY(-8px); /* Smallest default margin when keyboard is closed */
 }
 
 :root.dark .mobile-editor-toolbar {
@@ -428,20 +430,22 @@ body {
   background: rgba(255, 255, 255, 0.08);
 }
 
-.toolbar-icon-button:active:not(:disabled) {
+.toolbar-icon-button:active:not(:disabled):not([aria-disabled="true"]) {
   background: rgba(0, 0, 0, 0.1);
   transform: scale(0.92);
   transition: transform 0.1s ease;
 }
 
-:root.dark .toolbar-icon-button:active:not(:disabled) {
+:root.dark .toolbar-icon-button:active:not(:disabled):not([aria-disabled="true"]) {
   background: rgba(255, 255, 255, 0.12);
 }
 
-.toolbar-icon-button:disabled {
+.toolbar-icon-button:disabled,
+.toolbar-icon-button[aria-disabled="true"] {
   opacity: 0.2;
   cursor: not-allowed;
   filter: grayscale(1);
+  pointer-events: none;
 }
 
 .toolbar-icon-button svg {

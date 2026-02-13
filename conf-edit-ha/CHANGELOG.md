@@ -2,6 +2,13 @@
 
 All notable changes to Configuration Editor project are documented in this file.
 
+## [1.1.14] - 2026-02-13
+
+### Fixed
+- **iOS Keyboard**: Completely hid the iOS "Form Assistant" (arrows/Done bar) by converting buttons to `div role="button"` and disabling global autocorrect/autocomplete
+- **Mobile UI**: Tightened margins for the floating toolbar to maximize screen space
+- **Mobile UI**: Improved toolbar positioning stability when the keyboard is open
+
 ## [1.1.13] - 2026-02-13
 
 ### Fixed
