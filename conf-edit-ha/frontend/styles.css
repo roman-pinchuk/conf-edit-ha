@@ -356,11 +356,11 @@ body {
 .mobile-editor-toolbar {
   display: none;
   position: fixed;
-  bottom: max(16px, env(safe-area-inset-bottom));
-  left: 16px;
-  right: 16px;
+  bottom: 0;
+  left: 12px;
+  right: 12px;
   margin: 0 auto;
-  max-width: 470px;
+  max-width: calc(100% - 24px);
   background: var(--bg-primary);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
@@ -375,6 +375,8 @@ body {
   height: 56px;
   z-index: 100;
   box-sizing: border-box;
+  /* transition removed to prevent keyboard lag */
+  transform: translateY(-12px); /* Default margin when keyboard is closed */
 }
 
 :root.dark .mobile-editor-toolbar {

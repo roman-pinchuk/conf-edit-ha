@@ -293,7 +293,8 @@ export function createEditor(parent: HTMLElement): EditorView {
       EditorView.contentAttributes.of({
         autocorrect: "off",
         autocapitalize: "off",
-        spellcheck: "false"
+        spellcheck: "false",
+        enterkeyhint: "enter"
       }),
       themeCompartment.of(isDark() ? oneDark : []),
       rainbowIndentThemeCompartment.of(isDark() ? rainbowIndentDarkTheme : rainbowIndentLightTheme),
