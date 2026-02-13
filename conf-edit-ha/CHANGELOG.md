@@ -2,6 +2,19 @@
 
 All notable changes to Configuration Editor project are documented in this file.
 
+## [1.1.13] - 2026-02-13
+
+### Fixed
+- **Mobile Keyboard**: Implemented dynamic toolbar positioning using `VisualViewport` API to keep buttons pinned above the keyboard on iOS/Android
+- **Mobile UI**: Expanded floating toolbar to nearly full-width for better usability
+- **iOS Keyboard**: Added `tabindex="-1"` to all header/toolbar buttons to remove focus arrows from the iOS accessory bar
+
+## [1.1.12] - 2026-02-13
+
+### Fixed
+- **iOS Keyboard**: Added `tabindex="-1"` to all buttons to remove focus arrows from the iOS keyboard accessory bar
+- **iOS Keyboard**: Added `enterkeyhint="enter"` to editor to optimize the "Return" key behavior
+
 ## [1.1.11] - 2026-02-13
 
 ### Changed

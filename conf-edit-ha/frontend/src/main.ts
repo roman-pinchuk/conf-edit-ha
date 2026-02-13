@@ -40,6 +40,7 @@ const mobileMenuToggleEl = document.getElementById('mobile-menu-toggle') as HTML
 const sidebarEl = document.getElementById('sidebar')!;
 const sidebarOverlayEl = document.getElementById('sidebar-overlay')!;
 const mobileFilenameEl = document.getElementById('mobile-filename')!;
+const mobileToolbarEl = document.querySelector('.mobile-editor-toolbar') as HTMLElement;
 
 // Mobile toolbar elements
 const undoBtnEl = document.getElementById('undo-btn') as HTMLButtonElement;
@@ -132,6 +133,34 @@ function restoreState(): void {
 }
 
 /**
+ * Set up logic to keep the mobile toolbar pinned above the keyboard
+ */
+function setupKeyboardAwareToolbar(): void {
+  if (!window.visualViewport || !mobileToolbarEl) return;
+
+  const updateToolbarPosition = () => {
+    const viewport = window.visualViewport!;
+    const offset = window.innerHeight - viewport.height - viewport.offsetTop;
+    
+    // When keyboard is open (offset > 0), place it exactly at the keyboard top
+    // When keyboard is closed, use the default margin (16px)
+    if (offset > 0) {
+      // Keyboard is likely open
+      mobileToolbarEl.style.transform = `translateY(-${offset}px)`;
+    } else {
+      // Keyboard is closed
+      mobileToolbarEl.style.transform = 'translateY(-12px)';
+    }
+  };
+
+  window.visualViewport.addEventListener('resize', updateToolbarPosition);
+  window.visualViewport.addEventListener('scroll', updateToolbarPosition);
+  
+  // Initial position
+  updateToolbarPosition();
+}
+
+/**
  * Initialize the application
  */
 async function init(): Promise<void> {
@@ -192,6 +221,9 @@ async function init(): Promise<void> {
       
       // Initialize toolbar button states
       updateToolbarButtonStates();
+
+      // Set up keyboard-aware toolbar positioning
+      setupKeyboardAwareToolbar();
 
     // Restore state
     restoreState();
