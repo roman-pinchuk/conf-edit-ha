@@ -2,6 +2,23 @@
 
 All notable changes to Configuration Editor project are documented in this file.
 
+## [1.1.9] - 2026-02-13
+
+### Added
+- **New Mobile UI**: Redesigned mobile experience with a modern "Liquid Glass" aesthetic
+  - Floating bottom toolbar with backdrop blur and frosted glass effect
+  - Moved status bar to the top of the editor for better visibility
+  - Replaced burger menu with a vertical 3-dots icon
+  - Added filename display to both header and mobile toolbar
+- **Mobile Optimization**: 
+  - Implemented dynamic viewport units (`dvh`) for keyboard stability
+  - Added safe-area insets support for modern iPhone and Android displays
+  - Disabled iOS/Android autocorrect, autocapitalize, and spellcheck in editor
+
+### Changed
+- Removed manual "Refresh Entities" button (entities now refresh on page load)
+- Increased sidebar z-index to ensure it appears above all floating elements
+
 ## [1.1.8] - 2026-02-13
 
 ### Fixed

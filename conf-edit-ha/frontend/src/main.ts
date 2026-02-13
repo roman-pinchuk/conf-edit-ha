@@ -5,7 +5,7 @@
 import { initTheme } from './theme';
 import { createEditor, setContent, getContent, registerSaveShortcut, editorUndo, editorRedo, editorIndent, editorDedent, canEditorUndo, canEditorRedo } from './editor';
 import { fetchEntities, fetchFiles, readFile, saveFile, type FileInfo } from './api';
-import { setEntities, getEntityCount } from './autocomplete';
+import { setEntities } from './autocomplete';
 
 // Application state
 let currentFile: string | null = null;
@@ -18,7 +18,6 @@ let expandedDirs: Set<string> = new Set();
 let fileListClickHandler: ((e: Event) => void) | null = null;
 let editorChangeHandler: ((e: Event) => void) | null = null;
 let saveButtonHandler: (() => void) | null = null;
-let refreshButtonHandler: (() => void) | null = null;
 let mobileMenuHandler: (() => void) | null = null;
 let sidebarOverlayHandler: (() => void) | null = null;
 let undoButtonHandler: (() => void) | null = null;
@@ -34,13 +33,13 @@ const STORAGE_KEY_EXPANDED_DIRS = 'conf-edit-ha:expanded-dirs';
 const fileListEl = document.getElementById('file-list')!;
 const currentFilenameEl = document.getElementById('current-filename')!;
 const saveBtnEl = document.getElementById('save-btn') as HTMLButtonElement;
-const refreshBtnEl = document.getElementById('refresh-entities-btn') as HTMLButtonElement;
 const statusMessageEl = document.getElementById('status-message')!;
 const statusInfoEl = document.getElementById('status-info')!;
 const editorEl = document.getElementById('editor')!;
 const mobileMenuToggleEl = document.getElementById('mobile-menu-toggle') as HTMLButtonElement;
 const sidebarEl = document.getElementById('sidebar')!;
 const sidebarOverlayEl = document.getElementById('sidebar-overlay')!;
+const mobileFilenameEl = document.getElementById('mobile-filename')!;
 
 // Mobile toolbar elements
 const undoBtnEl = document.getElementById('undo-btn') as HTMLButtonElement;
@@ -164,7 +163,6 @@ async function init(): Promise<void> {
 
       // Set up button listeners (store handlers for cleanup)
       saveButtonHandler = handleSave;
-      refreshButtonHandler = handleRefreshEntities;
       mobileMenuHandler = toggleMobileSidebar;
       sidebarOverlayHandler = closeMobileSidebar;
       undoButtonHandler = handleUndo;
@@ -173,7 +171,6 @@ async function init(): Promise<void> {
       dedentButtonHandler = handleDedent;
 
       saveBtnEl.addEventListener('click', saveButtonHandler);
-      refreshBtnEl.addEventListener('click', refreshButtonHandler);
 
       // Mobile menu toggle
       mobileMenuToggleEl.addEventListener('click', mobileMenuHandler);
@@ -281,30 +278,6 @@ async function loadEntities(): Promise<void> {
      console.error('Error loading entities:', error);
      // Continue with empty entity list
    }
-}
-
-/**
- * Refresh entities from Home Assistant
- * Fetches latest entity list and updates autocomplete suggestions
- */
-async function handleRefreshEntities(): Promise<void> {
-  refreshBtnEl.disabled = true;
-  updateStatus('Refreshing entities...', '');
-
-  try {
-    await loadEntities();
-    const count = getEntityCount();
-    updateStatus(`Refreshed ${count} entities`, '', false, true);
-    setTimeout(() => {
-      if (!isModified) {
-        updateStatus('Ready', '');
-      }
-    }, 2000);
-  } catch (error) {
-    updateStatus('Failed to refresh entities', '', true);
-  } finally {
-    refreshBtnEl.disabled = false;
-  }
 }
 
 /**
@@ -548,6 +521,10 @@ async function loadFile(filename: string): Promise<void> {
 
     isLoadingFile = false;
     currentFilenameEl.textContent = filename;
+    if (mobileFilenameEl) {
+      // Show only the filename (not the full path) in the small toolbar label
+      mobileFilenameEl.textContent = filename.split('/').pop() || filename;
+    }
 
     // Update active file in list
     fileListEl.querySelectorAll('.tree-item').forEach((el) => {

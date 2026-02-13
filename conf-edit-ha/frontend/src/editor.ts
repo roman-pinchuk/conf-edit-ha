@@ -290,6 +290,11 @@ export function createEditor(parent: HTMLElement): EditorView {
           tabSize: 2,
         },
       }),
+      EditorView.contentAttributes.of({
+        autocorrect: "off",
+        autocapitalize: "off",
+        spellcheck: "false"
+      }),
       themeCompartment.of(isDark() ? oneDark : []),
       rainbowIndentThemeCompartment.of(isDark() ? rainbowIndentDarkTheme : rainbowIndentLightTheme),
       EditorView.lineWrapping,
