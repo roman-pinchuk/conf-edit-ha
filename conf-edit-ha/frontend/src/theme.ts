@@ -130,8 +130,6 @@ function applyTheme(e?: MediaQueryListEvent | Event): void {
    }
 
    const root = document.documentElement;
-   const lightIcon = document.getElementById('theme-icon-light');
-   const darkIcon = document.getElementById('theme-icon-dark');
 
    let isDark = false;
 
@@ -152,19 +150,6 @@ function applyTheme(e?: MediaQueryListEvent | Event): void {
         // Update mutation observer state after DOM change
         lastObservedDarkState = isDark;
       }
-
-   // Update icons - ensure they're always synchronized
-   if (lightIcon && darkIcon) {
-     const newLightDisplay = isDark ? 'none' : 'block';
-     const newDarkDisplay = isDark ? 'block' : 'none';
-     
-     if (lightIcon.style.display !== newLightDisplay) {
-       lightIcon.style.display = newLightDisplay;
-     }
-     if (darkIcon.style.display !== newDarkDisplay) {
-       darkIcon.style.display = newDarkDisplay;
-     }
-   }
 
    // Notify editor to update theme
    window.dispatchEvent(new CustomEvent('theme-changed', { detail: { dark: isDark } }));
