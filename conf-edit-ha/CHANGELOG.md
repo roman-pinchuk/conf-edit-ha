@@ -2,6 +2,14 @@
 
 All notable changes to Configuration Editor project are documented in this file.
 
+## [1.1.8] - 2026-02-13
+
+### Fixed
+- **Dark Theme Flicker**: Eliminated initial theme flicker by synchronizing `localStorage` preference with page load
+  - Implemented inline script in `index.html` to apply theme immediately before rendering
+  - Moved theme icon visibility management to CSS to avoid DOM manipulation delay
+  - Streamlined theme initialization logic in `theme.ts`
+
 ## [1.1.7] - 2026-01-25
 
 ### Fixed
