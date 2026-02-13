@@ -352,31 +352,34 @@ body {
   overflow: auto;
 }
 
-/* Mobile Editor Toolbar - Liquid Glass Style */
+/* Mobile Editor Toolbar - Home Assistant Floating Card Style */
 .mobile-editor-toolbar {
   display: none;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: 20px 24px calc(20px + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.7);
+  position: fixed;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 16px;
+  right: 16px;
+  margin: 0 auto;
+  max-width: 470px;
+  background: var(--bg-primary);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px; /* --ha-border-radius-2xl */
   padding: 4px 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.2), 
+              0px 6px 10px 0px rgba(0, 0, 0, 0.14), 
+              0px 1px 18px 0px rgba(0, 0, 0, 0.12);
   justify-content: space-between;
   align-items: center;
   height: 56px;
   z-index: 100;
+  box-sizing: border-box;
 }
 
 :root.dark .mobile-editor-toolbar {
-  background: rgba(35, 35, 35, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  background: rgba(35, 35, 35, 0.85);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .toolbar-section {
@@ -634,7 +637,7 @@ body {
     order: -1; /* Move to top of flex container */
     border-top: none;
     border-bottom: 1px solid var(--border-color);
-    background-color: var(--bg-primary); /* Ensure it doesn't show through if glass is used elsewhere */
+    background-color: var(--bg-primary);
     z-index: 50;
   }
 
@@ -645,7 +648,8 @@ body {
 
   /* Add padding to the bottom of the editor so floating toolbar doesn't overlap text */
   .cm-scroller {
-    padding-bottom: 120px;
+    padding-top: 0;
+    padding-bottom: 100px;
   }
 
   /* Tree items with better touch targets */

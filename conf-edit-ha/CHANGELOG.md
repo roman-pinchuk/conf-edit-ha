@@ -2,6 +2,19 @@
 
 All notable changes to Configuration Editor project are documented in this file.
 
+## [1.1.11] - 2026-02-13
+
+### Changed
+- **Mobile UI**: Refined floating toolbar to precisely match Home Assistant Energy dashboard card style
+- **Mobile UI**: Repositioned status bar to the top of the editor for better visibility and layout flow
+- **Mobile UI**: Adjusted editor padding for optimal interaction with bottom floating toolbar
+
+## [1.1.10] - 2026-02-13
+
+### Fixed
+- **Mobile UI**: Increased floating toolbar bottom margin for better iPhone home indicator clearance
+- **Mobile UI**: Increased editor bottom padding to prevent toolbar overlap with code
+
 ## [1.1.9] - 2026-02-13
 
 ### Added
