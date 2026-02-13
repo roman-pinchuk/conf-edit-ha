@@ -32,21 +32,20 @@ const STORAGE_KEY_EXPANDED_DIRS = 'conf-edit-ha:expanded-dirs';
 // DOM elements
 const fileListEl = document.getElementById('file-list')!;
 const currentFilenameEl = document.getElementById('current-filename')!;
-const saveBtnEl = document.getElementById('save-btn') as HTMLButtonElement;
+const saveBtnEl = document.getElementById('save-btn') as HTMLElement;
 const statusMessageEl = document.getElementById('status-message')!;
 const statusInfoEl = document.getElementById('status-info')!;
 const editorEl = document.getElementById('editor')!;
-const mobileMenuToggleEl = document.getElementById('mobile-menu-toggle') as HTMLButtonElement;
+const mobileMenuToggleEl = document.getElementById('mobile-menu-toggle') as HTMLElement;
 const sidebarEl = document.getElementById('sidebar')!;
 const sidebarOverlayEl = document.getElementById('sidebar-overlay')!;
 const mobileFilenameEl = document.getElementById('mobile-filename')!;
-const mobileToolbarEl = document.querySelector('.mobile-editor-toolbar') as HTMLElement;
 
 // Mobile toolbar elements
-const undoBtnEl = document.getElementById('undo-btn') as HTMLButtonElement;
-const redoBtnEl = document.getElementById('redo-btn') as HTMLButtonElement;
-const indentBtnEl = document.getElementById('indent-btn') as HTMLButtonElement;
-const dedentBtnEl = document.getElementById('dedent-btn') as HTMLButtonElement;
+const undoBtnEl = document.getElementById('undo-btn') as HTMLElement;
+const redoBtnEl = document.getElementById('redo-btn') as HTMLElement;
+const indentBtnEl = document.getElementById('indent-btn') as HTMLElement;
+const dedentBtnEl = document.getElementById('dedent-btn') as HTMLElement;
 
 
 
@@ -58,14 +57,10 @@ function updateToolbarButtonStates(): void {
   const canRedo = canEditorRedo();
 
   if (undoBtnEl) {
-    // Remove pointer-events, let buttons be clickable always
-    undoBtnEl.style.opacity = canUndo ? '1' : '0.4';
     undoBtnEl.setAttribute('aria-disabled', canUndo ? 'false' : 'true');
   }
   
   if (redoBtnEl) {
-    // Remove pointer-events, let buttons be clickable always
-    redoBtnEl.style.opacity = canRedo ? '1' : '0.4';
     redoBtnEl.setAttribute('aria-disabled', canRedo ? 'false' : 'true');
   }
 }
@@ -136,20 +131,25 @@ function restoreState(): void {
  * Set up logic to keep the mobile toolbar pinned above the keyboard
  */
 function setupKeyboardAwareToolbar(): void {
-  if (!window.visualViewport || !mobileToolbarEl) return;
+  const toolbar = document.querySelector('.mobile-editor-toolbar') as HTMLElement;
+  if (!window.visualViewport || !toolbar) return;
 
   const updateToolbarPosition = () => {
     const viewport = window.visualViewport!;
-    const offset = window.innerHeight - viewport.height - viewport.offsetTop;
+    const height = window.innerHeight;
+    const offset = height - viewport.height - viewport.offsetTop;
     
-    // When keyboard is open (offset > 0), place it exactly at the keyboard top
-    // When keyboard is closed, use the default margin (16px)
-    if (offset > 0) {
-      // Keyboard is likely open
-      mobileToolbarEl.style.transform = `translateY(-${offset}px)`;
+    if (offset > 20) {
+      // Keyboard is open - pin to top of keyboard
+      // Using bottom + transform for maximum compatibility across WebViews
+      toolbar.style.bottom = `${offset}px`;
+      toolbar.style.transform = 'translateY(0)';
+      toolbar.style.margin = '0 auto 4px';
     } else {
       // Keyboard is closed
-      mobileToolbarEl.style.transform = 'translateY(-12px)';
+      toolbar.style.bottom = '0';
+      toolbar.style.transform = 'translateY(-8px)';
+      toolbar.style.margin = '0 auto';
     }
   };
 
@@ -182,7 +182,7 @@ async function init(): Promise<void> {
         }
 
         isModified = true;
-        saveBtnEl.disabled = false;
+        saveBtnEl.setAttribute('aria-disabled', 'false');
         updateStatus('Modified', '');
         
         // Update toolbar button states after content changes
@@ -547,7 +547,7 @@ async function loadFile(filename: string): Promise<void> {
     currentFile = filename;
     isModified = false;
     isLoadingFile = true;
-    saveBtnEl.disabled = true;
+    saveBtnEl.setAttribute('aria-disabled', 'true');
 
     setContent(fileContent.content, true); // Skip adding to history
 
@@ -589,7 +589,7 @@ async function handleSave(): Promise<void> {
   }
 
   try {
-    saveBtnEl.disabled = true;
+    saveBtnEl.setAttribute('aria-disabled', 'true');
     updateStatus('Saving...', '');
 
     const content = getContent();
@@ -606,7 +606,7 @@ async function handleSave(): Promise<void> {
   } catch (error) {
     console.error('Error saving file:', error);
     updateStatus('Failed to save', '', true);
-    saveBtnEl.disabled = false;
+    saveBtnEl.setAttribute('aria-disabled', 'false');
   }
 }
 
