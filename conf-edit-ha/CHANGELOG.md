@@ -2,6 +2,12 @@
 
 All notable changes to Configuration Editor project are documented in this file.
 
+## [1.1.15] - 2026-02-13
+
+### Fixed
+- **Mobile UI**: Repositioned floating toolbar to strictly respect device safe areas (`env(safe-area-inset-bottom)`)
+- **Mobile UI**: Improved keyboard-aware positioning logic to account for safe area offsets when the keyboard is active
+
 ## [1.1.14] - 2026-02-13
 
 ### Fixed

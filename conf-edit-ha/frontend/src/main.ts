@@ -140,14 +140,14 @@ function setupKeyboardAwareToolbar(): void {
     const offset = height - viewport.height - viewport.offsetTop;
     
     if (offset > 20) {
-      // Keyboard is open - pin to top of keyboard
-      // Using bottom + transform for maximum compatibility across WebViews
-      toolbar.style.bottom = `${offset}px`;
-      toolbar.style.transform = 'translateY(0)';
-      toolbar.style.margin = '0 auto 4px';
+      // Keyboard is open - pin exactly above keyboard
+      // Use calc to subtract safe area from offset since CSS has bottom: safe-area
+      toolbar.style.bottom = `calc(${offset}px - env(safe-area-inset-bottom))`;
+      toolbar.style.transform = 'translateY(-4px)';
+      toolbar.style.margin = '0 auto';
     } else {
-      // Keyboard is closed
-      toolbar.style.bottom = '0';
+      // Keyboard is closed - return to default safe zone position
+      toolbar.style.bottom = 'env(safe-area-inset-bottom)';
       toolbar.style.transform = 'translateY(-8px)';
       toolbar.style.margin = '0 auto';
     }

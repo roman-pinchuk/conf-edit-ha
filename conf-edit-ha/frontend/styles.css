@@ -358,7 +358,7 @@ body {
 .mobile-editor-toolbar {
   display: none;
   position: fixed;
-  bottom: 0;
+  bottom: env(safe-area-inset-bottom);
   left: 8px;
   right: 8px;
   margin: 0 auto;
@@ -378,7 +378,7 @@ body {
   z-index: 100;
   box-sizing: border-box;
   /* transition removed to prevent keyboard lag */
-  transform: translateY(-8px); /* Smallest default margin when keyboard is closed */
+  transform: translateY(-8px); 
 }
 
 :root.dark .mobile-editor-toolbar {
