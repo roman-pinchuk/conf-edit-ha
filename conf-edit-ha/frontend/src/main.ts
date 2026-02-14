@@ -128,10 +128,10 @@ function restoreState(): void {
 }
 
 /**
- * Set up logic to keep the mobile toolbar pinned above the keyboard
+ * Set up logic to keep the toolbar pinned above the keyboard on mobile
  */
 function setupKeyboardAwareToolbar(): void {
-  const toolbar = document.querySelector('.mobile-editor-toolbar') as HTMLElement;
+  const toolbar = document.querySelector('.editor-toolbar') as HTMLElement;
   if (!window.visualViewport || !toolbar) return;
 
   const updateToolbarPosition = () => {
