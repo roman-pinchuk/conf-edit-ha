@@ -68,10 +68,15 @@ export function initTheme(): void {
   // Watch the html element for any attribute changes
   setupDOMMutationObserver();
 
-  // Set up toggle button
+  // Set up toggle buttons
   const toggleBtn = document.getElementById('theme-toggle-btn');
   if (toggleBtn) {
     toggleBtn.addEventListener('click', toggleTheme);
+  }
+  
+  const toggleBtnMobile = document.getElementById('theme-toggle-btn-mobile');
+  if (toggleBtnMobile) {
+    toggleBtnMobile.addEventListener('click', toggleTheme);
   }
 
   // Apply initial theme

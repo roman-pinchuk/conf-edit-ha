@@ -2,6 +2,13 @@
 
 All notable changes to Configuration Editor project are documented in this file.
 
+## [1.2.1] - 2026-02-13
+
+### Fixed
+- **Desktop UI**: Restored Save and Theme Toggle buttons to the top header for a more traditional desktop experience.
+- **Responsive Logic**: Improved visibility logic to show action buttons in the header on desktop and in the floating toolbar on mobile.
+- **Code Cleanup**: Unified event handling for dual-mode (header/toolbar) action buttons.
+
 ## [1.2.0] - 2026-02-13
 
 ### Added

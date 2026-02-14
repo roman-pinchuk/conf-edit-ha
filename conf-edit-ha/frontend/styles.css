@@ -357,7 +357,7 @@ body {
 
 /* Editor Toolbar - Home Assistant Floating Card Style */
 .editor-toolbar {
-  display: flex;
+  display: none; /* Hidden on desktop */
   position: fixed;
   bottom: env(safe-area-inset-bottom);
   left: 8px;
@@ -381,6 +381,20 @@ body {
   transition: bottom 0.1s ease-out, transform 0.1s ease-out, border-radius 0.2s ease, width 0.2s ease, margin 0.2s ease;
   transform: translateY(-8px); 
 }
+
+/* Header theme icons (separate from toolbar icons) */
+#theme-icon-dark-header {
+  display: none;
+}
+
+:root.dark #theme-icon-dark-header {
+  display: block;
+}
+
+:root.dark #theme-icon-light-header {
+  display: none;
+}
+
 
 :root.dark .editor-toolbar {
   background: rgba(35, 35, 35, 0.85);
@@ -578,28 +592,10 @@ body {
     height: 50px;
   }
 
-  .header-left h1 {
-    font-size: 1rem;
-  }
-
-  .header-left {
-    gap: 0.5rem;
-    overflow: hidden; /* For filename truncation */
-    flex: 1;
-  }
-
-  .filename {
-    display: block;
-    font-size: 0.75rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    opacity: 0.7;
-  }
-
   .header-right {
-    gap: 0.5rem;
+    display: none; /* Buttons are in bottom toolbar */
   }
+
 
   /* Buttons slightly smaller on mobile */
   .btn {

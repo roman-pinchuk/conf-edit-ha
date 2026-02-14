@@ -33,6 +33,7 @@ const STORAGE_KEY_EXPANDED_DIRS = 'conf-edit-ha:expanded-dirs';
 const fileListEl = document.getElementById('file-list')!;
 const currentFilenameEl = document.getElementById('current-filename')!;
 const saveBtnEl = document.getElementById('save-btn') as HTMLElement;
+const saveBtnMobileEl = document.getElementById('save-btn-mobile') as HTMLElement;
 const statusMessageEl = document.getElementById('status-message')!;
 const statusInfoEl = document.getElementById('status-info')!;
 const editorEl = document.getElementById('editor')!;
@@ -46,6 +47,7 @@ const undoBtnEl = document.getElementById('undo-btn') as HTMLElement;
 const redoBtnEl = document.getElementById('redo-btn') as HTMLElement;
 const indentBtnEl = document.getElementById('indent-btn') as HTMLElement;
 const dedentBtnEl = document.getElementById('dedent-btn') as HTMLElement;
+const themeToggleBtnMobileEl = document.getElementById('theme-toggle-btn-mobile') as HTMLElement;
 
 
 
@@ -193,7 +195,8 @@ async function init(): Promise<void> {
         }
 
         isModified = true;
-        saveBtnEl.setAttribute('aria-disabled', 'false');
+        if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'false');
+        if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'false');
         updateStatus('Modified', '');
         
         // Update toolbar button states after content changes
@@ -210,7 +213,8 @@ async function init(): Promise<void> {
       indentButtonHandler = handleIndent;
       dedentButtonHandler = handleDedent;
 
-      saveBtnEl.addEventListener('click', saveButtonHandler);
+      if (saveBtnEl) saveBtnEl.addEventListener('click', saveButtonHandler);
+      if (saveBtnMobileEl) saveBtnMobileEl.addEventListener('click', saveButtonHandler);
 
       // Mobile menu toggle
       mobileMenuToggleEl.addEventListener('click', mobileMenuHandler);
@@ -228,6 +232,10 @@ async function init(): Promise<void> {
         }
         if (dedentBtnEl) {
           dedentBtnEl.addEventListener('click', dedentButtonHandler);
+        }
+        if (themeToggleBtnMobileEl) {
+          // Both header and mobile theme buttons are handled by theme.ts
+          // but we need to ensure the mobile one also triggers it
         }
       
       // Initialize toolbar button states
@@ -558,7 +566,8 @@ async function loadFile(filename: string): Promise<void> {
     currentFile = filename;
     isModified = false;
     isLoadingFile = true;
-    saveBtnEl.setAttribute('aria-disabled', 'true');
+    if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'true');
+    if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'true');
 
     setContent(fileContent.content, true); // Skip adding to history
 
@@ -600,7 +609,8 @@ async function handleSave(): Promise<void> {
   }
 
   try {
-    saveBtnEl.setAttribute('aria-disabled', 'true');
+    if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'true');
+    if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'true');
     updateStatus('Saving...', '');
 
     const content = getContent();
@@ -617,7 +627,8 @@ async function handleSave(): Promise<void> {
   } catch (error) {
     console.error('Error saving file:', error);
     updateStatus('Failed to save', '', true);
-    saveBtnEl.setAttribute('aria-disabled', 'false');
+    if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'false');
+    if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'false');
   }
 }
 
