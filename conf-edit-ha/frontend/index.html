@@ -41,21 +41,6 @@
          <h1>Configuration Editor</h1>
          <span class="filename" id="current-filename" aria-label="Current file">No file selected</span>
        </div>
-       <div class="header-right">
-         <div id="theme-toggle-btn" class="btn btn-secondary btn-icon-only" title="Toggle theme" aria-label="Toggle dark/light theme" aria-pressed="false" tabindex="-1" role="button">
-           <svg id="theme-icon-light" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-             <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
-             <path d="M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
-           </svg>
-           <svg id="theme-icon-dark" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-             <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
-           </svg>
-         </div>
-         <div id="save-btn" class="btn btn-primary" title="Save file (Ctrl+S)" aria-label="Save file" aria-disabled="true" tabindex="-1" role="button">
-           Save
-         </div>
-       </div>
-     </header>
      </header>
 
      <!-- Main Content -->
@@ -77,7 +62,7 @@
         <main class="editor-container" aria-label="Code editor">
           <div id="editor" class="editor" role="textbox" aria-label="YAML file editor" aria-multiline="true"></div>
           
-           <nav class="mobile-editor-toolbar" aria-label="Editor editing tools">
+           <nav class="editor-toolbar" id="editor-toolbar" aria-label="Editor editing tools">
              <div class="toolbar-section">
                 <div 
                   id="undo-btn" 
@@ -104,11 +89,7 @@
                    <path d="M21 7v6h-6M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"/>
                  </svg>
                </div>
-             </div>
 
-             <div class="toolbar-label" id="mobile-filename">No file</div>
-
-             <div class="toolbar-section">
                 <div 
                   id="dedent-btn" 
                   class="toolbar-icon-button" 
@@ -137,6 +118,27 @@
                     <path d="M13 9l3 3-3 3"/>
                     <path d="M18 5v14"/>
                   </svg>
+                </div>
+             </div>
+
+             <div class="toolbar-label" id="mobile-filename">No file</div>
+
+             <div class="toolbar-section">
+                <div id="theme-toggle-btn" class="toolbar-icon-button" title="Toggle theme" aria-label="Toggle dark/light theme" aria-pressed="false" tabindex="-1" role="button">
+                  <svg id="theme-icon-light" width="20" height="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                    <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+                    <path d="M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+                  </svg>
+                  <svg id="theme-icon-dark" width="20" height="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                    <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+                  </svg>
+                </div>
+
+                <div id="save-btn" class="btn btn-primary" title="Save file (Ctrl+S)" aria-label="Save file" aria-disabled="true" tabindex="-1" role="button">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" />
+                  </svg>
+                  <span class="btn-text">Save</span>
                 </div>
              </div>
            </nav>

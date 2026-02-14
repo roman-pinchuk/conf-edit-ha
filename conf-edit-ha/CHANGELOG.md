@@ -2,6 +2,17 @@
 
 All notable changes to Configuration Editor project are documented in this file.
 
+## [1.2.0] - 2026-02-13
+
+### Added
+- **Unified Editor Toolbar**: Consolidated all action buttons (Save, Theme Toggle, Undo/Redo, Indent/Dedent) into a single, modern floating toolbar.
+- **Cross-Platform Experience**: The floating toolbar is now the primary interaction method on both desktop and mobile, providing a consistent Home Assistant-style experience.
+- **Enhanced Save Button**: Added a dedicated save icon and optimized the button layout to be responsive (icon-only on very small screens).
+
+### Changed
+- **Header Simplification**: Removed redundant action buttons from the top header to focus on filename and navigation.
+- **Editor Layout**: Improved editor padding to ensure the floating toolbar never overlaps with the code.
+
 ## [1.1.16] - 2026-02-13
 
 ### Fixed
