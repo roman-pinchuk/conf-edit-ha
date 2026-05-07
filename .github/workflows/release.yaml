@@ -30,6 +30,7 @@ jobs:
 
           if [ -z "$PREV_TAG" ]; then
             LOG=$(git log --oneline --no-merges HEAD)
+            PREV_TAG="(initial release)"
           else
             LOG=$(git log --oneline --no-merges "$PREV_TAG"..HEAD)
           fi
@@ -67,7 +68,17 @@ jobs:
             fi
           } > changelog.md
 
-          cat changelog.md
+          cat >> $GITHUB_STEP_SUMMARY <<'EOF'
+          ## Release Preview
+
+          **Tag:** `${{ github.ref_name }}`
+          **Version:** `${{ env.VERSION }}`
+          **Previous tag:** `$PREV_TAG`
+          **Commits:** $(echo "$LOG" | wc -l | tr -d ' ')
+
+          ### Changelog
+          EOF
+          cat changelog.md >> $GITHUB_STEP_SUMMARY
 
       - name: Run Home Assistant Add-on Lint
         uses: frenck/action-addon-linter@v2
@@ -123,3 +134,28 @@ jobs:
           gh release create "$GITHUB_REF_NAME" \
             --title "$GITHUB_REF_NAME" \
             --notes-file changelog.md
+
+      - name: Release Summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<'EOF'
+          ## Release ${{ github.ref_name }}
+
+          ### What was released
+          - ✅ Version \`${{ env.VERSION }}\` tagged and released
+          - ✅ GitHub Release created at [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }})
+          - ✅ Multi-arch Docker images built and pushed to \`ghcr.io/${{ github.repository_owner }}\`
+            - \`linux/amd64\`
+            - \`linux/arm64\`
+          - ✅ Frontend bundled and verified
+          - ✅ Add-on lint passed
+
+          ### Commits since last release
+          EOF
+
+          PREV_TAG=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME"^ 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            LOG=$(git log --oneline --no-merges HEAD)
+          else
+            LOG=$(git log --oneline --no-merges "$PREV_TAG"..HEAD)
+          fi
+          echo "$LOG" | sed 's/^/    /' >> $GITHUB_STEP_SUMMARY
