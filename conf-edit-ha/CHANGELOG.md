@@ -2,6 +2,13 @@
 
 All notable changes to Configuration Editor project are documented in this file.
 
+## [1.3.0] - 2026-05-08
+
+### Added
+- **Home Assistant config validation**: Runs Home Assistant's config check automatically after a successful save.
+- **Validation details UI**: Shows invalid or unavailable validation results in the status bar with click/tap-to-expand details.
+- **Mobile validation panel**: Displays long validation errors in a mobile-friendly bottom sheet.
+
 ## [1.2.1] - 2026-02-13
 
 ### Fixed
