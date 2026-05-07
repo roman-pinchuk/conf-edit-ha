@@ -2,6 +2,8 @@
 
 All notable changes to Configuration Editor project are documented in this file.
 
+> **Note**: Starting from v1.4.0, release notes are auto-generated from git commits and published on [GitHub Releases](https://github.com/roman-pinchuk/conf-edit-ha/releases). This file is kept for historical reference but is no longer updated manually.
+
 ## [1.3.1] - 2026-05-08
 
 ### Fixed
