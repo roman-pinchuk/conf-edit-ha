@@ -344,6 +344,52 @@ body {
   overflow: auto;
 }
 
+.validation-details {
+  max-height: 30vh;
+  overflow: auto;
+  border-top: 1px solid var(--border-color);
+  border-left: 4px solid var(--warning-color);
+  background-color: var(--bg-primary);
+  box-shadow: 0 -4px 12px var(--shadow);
+}
+
+.validation-details-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem 0.25rem;
+  color: var(--warning-color);
+}
+
+.validation-details-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.validation-details-close:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+#validation-details-content {
+  margin: 0;
+  padding: 0.5rem 1rem 1rem;
+  color: var(--text-primary);
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 /* CodeMirror customization */
 .cm-editor {
   height: 100%;
@@ -498,6 +544,14 @@ body {
   height: 32px;
 }
 
+.status-bar.has-details {
+  cursor: pointer;
+}
+
+.status-bar.has-details:hover {
+  background-color: var(--bg-tertiary);
+}
+
 #status-message {
   color: var(--text-secondary);
 }
@@ -512,6 +566,10 @@ body {
 
 #status-message.error {
   color: var(--error-color);
+}
+
+#status-message.warning {
+  color: var(--warning-color);
 }
 
 /* Scrollbar Styling */
@@ -660,6 +718,27 @@ body {
     border-bottom: 1px solid var(--border-color);
     background-color: var(--bg-primary);
     z-index: 50;
+  }
+
+  .validation-details {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: 76px;
+    max-height: 50vh;
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--warning-color);
+    border-radius: 16px;
+    z-index: 120;
+  }
+
+  .validation-details-header {
+    padding: 0.75rem 0.75rem 0.25rem;
+  }
+
+  #validation-details-content {
+    padding: 0.5rem 0.75rem 0.75rem;
+    font-size: 11px;
   }
 
   /* Smaller CodeMirror font on mobile */

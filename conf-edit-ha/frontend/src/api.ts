@@ -25,6 +25,11 @@ export interface FileContent {
   modified: string;
 }
 
+export interface ValidationResult {
+  result: 'valid' | 'invalid' | 'unavailable' | 'unknown';
+  errors: string | null;
+}
+
 // API base uses relative path for Home Assistant add-on compatibility
 // Works correctly in iOS WebView and all other environments
 const API_BASE = './api';
@@ -160,5 +165,49 @@ export async function saveFile(filename: string, content: string): Promise<void>
     }
   } catch (error: any) {
     throw error;
+  }
+}
+
+/**
+ * Run Home Assistant configuration validation
+ */
+export async function validateConfig(): Promise<ValidationResult> {
+  const url = `${API_BASE}/validate`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      credentials: 'same-origin',
+      mode: 'cors',
+      body: JSON.stringify({}),
+    });
+
+    let result: ValidationResult | null = null;
+    try {
+      result = await response.json();
+    } catch (e) {
+      result = null;
+    }
+
+    if (!response.ok) {
+      return result || {
+        result: 'unavailable',
+        errors: `Validation failed: ${response.statusText}`,
+      };
+    }
+
+    return result || {
+      result: 'unavailable',
+      errors: 'Validation returned no response',
+    };
+  } catch (error: any) {
+    return {
+      result: 'unavailable',
+      errors: error?.message || 'Could not check Home Assistant config',
+    };
   }
 }
