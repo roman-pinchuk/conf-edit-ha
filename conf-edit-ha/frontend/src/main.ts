@@ -678,7 +678,7 @@ async function handleSave(): Promise<void> {
       await saveFile(currentFile, content);
 
       isModified = false;
-      updateStatus('Saved, checking config...', 'Running Home Assistant validation', false, true);
+      updateStatus('Saved, checking config...', 'Running Home Assistant validation');
 
       const validation = await validateConfig();
 
