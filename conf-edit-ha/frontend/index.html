@@ -157,10 +157,18 @@
              </div>
            </nav>
 
-          <div id="status-bar" class="status-bar" aria-live="polite" aria-atomic="true">
-            <span id="status-message" aria-label="Editor status">Ready</span>
-            <span id="status-info" aria-label="Editor info"></span>
-          </div>
+           <section id="validation-details" class="validation-details" aria-live="polite" hidden>
+             <div class="validation-details-header">
+               <strong id="validation-details-title">Home Assistant validation</strong>
+               <button id="validation-details-close" class="validation-details-close" type="button" aria-label="Close validation details">x</button>
+             </div>
+             <pre id="validation-details-content"></pre>
+           </section>
+
+           <div id="status-bar" class="status-bar" aria-live="polite" aria-atomic="true">
+             <span id="status-message" aria-label="Editor status">Ready</span>
+             <span id="status-info" aria-label="Editor info"></span>
+           </div>
         </main>
      </div>
   </div>

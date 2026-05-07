@@ -134,6 +134,49 @@ def get_services():
         return jsonify({}), 200
 
 
+@app.route('/api/validate', methods=['POST'])
+def validate_config():
+    """Run Home Assistant's config validation check"""
+    if not TOKEN:
+        logger.warning("SUPERVISOR_TOKEN is not set - cannot validate config")
+        return jsonify({
+            'result': 'unavailable',
+            'errors': 'Home Assistant supervisor token is not configured'
+        }), 503
+
+    try:
+        headers = {
+            'Authorization': f'Bearer {TOKEN}',
+            'Content-Type': 'application/json'
+        }
+        response = requests.post(
+            f'{HA_URL}/config/core/check_config',
+            headers=headers,
+            json={},
+            timeout=60
+        )
+        response.raise_for_status()
+
+        result = response.json()
+        return jsonify({
+            'result': result.get('result', 'unknown'),
+            'errors': result.get('errors')
+        }), 200
+
+    except ValueError as e:
+        logger.error(f"Invalid config validation response: {e}")
+        return jsonify({
+            'result': 'unavailable',
+            'errors': 'Home Assistant returned an invalid validation response'
+        }), 502
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error validating config: {e}")
+        return jsonify({
+            'result': 'unavailable',
+            'errors': 'Could not check Home Assistant config'
+        }), 502
+
+
 def build_file_tree(root_path, current_path=None):
     """Recursively build a tree structure of files and directories"""
     if current_path is None:

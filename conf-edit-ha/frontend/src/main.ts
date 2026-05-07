@@ -4,7 +4,7 @@
 
 import { initTheme } from './theme';
 import { createEditor, setContent, getContent, registerSaveShortcut, editorUndo, editorRedo, editorIndent, editorDedent, canEditorUndo, canEditorRedo } from './editor';
-import { fetchEntities, fetchFiles, readFile, saveFile, type FileInfo } from './api';
+import { fetchEntities, fetchFiles, readFile, saveFile, validateConfig, type FileInfo } from './api';
 import { setEntities } from './autocomplete';
 
 // Application state
@@ -13,6 +13,9 @@ let isModified = false;
 let isLoadingFile = false;
 let files: FileInfo[] = [];
 let expandedDirs: Set<string> = new Set();
+let validationDetails: string | null = null;
+let validationDetailsTitle = 'Home Assistant validation';
+let isValidationDetailsOpen = false;
 
 // Event listener references for cleanup
 let fileListClickHandler: ((e: Event) => void) | null = null;
@@ -24,6 +27,8 @@ let undoButtonHandler: (() => void) | null = null;
 let redoButtonHandler: (() => void) | null = null;
 let indentButtonHandler: (() => void) | null = null;
 let dedentButtonHandler: (() => void) | null = null;
+let statusBarHandler: (() => void) | null = null;
+let validationCloseHandler: (() => void) | null = null;
 
 // LocalStorage keys
 const STORAGE_KEY_CURRENT_FILE = 'conf-edit-ha:current-file';
@@ -36,6 +41,11 @@ const saveBtnEl = document.getElementById('save-btn') as HTMLElement;
 const saveBtnMobileEl = document.getElementById('save-btn-mobile') as HTMLElement;
 const statusMessageEl = document.getElementById('status-message')!;
 const statusInfoEl = document.getElementById('status-info')!;
+const statusBarEl = document.getElementById('status-bar')!;
+const validationDetailsEl = document.getElementById('validation-details') as HTMLElement;
+const validationDetailsTitleEl = document.getElementById('validation-details-title')!;
+const validationDetailsContentEl = document.getElementById('validation-details-content')!;
+const validationDetailsCloseEl = document.getElementById('validation-details-close') as HTMLElement;
 const editorEl = document.getElementById('editor')!;
 const mobileMenuToggleEl = document.getElementById('mobile-menu-toggle') as HTMLElement;
 const sidebarEl = document.getElementById('sidebar')!;
@@ -101,6 +111,50 @@ function handleIndent(): void {
  */
 function handleDedent(): void {
   editorDedent();
+}
+
+/**
+ * Clear expanded validation details when content context changes
+ */
+function clearValidationDetails(): void {
+  validationDetails = null;
+  isValidationDetailsOpen = false;
+  validationDetailsEl.hidden = true;
+  statusBarEl.classList.remove('has-details');
+  statusBarEl.removeAttribute('title');
+}
+
+/**
+ * Store validation details and update collapsed/expanded display
+ */
+function setValidationDetails(title: string, details: string): void {
+  validationDetailsTitle = title;
+  validationDetails = details;
+  isValidationDetailsOpen = false;
+  validationDetailsEl.hidden = true;
+  statusBarEl.classList.add('has-details');
+  statusBarEl.setAttribute('title', details);
+  validationDetailsTitleEl.textContent = title;
+  validationDetailsContentEl.textContent = details;
+}
+
+/**
+ * Toggle Home Assistant validation details panel
+ */
+function toggleValidationDetails(): void {
+  if (!validationDetails) {
+    return;
+  }
+
+  isValidationDetailsOpen = !isValidationDetailsOpen;
+  validationDetailsTitleEl.textContent = validationDetailsTitle;
+  validationDetailsContentEl.textContent = validationDetails;
+  validationDetailsEl.hidden = !isValidationDetailsOpen;
+}
+
+function closeValidationDetails(): void {
+  isValidationDetailsOpen = false;
+  validationDetailsEl.hidden = true;
 }
 
 /**
@@ -194,8 +248,9 @@ async function init(): Promise<void> {
           return;
         }
 
-        isModified = true;
-        if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'false');
+         isModified = true;
+         clearValidationDetails();
+         if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'false');
         if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'false');
         updateStatus('Modified', '');
         
@@ -211,7 +266,9 @@ async function init(): Promise<void> {
       undoButtonHandler = handleUndo;
       redoButtonHandler = handleRedo;
       indentButtonHandler = handleIndent;
-      dedentButtonHandler = handleDedent;
+       dedentButtonHandler = handleDedent;
+       statusBarHandler = toggleValidationDetails;
+       validationCloseHandler = closeValidationDetails;
 
       if (saveBtnEl) saveBtnEl.addEventListener('click', saveButtonHandler);
       if (saveBtnMobileEl) saveBtnMobileEl.addEventListener('click', saveButtonHandler);
@@ -233,6 +290,8 @@ async function init(): Promise<void> {
         if (dedentBtnEl) {
           dedentBtnEl.addEventListener('click', dedentButtonHandler);
         }
+        statusBarEl.addEventListener('click', statusBarHandler);
+        validationDetailsCloseEl.addEventListener('click', validationCloseHandler);
         if (themeToggleBtnMobileEl) {
           // Both header and mobile theme buttons are handled by theme.ts
           // but we need to ensure the mobile one also triggers it
@@ -559,7 +618,8 @@ function isChildOf(element: HTMLElement, dirPath: string): boolean {
  */
 async function loadFile(filename: string): Promise<void> {
   try {
-    updateStatus('Loading...', '');
+     updateStatus('Loading...', '');
+     clearValidationDetails();
 
     const fileContent = await readFile(filename);
 
@@ -608,22 +668,37 @@ async function handleSave(): Promise<void> {
     return;
   }
 
-  try {
-    if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'true');
-    if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'true');
-    updateStatus('Saving...', '');
+    try {
+      if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'true');
+      if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'true');
+      clearValidationDetails();
+      updateStatus('Saving...', '');
 
-    const content = getContent();
-    await saveFile(currentFile, content);
+      const content = getContent();
+      await saveFile(currentFile, content);
 
-    isModified = false;
-    updateStatus('Saved successfully', '', false, true);
+      isModified = false;
+      updateStatus('Saved, checking config...', 'Running Home Assistant validation', false, true);
 
-    setTimeout(() => {
-      if (!isModified) {
-        updateStatus('Ready', '');
+      const validation = await validateConfig();
+
+      if (validation.result === 'valid') {
+        updateStatus('Saved, config valid', 'HA validation passed', false, true);
+      } else if (validation.result === 'invalid') {
+        const details = validation.errors || 'Home Assistant reported the configuration as invalid.';
+        setValidationDetails('Home Assistant validation failed', details);
+        updateStatus('Saved, config invalid', 'Click for details', true);
+      } else {
+        const details = validation.errors || 'Could not check Home Assistant config.';
+        setValidationDetails('Home Assistant validation unavailable', details);
+        updateStatus('Saved, validation unavailable', 'Click for details', false, false, true);
       }
-    }, 2000);
+
+      setTimeout(() => {
+        if (!isModified && !validationDetails) {
+          updateStatus('Ready', '');
+        }
+      }, 2000);
   } catch (error) {
     console.error('Error saving file:', error);
     updateStatus('Failed to save', '', true);
@@ -635,16 +710,18 @@ async function handleSave(): Promise<void> {
 /**
  * Update status bar
  */
-function updateStatus(message: string, info: string, isError = false, isSuccess = false): void {
+function updateStatus(message: string, info: string, isError = false, isSuccess = false, isWarning = false): void {
   statusMessageEl.textContent = message;
   statusInfoEl.textContent = info;
 
-  statusMessageEl.classList.remove('error', 'success');
+  statusMessageEl.classList.remove('error', 'success', 'warning');
 
   if (isError) {
     statusMessageEl.classList.add('error');
   } else if (isSuccess) {
     statusMessageEl.classList.add('success');
+  } else if (isWarning) {
+    statusMessageEl.classList.add('warning');
   }
 }
 
