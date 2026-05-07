@@ -5,16 +5,20 @@ on:
     tags:
       - 'v*'
 
+env:
+  ARCHITECTURES: '["amd64", "aarch64"]'
+  IMAGE_NAME: conf-edit-ha
+
 jobs:
-  release:
-    name: Release
+  init:
+    name: Initialize build
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      packages: write
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -24,7 +28,6 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Generate changelog
-        id: changelog
         run: |
           PREV_TAG=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME"^ 2>/dev/null || echo "")
 
@@ -80,13 +83,20 @@ jobs:
           EOF
           cat changelog.md >> $GITHUB_STEP_SUMMARY
 
+      - name: Upload changelog
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog
+          path: changelog.md
+          retention-days: 1
+
       - name: Run Home Assistant Add-on Lint
         uses: frenck/action-addon-linter@v2
         with:
           path: "./conf-edit-ha"
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
@@ -103,29 +113,100 @@ jobs:
             exit 1
           fi
 
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: conf-edit-ha/static/
+          retention-days: 1
+
+      - name: Get build matrix
+        id: matrix
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.03.2
+        with:
+          architectures: ${{ env.ARCHITECTURES }}
+          image-name: ${{ env.IMAGE_NAME }}
+
+  build:
+    name: Build ${{ matrix.arch }} image
+    needs: init
+    runs-on: ${{ matrix.os }}
+    permissions:
+      id-token: write
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: conf-edit-ha/static/
+
+      - name: Set build args per architecture
+        run: |
+          case "${{ matrix.arch }}" in
+            amd64)   BF="ghcr.io/home-assistant/amd64-base-python:3.11-alpine3.18" ;;
+            aarch64) BF="ghcr.io/home-assistant/aarch64-base-python:3.11-alpine3.18" ;;
+          esac
+          echo "BUILD_FROM=$BF" >> $GITHUB_ENV
+
       - name: Patch config.yaml with release version
         run: |
-          sed -i "s/^version:.*/version: \"$VERSION\"/" conf-edit-ha/config.yaml
-          echo "Patched config.yaml:"
+          sed -i "s/^version:.*/version: \"${GITHUB_REF_NAME#v}\"/" conf-edit-ha/config.yaml
           grep "^version:" conf-edit-ha/config.yaml
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+      - name: Build and push image
+        uses: home-assistant/builder/actions/build-image@2026.03.2
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          arch: ${{ matrix.arch }}
+          build-args: |
+            BUILD_FROM=${{ env.BUILD_FROM }}
+          context: ./conf-edit-ha
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image: ${{ matrix.image }}
+          image-tags: |
+            ${{ github.ref_name }}
+            latest
+          push: "true"
+          version: ${{ github.ref_name }}
 
-      - name: Build and Push Docker Image
-        uses: home-assistant/builder@master
+  manifest:
+    name: Publish multi-arch manifest
+    needs: [init, build]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+    steps:
+      - name: Publish multi-arch manifest
+        uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.03.2
         with:
-          args: |
-            --amd64 \
-            --aarch64 \
-            --target /data/conf-edit-ha \
-            --image "conf-edit-ha-{arch}" \
-            --docker-hub "ghcr.io/${{ github.repository_owner }}" \
-            --addon
+          architectures: ${{ env.ARCHITECTURES }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image-name: ${{ env.IMAGE_NAME }}
+          image-tags: |
+            ${{ github.ref_name }}
+            latest
+
+  github-release:
+    name: Create GitHub Release
+    needs: [init, build, manifest]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Download changelog
+        uses: actions/download-artifact@v4
+        with:
+          name: changelog
 
       - name: Create GitHub Release
         env:
@@ -137,11 +218,18 @@ jobs:
 
       - name: Release Summary
         run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME"^ 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            LOG=$(git log --oneline --no-merges HEAD)
+          else
+            LOG=$(git log --oneline --no-merges "$PREV_TAG"..HEAD)
+          fi
+
           cat >> $GITHUB_STEP_SUMMARY <<'EOF'
           ## Release ${{ github.ref_name }}
 
           ### What was released
-          - ✅ Version \`${{ env.VERSION }}\` tagged and released
+          - ✅ Version \`${GITHUB_REF_NAME#v}\` tagged and released
           - ✅ GitHub Release created at [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }})
           - ✅ Multi-arch Docker images built and pushed to \`ghcr.io/${{ github.repository_owner }}\`
             - \`linux/amd64\`
@@ -151,11 +239,4 @@ jobs:
 
           ### Commits since last release
           EOF
-
-          PREV_TAG=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME"^ 2>/dev/null || echo "")
-          if [ -z "$PREV_TAG" ]; then
-            LOG=$(git log --oneline --no-merges HEAD)
-          else
-            LOG=$(git log --oneline --no-merges "$PREV_TAG"..HEAD)
-          fi
           echo "$LOG" | sed 's/^/    /' >> $GITHUB_STEP_SUMMARY
