@@ -1,0 +1,125 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME"^ 2>/dev/null || echo "")
+
+          if [ -z "$PREV_TAG" ]; then
+            LOG=$(git log --oneline --no-merges HEAD)
+          else
+            LOG=$(git log --oneline --no-merges "$PREV_TAG"..HEAD)
+          fi
+
+          {
+            echo "## What's Changed"
+            echo ""
+
+            FEATS=$(echo "$LOG" | grep -iE '^\w+\s+feat' || true)
+            FIXES=$(echo "$LOG" | grep -iE '^\w+\s+fix' || true)
+            CHORES=$(echo "$LOG" | grep -iE '^\w+\s+chore' || true)
+            OTHER=$(echo "$LOG" | grep -v -iE '^\w+\s+(feat|fix|chore)' || true)
+
+            if [ -n "$FEATS" ]; then
+              echo "### Features"
+              echo "$FEATS" | sed 's/^[a-f0-9]*\s*//' | sed 's/^/- /'
+              echo ""
+            fi
+
+            if [ -n "$FIXES" ]; then
+              echo "### Bug Fixes"
+              echo "$FIXES" | sed 's/^[a-f0-9]*\s*//' | sed 's/^/- /'
+              echo ""
+            fi
+
+            if [ -n "$CHORES" ]; then
+              echo "### Maintenance"
+              echo "$CHORES" | sed 's/^[a-f0-9]*\s*//' | sed 's/^/- /'
+              echo ""
+            fi
+
+            if [ -n "$OTHER" ]; then
+              echo "### Other"
+              echo "$OTHER" | sed 's/^[a-f0-9]*\s*//' | sed 's/^/- /'
+            fi
+          } > changelog.md
+
+          cat changelog.md
+
+      - name: Run Home Assistant Add-on Lint
+        uses: frenck/action-addon-linter@v2
+        with:
+          path: "./conf-edit-ha"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Frontend
+        working-directory: ./conf-edit-ha/frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Verify Static Assets
+        run: |
+          if [ ! -d "./conf-edit-ha/static" ]; then
+            echo "Error: static directory not found after build"
+            exit 1
+          fi
+
+      - name: Patch config.yaml with release version
+        run: |
+          sed -i "s/^version:.*/version: \"$VERSION\"/" conf-edit-ha/config.yaml
+          echo "Patched config.yaml:"
+          grep "^version:" conf-edit-ha/config.yaml
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: home-assistant/builder@master
+        with:
+          args: |
+            --amd64 \
+            --aarch64 \
+            --target /data/conf-edit-ha \
+            --image "conf-edit-ha-{arch}" \
+            --docker-hub "ghcr.io/${{ github.repository_owner }}" \
+            --addon
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file changelog.md
