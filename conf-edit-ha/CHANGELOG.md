@@ -2,6 +2,11 @@
 
 All notable changes to Configuration Editor project are documented in this file.
 
+## [1.3.1] - 2026-05-08
+
+### Fixed
+- **Status bar color**: "Saved, checking config..." now uses the standard status color instead of green to avoid confusion.
+
 ## [1.3.0] - 2026-05-08
 
 ### Added
