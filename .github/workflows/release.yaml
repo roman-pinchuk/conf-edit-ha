@@ -17,15 +17,18 @@ jobs:
       contents: write
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
+      version: ${{ steps.extract_version.outputs.version }}
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Extract version from tag
+        id: extract_version
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Generate changelog
         run: |
@@ -169,10 +172,10 @@ jobs:
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image: ${{ matrix.image }}
           image-tags: |
-            ${{ github.ref_name }}
+            ${{ needs.init.outputs.version }}
             latest
           push: "true"
-          version: ${{ github.ref_name }}
+          version: ${{ needs.init.outputs.version }}
 
   manifest:
     name: Publish multi-arch manifest
@@ -189,7 +192,7 @@ jobs:
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image-name: ${{ env.IMAGE_NAME }}
           image-tags: |
-            ${{ github.ref_name }}
+            ${{ needs.init.outputs.version }}
             latest
 
   github-release:
