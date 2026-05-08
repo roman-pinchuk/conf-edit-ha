@@ -216,6 +216,20 @@ jobs:
             --title "$GITHUB_REF_NAME" \
             --notes-file changelog.md
 
+      - name: Bump version in config.yaml on main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          sed -i "s/^version:.*/version: \"${VERSION}\"/" conf-edit-ha/config.yaml
+          git add conf-edit-ha/config.yaml
+          git commit -m "chore: bump version to ${VERSION} [skip ci]"
+          git push origin main
+
       - name: Release Summary
         run: |
           PREV_TAG=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME"^ 2>/dev/null || echo "")
