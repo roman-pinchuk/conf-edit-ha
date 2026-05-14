@@ -158,19 +158,53 @@ function applyTheme(e?: MediaQueryListEvent | Event): void {
 
    // Notify editor to update theme
    window.dispatchEvent(new CustomEvent('theme-changed', { detail: { dark: isDark } }));
+
+   // Update icons
+   const autoIcon = document.getElementById('theme-icon-auto');
+   const lightIcon = document.getElementById('theme-icon-light');
+   const darkIcon = document.getElementById('theme-icon-dark');
+   const autoIconHeader = document.getElementById('theme-icon-auto-header');
+   const lightIconHeader = document.getElementById('theme-icon-light-header');
+   const darkIconHeader = document.getElementById('theme-icon-dark-header');
+
+   if (autoIcon) autoIcon.style.display = currentTheme === 'auto' ? 'block' : 'none';
+   if (lightIcon) lightIcon.style.display = currentTheme === 'light' ? 'block' : 'none';
+   if (darkIcon) darkIcon.style.display = currentTheme === 'dark' ? 'block' : 'none';
+   
+   if (autoIconHeader) autoIconHeader.style.display = currentTheme === 'auto' ? 'block' : 'none';
+   if (lightIconHeader) lightIconHeader.style.display = currentTheme === 'light' ? 'block' : 'none';
+   if (darkIconHeader) darkIconHeader.style.display = currentTheme === 'dark' ? 'block' : 'none';
+
+   // Update tooltips
+   let nextThemeName = '';
+   if (currentTheme === 'auto') nextThemeName = 'Light';
+   else if (currentTheme === 'light') nextThemeName = 'Dark';
+   else nextThemeName = 'System';
+
+   const nextTooltip = `Switch to ${nextThemeName} mode`;
+   const toggleBtn = document.getElementById('theme-toggle-btn');
+   const toggleBtnMobile = document.getElementById('theme-toggle-btn-mobile');
+   
+   if (toggleBtn) {
+     toggleBtn.title = nextTooltip;
+     toggleBtn.setAttribute('aria-label', nextTooltip);
+   }
+   if (toggleBtnMobile) {
+     toggleBtnMobile.title = nextTooltip;
+     toggleBtnMobile.setAttribute('aria-label', nextTooltip);
+   }
 }
 
 /**
- * Toggle between light and dark themes
+ * Toggle between theme modes: auto -> light -> dark -> auto
  */
 function toggleTheme(): void {
    if (currentTheme === 'auto') {
-     // If auto, switch to opposite of current system theme
-     currentTheme = systemThemeDark ? 'light' : 'dark';
+     currentTheme = 'light';
    } else if (currentTheme === 'light') {
      currentTheme = 'dark';
    } else {
-     currentTheme = 'light';
+     currentTheme = 'auto';
    }
 
     // Save with verification - iOS Safari has issues with localStorage reliability

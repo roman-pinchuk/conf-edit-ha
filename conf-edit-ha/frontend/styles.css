@@ -119,15 +119,8 @@ body {
 }
 
 /* Theme Toggle Icons */
+#theme-icon-auto,
 #theme-icon-dark {
-  display: none;
-}
-
-:root.dark #theme-icon-dark {
-  display: block;
-}
-
-:root.dark #theme-icon-light {
   display: none;
 }
 
@@ -429,18 +422,10 @@ body {
 }
 
 /* Header theme icons (separate from toolbar icons) */
+#theme-icon-auto-header,
 #theme-icon-dark-header {
   display: none;
 }
-
-:root.dark #theme-icon-dark-header {
-  display: block;
-}
-
-:root.dark #theme-icon-light-header {
-  display: none;
-}
-
 
 :root.dark .editor-toolbar {
   background: rgba(35, 35, 35, 0.85);
