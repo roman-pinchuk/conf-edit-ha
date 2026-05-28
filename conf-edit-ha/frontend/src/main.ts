@@ -29,6 +29,7 @@ let indentButtonHandler: (() => void) | null = null;
 let dedentButtonHandler: (() => void) | null = null;
 let statusBarHandler: (() => void) | null = null;
 let validationCloseHandler: (() => void) | null = null;
+let sponsorHandler: (() => void) | null = null;
 
 // LocalStorage keys
 const STORAGE_KEY_CURRENT_FILE = 'conf-edit-ha:current-file';
@@ -58,6 +59,7 @@ const redoBtnEl = document.getElementById('redo-btn') as HTMLElement;
 const indentBtnEl = document.getElementById('indent-btn') as HTMLElement;
 const dedentBtnEl = document.getElementById('dedent-btn') as HTMLElement;
 const themeToggleBtnMobileEl = document.getElementById('theme-toggle-btn-mobile') as HTMLElement;
+const sponsorBtnMobileEl = document.getElementById('sponsor-btn-mobile') as HTMLElement;
 
 
 
@@ -111,6 +113,13 @@ function handleIndent(): void {
  */
 function handleDedent(): void {
   editorDedent();
+}
+
+/**
+ * Handle sponsor button click - open GitHub Sponsors page
+ */
+function handleSponsor(): void {
+  window.open('https://github.com/sponsors/roman-pinchuk', '_blank', 'noopener');
 }
 
 /**
@@ -267,8 +276,9 @@ async function init(): Promise<void> {
       redoButtonHandler = handleRedo;
       indentButtonHandler = handleIndent;
        dedentButtonHandler = handleDedent;
-       statusBarHandler = toggleValidationDetails;
-       validationCloseHandler = closeValidationDetails;
+        statusBarHandler = toggleValidationDetails;
+        validationCloseHandler = closeValidationDetails;
+        sponsorHandler = handleSponsor;
 
       if (saveBtnEl) saveBtnEl.addEventListener('click', saveButtonHandler);
       if (saveBtnMobileEl) saveBtnMobileEl.addEventListener('click', saveButtonHandler);
@@ -295,6 +305,9 @@ async function init(): Promise<void> {
         if (themeToggleBtnMobileEl) {
           // Both header and mobile theme buttons are handled by theme.ts
           // but we need to ensure the mobile one also triggers it
+        }
+        if (sponsorBtnMobileEl) {
+          sponsorBtnMobileEl.addEventListener('click', sponsorHandler);
         }
       
       // Initialize toolbar button states

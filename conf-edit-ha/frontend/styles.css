@@ -159,6 +159,20 @@ body {
   background-color: var(--border-color);
 }
 
+/* Sponsor Button */
+.sponsor-btn {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 0;
+}
+
+.sponsor-btn-mobile svg {
+  color: #db61a2;
+}
+
 /* Main Container */
 .main-container {
   display: flex;
