@@ -41,10 +41,12 @@ if not TOKEN:
 
 def validate_file_path(filename):
     try:
-        file_path = (Path(CONFIG_DIR) / filename).resolve()
-        file_path.relative_to(Path(CONFIG_DIR).resolve())
-        return file_path
-    except (ValueError, OSError, RuntimeError):
+        resolved = os.path.realpath(os.path.join(CONFIG_DIR, filename))
+        base = os.path.realpath(CONFIG_DIR)
+        if not resolved.startswith(base + os.sep) and resolved != base:
+            return None
+        return Path(resolved)
+    except (OSError, RuntimeError):
         return None
 
 
