@@ -40,29 +40,11 @@ if not TOKEN:
 
 
 def validate_file_path(filename):
-    """
-    Validate that a filename is safe and doesn't attempt path traversal.
-    
-    Prevents directory traversal attacks by checking for '..' and absolute paths.
-    Returns the absolute path if valid, None if invalid.
-    """
-    if '..' in filename or filename.startswith('/'):
-        return None
-    
-    file_path = Path(CONFIG_DIR) / filename
-    
-    # Ensure the resolved path is within CONFIG_DIR
     try:
-        # Resolve both paths to their absolute forms for comparison
-        resolved_path = file_path.resolve()
-        config_path = Path(CONFIG_DIR).resolve()
-        
-        # Check if the file is within the config directory
-        if not str(resolved_path).startswith(str(config_path)):
-            return None
-        
+        file_path = (Path(CONFIG_DIR) / filename).resolve()
+        file_path.relative_to(Path(CONFIG_DIR).resolve())
         return file_path
-    except (OSError, RuntimeError):
+    except (ValueError, OSError, RuntimeError):
         return None
 
 
