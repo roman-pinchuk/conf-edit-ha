@@ -223,20 +223,19 @@ def read_file(filename):
             if not resolved.startswith(base + os.sep) and resolved != base:
                 logger.warning("Path validation failed for: %s", filename)
                 raise PermissionError(filename)
-            file_path = Path(resolved)
         except (OSError, RuntimeError, PermissionError):
             logger.warning("Path validation error for: %s", filename)
             return jsonify({'error': 'Access denied'}), 403
 
         # Read file content
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(resolved, 'r', encoding='utf-8') as f:
             content = f.read()
 
         return jsonify({
             'filename': filename,
             'content': content,
-            'size': file_path.stat().st_size,
-            'modified': datetime.fromtimestamp(file_path.stat().st_mtime).isoformat()
+            'size': os.path.getsize(resolved),
+            'modified': datetime.fromtimestamp(os.path.getmtime(resolved)).isoformat()
         }), 200
 
     except FileNotFoundError:
@@ -261,7 +260,6 @@ def write_file(filename):
             base = os.path.realpath(CONFIG_DIR)
             if not resolved.startswith(base + os.sep) and resolved != base:
                 return jsonify({'error': 'Access denied'}), 403
-            file_path = Path(resolved)
         except (OSError, RuntimeError):
             return jsonify({'error': 'Access denied'}), 403
 
@@ -273,25 +271,25 @@ def write_file(filename):
         content = data['content']
 
         # Create backup if file exists
-        if file_path.exists():
+        if os.path.exists(resolved):
             try:
-                backup_path = file_path.with_suffix(file_path.suffix + '.backup')
-                shutil.copy2(file_path, backup_path)
+                backup_path = resolved + '.backup'
+                shutil.copy2(resolved, backup_path)
                 logger.info("Created backup: %s", backup_path)
             except (OSError, IOError) as e:
                 logger.warning("Failed to create backup for %s: %s", filename, e)
                 # Continue without backup
 
         # Write new content
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(resolved, 'w', encoding='utf-8') as f:
             f.write(content)
 
-        logger.info("Saved file: %s", file_path)
+        logger.info("Saved file: %s", resolved)
 
         return jsonify({
             'success': True,
             'filename': filename,
-            'size': file_path.stat().st_size
+            'size': os.path.getsize(resolved)
         }), 200
 
     except PermissionError:
@@ -303,7 +301,7 @@ def write_file(filename):
 
 
 @app.errorhandler(404)
-def not_found(e):
+def not_found(_e):
     """Handle 404 errors by serving index.html (for SPA routing)"""
     return send_file('static/index.html')
 
