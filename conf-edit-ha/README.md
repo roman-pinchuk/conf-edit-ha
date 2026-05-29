@@ -1,6 +1,9 @@
 # <img src="icon.png" width="32" height="32" style="vertical-align: middle;"> Home Assistant Configuration Editor
 
 [![GitHub Release](https://img.shields.io/github/v/release/roman-pinchuk/conf-edit-ha?style=flat-square)](https://github.com/roman-pinchuk/conf-edit-ha/releases)
+[![CodeQL](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/roman-pinchuk/conf-edit-ha/security/code-scanning)
+[![Dependabot](https://img.shields.io/badge/dependabot-enabled-025E8C?logo=Dependabot&style=flat-square)](https://github.com/roman-pinchuk/conf-edit-ha/security/dependabot)
+[![Last commit](https://img.shields.io/github/last-commit/roman-pinchuk/conf-edit-ha?style=flat-square)](https://github.com/roman-pinchuk/conf-edit-ha/commits/main)
 [![Builder](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml/badge.svg)](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml)
 [![License](https://img.shields.io/github/license/roman-pinchuk/conf-edit-ha?style=flat-square)](LICENSE.md)
 [![Home Assistant Ingress](https://img.shields.io/badge/Home%20Assistant-Ingress-blue?style=flat-square)](https://www.home-assistant.io/docs/addons/ingress/)
