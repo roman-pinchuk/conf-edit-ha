@@ -216,18 +216,11 @@ def list_files():
 def read_file(filename):
     """Read the content of a specific file"""
     try:
-        # Validate file path for security
-        try:
-            resolved = os.path.realpath(os.path.normpath(os.path.join(CONFIG_DIR, filename)))
-            base = os.path.realpath(CONFIG_DIR)
-            if not resolved.startswith(base + os.sep) and resolved != base:
-                logger.warning("Path validation failed for: %s", filename)
-                raise PermissionError(filename)
-        except (OSError, RuntimeError, PermissionError):
-            logger.warning("Path validation error for: %s", filename)
+        resolved = os.path.normpath(os.path.join(CONFIG_DIR, filename))
+        if not resolved.startswith(CONFIG_DIR + os.sep) and resolved != CONFIG_DIR:
+            logger.warning("Path validation failed for: %s", filename)
             return jsonify({'error': 'Access denied'}), 403
 
-        # Read file content
         with open(resolved, 'r', encoding='utf-8') as f:
             content = f.read()
 
@@ -245,7 +238,7 @@ def read_file(filename):
         return jsonify({'error': 'Permission denied'}), 403
     except UnicodeDecodeError:
         return jsonify({'error': 'File is not a text file'}), 400
-    except (OSError, IOError) as e:
+    except OSError as e:
         logger.error("Error reading file %s: %s", filename, e)
         return jsonify({'error': 'Failed to read file'}), 500
 
@@ -254,13 +247,8 @@ def read_file(filename):
 def write_file(filename):
     """Write content to a specific file (creates backup first)"""
     try:
-        # Validate file path for security
-        try:
-            resolved = os.path.realpath(os.path.normpath(os.path.join(CONFIG_DIR, filename)))
-            base = os.path.realpath(CONFIG_DIR)
-            if not resolved.startswith(base + os.sep) and resolved != base:
-                return jsonify({'error': 'Access denied'}), 403
-        except (OSError, RuntimeError):
+        resolved = os.path.normpath(os.path.join(CONFIG_DIR, filename))
+        if not resolved.startswith(CONFIG_DIR + os.sep) and resolved != CONFIG_DIR:
             return jsonify({'error': 'Access denied'}), 403
 
         # Get content from request
