@@ -1,0 +1,6 @@
+extensions:
+  - addsTo:
+      pack: codeql/python-queries
+      extensible: sanitizerModel
+    data:
+      - ["os.path", "normpath", "returnValue", "path-injection"]
