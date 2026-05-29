@@ -1,6 +1,6 @@
 extensions:
   - addsTo:
-      pack: codeql/python-queries
-      extensible: sanitizerModel
+      pack: codeql/python-all
+      extensible: neutralModel
     data:
-      - ["os.path", "normpath", "returnValue", "path-injection"]
+      - ["os.path", "", "normpath", "", "summary", "manual"]
