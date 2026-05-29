@@ -218,7 +218,7 @@ def read_file(filename):
     try:
         # Validate file path for security
         try:
-            resolved = os.path.realpath(os.path.join(CONFIG_DIR, filename))
+            resolved = os.path.realpath(os.path.normpath(os.path.join(CONFIG_DIR, filename)))
             base = os.path.realpath(CONFIG_DIR)
             if not resolved.startswith(base + os.sep) and resolved != base:
                 logger.warning("Path validation failed for: %s", filename)
@@ -256,7 +256,7 @@ def write_file(filename):
     try:
         # Validate file path for security
         try:
-            resolved = os.path.realpath(os.path.join(CONFIG_DIR, filename))
+            resolved = os.path.realpath(os.path.normpath(os.path.join(CONFIG_DIR, filename)))
             base = os.path.realpath(CONFIG_DIR)
             if not resolved.startswith(base + os.sep) and resolved != base:
                 return jsonify({'error': 'Access denied'}), 403
