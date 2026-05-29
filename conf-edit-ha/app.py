@@ -39,17 +39,6 @@ if not TOKEN:
     logger.warning("SUPERVISOR_TOKEN not found in environment")
 
 
-def validate_file_path(filename):
-    try:
-        resolved = os.path.realpath(os.path.join(CONFIG_DIR, filename))
-        base = os.path.realpath(CONFIG_DIR)
-        if not resolved.startswith(base + os.sep) and resolved != base:
-            return None
-        return Path(resolved)
-    except (OSError, RuntimeError):
-        return None
-
-
 @app.route('/')
 def index():
     """Serve the main HTML file"""
@@ -93,11 +82,11 @@ def get_entities():
             for state in states
         ]
 
-        logger.info(f"Loaded {len(entities)} entities for autocomplete")
+        logger.info("Loaded %d entities for autocomplete", len(entities))
         return jsonify(entities), 200
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error fetching entities: {e}")
+        logger.error("Error fetching entities: %s", e)
         # Return empty list when HA is not available
         return jsonify([]), 200
 
@@ -113,7 +102,7 @@ def get_services():
         return jsonify(response.json()), 200
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error fetching services: {e}")
+        logger.error("Error fetching services: %s", e)
         # Return empty dict when HA is not available
         return jsonify({}), 200
 
@@ -148,13 +137,13 @@ def validate_config():
         }), 200
 
     except ValueError as e:
-        logger.error(f"Invalid config validation response: {e}")
+        logger.error("Invalid config validation response: %s", e)
         return jsonify({
             'result': 'unavailable',
             'errors': 'Home Assistant returned an invalid validation response'
         }), 502
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error validating config: {e}")
+        logger.error("Error validating config: %s", e)
         return jsonify({
             'result': 'unavailable',
             'errors': 'Could not check Home Assistant config'
@@ -216,10 +205,10 @@ def list_files():
         return jsonify(tree), 200
 
     except PermissionError as e:
-        logger.error(f"Permission denied listing files: {e}")
+        logger.error("Permission denied listing files: %s", e)
         return jsonify({'error': 'Permission denied'}), 403
     except OSError as e:
-        logger.error(f"Error listing files: {e}")
+        logger.error("Error listing files: %s", e)
         return jsonify({'error': 'Failed to list files'}), 500
 
 
@@ -228,15 +217,17 @@ def read_file(filename):
     """Read the content of a specific file"""
     try:
         # Validate file path for security
-        file_path = validate_file_path(filename)
-        
-        if file_path is None:
-            logger.warning(f"Path validation failed for: {filename}")
+        try:
+            resolved = os.path.realpath(os.path.join(CONFIG_DIR, filename))
+            base = os.path.realpath(CONFIG_DIR)
+            if not resolved.startswith(base + os.sep) and resolved != base:
+                logger.warning("Path validation failed for: %s", filename)
+                raise PermissionError(filename)
+            file_path = Path(resolved)
+        except (OSError, RuntimeError, PermissionError):
+            logger.warning("Path validation error for: %s", filename)
             return jsonify({'error': 'Access denied'}), 403
 
-        if not file_path.exists():
-            return jsonify({'error': 'File not found'}), 404
-        
         # Read file content
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -251,12 +242,12 @@ def read_file(filename):
     except FileNotFoundError:
         return jsonify({'error': 'File not found'}), 404
     except PermissionError:
-        logger.error(f"Permission denied reading file {filename}")
+        logger.error("Permission denied reading file %s", filename)
         return jsonify({'error': 'Permission denied'}), 403
     except UnicodeDecodeError:
         return jsonify({'error': 'File is not a text file'}), 400
     except (OSError, IOError) as e:
-        logger.error(f"Error reading file {filename}: {e}")
+        logger.error("Error reading file %s: %s", filename, e)
         return jsonify({'error': 'Failed to read file'}), 500
 
 
@@ -265,8 +256,13 @@ def write_file(filename):
     """Write content to a specific file (creates backup first)"""
     try:
         # Validate file path for security
-        file_path = validate_file_path(filename)
-        if file_path is None:
+        try:
+            resolved = os.path.realpath(os.path.join(CONFIG_DIR, filename))
+            base = os.path.realpath(CONFIG_DIR)
+            if not resolved.startswith(base + os.sep) and resolved != base:
+                return jsonify({'error': 'Access denied'}), 403
+            file_path = Path(resolved)
+        except (OSError, RuntimeError):
             return jsonify({'error': 'Access denied'}), 403
 
         # Get content from request
@@ -281,16 +277,16 @@ def write_file(filename):
             try:
                 backup_path = file_path.with_suffix(file_path.suffix + '.backup')
                 shutil.copy2(file_path, backup_path)
-                logger.info(f"Created backup: {backup_path}")
+                logger.info("Created backup: %s", backup_path)
             except (OSError, IOError) as e:
-                logger.warning(f"Failed to create backup for {filename}: {e}")
+                logger.warning("Failed to create backup for %s: %s", filename, e)
                 # Continue without backup
 
         # Write new content
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
 
-        logger.info(f"Saved file: {file_path}")
+        logger.info("Saved file: %s", file_path)
 
         return jsonify({
             'success': True,
@@ -299,10 +295,10 @@ def write_file(filename):
         }), 200
 
     except PermissionError:
-        logger.error(f"Permission denied writing to file {filename}")
+        logger.error("Permission denied writing to file %s", filename)
         return jsonify({'error': 'Permission denied'}), 403
     except (OSError, IOError) as e:
-        logger.error(f"Error writing file {filename}: {e}")
+        logger.error("Error writing file %s: %s", filename, e)
         return jsonify({'error': 'Failed to write file'}), 500
 
 
@@ -313,9 +309,9 @@ def not_found(e):
 
 
 if __name__ == '__main__':
-    logger.info(f"Starting Configuration Editor on port {PORT}")
-    logger.info(f"Config directory: {CONFIG_DIR}")
-    logger.info(f"Token configured: {'Yes' if TOKEN else 'No'}")
+    logger.info("Starting Configuration Editor on port %d", PORT)
+    logger.info("Config directory: %s", CONFIG_DIR)
+    logger.info("Token configured: %s", 'Yes' if TOKEN else 'No')
 
     app.run(
         host='::',
