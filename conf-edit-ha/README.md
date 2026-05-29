@@ -10,7 +10,7 @@
 ![Supports amd64](https://img.shields.io/badge/amd64-yes-green?style=flat-square)
 ![Supports aarch64](https://img.shields.io/badge/aarch64-yes-green?style=flat-square)
 
-![Untitled 2](https://github.com/user-attachments/assets/9a611ea8-a926-4b85-be7c-8d0cb6df7d33)
+<img width="5120" height="2880" alt="ha-edit-conf" src="https://github.com/user-attachments/assets/5ad2a2e6-a28a-49b1-b891-abb6ad7cd1de" />
 
 A lightweight Home Assistant add-on that provides a simple text editor for configuration files with YAML syntax highlighting, entity autocomplete, and Home Assistant config validation after saving.
 
