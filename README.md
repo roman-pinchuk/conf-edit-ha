@@ -6,7 +6,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/roman-pinchuk/conf-edit-ha?style=flat-square)](https://github.com/roman-pinchuk/conf-edit-ha/commits/main)
 [![Builder](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml/badge.svg)](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml)
 [![License](https://img.shields.io/github/license/roman-pinchuk/conf-edit-ha?style=flat-square)](LICENSE.md)
-[![Home Assistant Ingress](https://img.shields.io/badge/Home%20Assistant-Ingress-blue?style=flat-square)](https://www.home-assistant.io/docs/addons/ingress/)
+[![Home Assistant Ingress](https://img.shields.io/badge/Home%20Assistant-Ingress-blue?style=flat-square)](https://developers.home-assistant.io/docs/apps/presentation/#ingress)
 ![Supports amd64](https://img.shields.io/badge/amd64-yes-green?style=flat-square)
 ![Supports aarch64](https://img.shields.io/badge/aarch64-yes-green?style=flat-square)
 
