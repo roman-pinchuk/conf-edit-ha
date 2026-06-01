@@ -175,7 +175,10 @@
            <section id="validation-details" class="validation-details" aria-live="polite" hidden>
              <div class="validation-details-header">
                <strong id="validation-details-title">Home Assistant validation</strong>
-               <button id="validation-details-close" class="validation-details-close" type="button" aria-label="Close validation details">x</button>
+               <div style="display: flex; gap: 10px; align-items: center;">
+                 <button id="validation-details-restore" class="btn btn-secondary" style="font-size: 12px; padding: 2px 8px; border-radius: 4px;" type="button" aria-label="Restore last valid state" title="Discard current errors and restore the last valid text">Restore Valid State</button>
+                 <button id="validation-details-close" class="validation-details-close" type="button" aria-label="Close validation details">x</button>
+               </div>
              </div>
              <pre id="validation-details-content"></pre>
            </section>

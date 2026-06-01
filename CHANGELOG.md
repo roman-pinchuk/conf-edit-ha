@@ -2,6 +2,12 @@
 
 All notable changes to the Configuration Editor project are documented in this file.
 
+## [1.5.2] - 2026-06-01
+
+### Added
+- **Real-time Client Validation**: The editor now actively validates YAML syntax and Home Assistant entity IDs as you type, instantly blocking the Save action to prevent breaking your configuration.
+- **Restore Valid State**: Added a convenient "Restore Valid State" button to the validation error panel that instantly reverts the editor content to the last known fully valid state, making it easy to recover from configuration mistakes.
+
 ## [1.1.5] - 2026-01-24
 
 ### Fixed

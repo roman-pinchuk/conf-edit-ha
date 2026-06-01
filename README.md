@@ -24,7 +24,8 @@ A lightweight Home Assistant add-on that provides a simple text editor for confi
 ## Features
 
 - **Lightweight CodeMirror 6 editor** (~1MB, 10x smaller than Monaco)
-- **YAML syntax highlighting** with real-time validation
+- **Real-time client validation**: Blocks saving if there are YAML syntax errors or invalid entity IDs
+- **One-click "Restore Valid State"** to quickly undo broken configuration edits
 - **Home Assistant config validation** after save using the same config check API as Developer Tools
 - **Entity autocomplete** (substring matching from live HA API)
 - **VS Code-style file tree** with expand/collapse and indentation guides
@@ -67,9 +68,10 @@ theme: auto  # Options: auto, light, dark
 2. Select a YAML file from the file browser
 3. Edit the file with syntax highlighting
 4. Type to get entity autocomplete suggestions
-5. Click "Save" to save changes (creates automatic backup)
-6. Review the Home Assistant validation result in the status bar
-7. If validation fails, click or tap the status bar to expand the full error details
+5. Real-time validation will instantly warn you of YAML syntax errors or unknown entity IDs and block saving. You can click **Restore Valid State** to easily undo them.
+6. Click "Save" to save changes (creates automatic backup)
+7. Review the Home Assistant validation result in the status bar
+8. If backend validation fails, click or tap the status bar to expand the full error details
 
 ## Tech Stack
 
