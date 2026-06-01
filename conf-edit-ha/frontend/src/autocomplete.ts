@@ -64,3 +64,12 @@ export function entityCompletions(context: CompletionContext): CompletionResult 
 export function getEntityCount(): number {
    return entityIds.length;
 }
+
+/**
+ * Check if an entity ID exists in the cached entities
+ * @param entityId The entity ID to check
+ * @returns true if the entity exists, false otherwise
+ */
+export function isValidEntity(entityId: string): boolean {
+   return entityMetadata.has(entityId);
+}

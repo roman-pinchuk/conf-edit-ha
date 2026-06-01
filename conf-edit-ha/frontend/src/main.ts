@@ -3,7 +3,7 @@
  */
 
 import { initTheme } from './theme';
-import { createEditor, setContent, getContent, registerSaveShortcut, editorUndo, editorRedo, editorIndent, editorDedent, canEditorUndo, canEditorRedo } from './editor';
+import { createEditor, setContent, getContent, registerSaveShortcut, editorUndo, editorRedo, editorIndent, editorDedent, canEditorUndo, canEditorRedo, restoreLastValidContent } from './editor';
 import { fetchEntities, fetchFiles, readFile, saveFile, validateConfig, type FileInfo } from './api';
 import { setEntities } from './autocomplete';
 
@@ -11,6 +11,7 @@ import { setEntities } from './autocomplete';
 let currentFile: string | null = null;
 let isModified = false;
 let isLoadingFile = false;
+let isDocumentValid = true;
 let files: FileInfo[] = [];
 let expandedDirs: Set<string> = new Set();
 let validationDetails: string | null = null;
@@ -46,6 +47,7 @@ const statusBarEl = document.getElementById('status-bar')!;
 const validationDetailsEl = document.getElementById('validation-details') as HTMLElement;
 const validationDetailsTitleEl = document.getElementById('validation-details-title')!;
 const validationDetailsContentEl = document.getElementById('validation-details-content')!;
+const validationDetailsRestoreEl = document.getElementById('validation-details-restore') as HTMLButtonElement;
 const validationDetailsCloseEl = document.getElementById('validation-details-close') as HTMLElement;
 const editorEl = document.getElementById('editor')!;
 const mobileMenuToggleEl = document.getElementById('mobile-menu-toggle') as HTMLElement;
@@ -258,15 +260,49 @@ async function init(): Promise<void> {
         }
 
          isModified = true;
-         clearValidationDetails();
-         if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'false');
-        if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'false');
-        updateStatus('Modified', '');
+         // We don't clear validation details here anymore to prevent flickering.
+         // editor-validation event will handle clearing if the document becomes valid.
+         if (isDocumentValid) {
+           if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'false');
+           if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'false');
+           updateStatus('Modified', '');
+         }
         
         // Update toolbar button states after content changes
         updateToolbarButtonStates();
       };
       window.addEventListener('editor-changed', editorChangeHandler);
+
+      window.addEventListener('editor-validation', (e: Event) => {
+        if (isLoadingFile) return;
+        
+        const customEvent = e as CustomEvent<any>;
+        const validation = customEvent.detail;
+        isDocumentValid = validation.isValid;
+        
+        if (!isDocumentValid) {
+          if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'true');
+          if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'true');
+          
+          setValidationDetails('Invalid Configuration', validation.errors.join('\n'));
+          updateStatus('Invalid config', 'Cannot save', true);
+          
+          // Open details automatically if not open
+          if (!isValidationDetailsOpen) {
+            toggleValidationDetails();
+          }
+        } else {
+          // If valid now, we clear the validation error
+          if (validationDetails) {
+            clearValidationDetails();
+          }
+          if (isModified) {
+            if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'false');
+            if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'false');
+            updateStatus('Modified', '');
+          }
+        }
+      });
 
       // Set up button listeners (store handlers for cleanup)
       saveButtonHandler = handleSave;
@@ -279,6 +315,15 @@ async function init(): Promise<void> {
         statusBarHandler = toggleValidationDetails;
         validationCloseHandler = closeValidationDetails;
         sponsorHandler = handleSponsor;
+
+      if (validationDetailsRestoreEl) {
+        validationDetailsRestoreEl.addEventListener('click', () => {
+          if (restoreLastValidContent()) {
+             closeValidationDetails();
+             updateStatus('Restored to valid state', '');
+          }
+        });
+      }
 
       if (saveBtnEl) saveBtnEl.addEventListener('click', saveButtonHandler);
       if (saveBtnMobileEl) saveBtnMobileEl.addEventListener('click', saveButtonHandler);
@@ -678,6 +723,16 @@ async function handleSave(): Promise<void> {
   }
 
   if (!isModified) {
+    return;
+  }
+
+  if (!isDocumentValid) {
+    updateStatus('Cannot save invalid configuration', '', true);
+    // Expand the validation details to show the user what's wrong
+    if (validationDetails) {
+      isValidationDetailsOpen = false;
+      toggleValidationDetails();
+    }
     return;
   }
 

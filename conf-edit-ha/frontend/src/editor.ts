@@ -11,8 +11,106 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { linter, Diagnostic } from '@codemirror/lint';
 import { indentLess, insertTab, undo, redo, undoDepth, redoDepth } from '@codemirror/commands';
 import { parse as parseYAML } from 'yaml';
-import { entityCompletions } from './autocomplete';
+import { entityCompletions, isValidEntity } from './autocomplete';
 import { isDark } from './theme';
+import { syntaxTree } from '@codemirror/language';
+
+export interface DocumentValidationResult {
+  isValid: boolean;
+  errors: string[];
+}
+
+let currentValidationResult: DocumentValidationResult = { isValid: true, errors: [] };
+let lastValidContent: string | null = null;
+
+export function getValidationResult(): DocumentValidationResult {
+  return currentValidationResult;
+}
+
+export function restoreLastValidContent(): boolean {
+  if (lastValidContent !== null && editorView) {
+    // False means don't skip history, so the user can undo the restore if they change their mind
+    setContent(lastValidContent, false);
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Validate document syntax and entities
+ */
+function validateDocument(state: EditorState): void {
+  const errors: string[] = [];
+  let syntaxErrorCount = 0;
+  
+  syntaxTree(state).iterate({
+    enter: (node) => {
+      if (node.type.isError) {
+        syntaxErrorCount++;
+      }
+    }
+  });
+
+  if (syntaxErrorCount > 0) {
+    errors.push(`Found YAML syntax error(s).`);
+  }
+
+  const docText = state.doc.toString();
+  const lines = docText.split('\n');
+  let inEntitiesList = false;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    
+    // Check for entity_id: xxx
+    const entityIdMatch = line.match(/(?:entity_id|entity)\s*:\s*['"]?([a-z_]+\.[a-z0-9_]+)['"]?/);
+    if (entityIdMatch) {
+      const entityId = entityIdMatch[1];
+      if (!isValidEntity(entityId)) {
+        errors.push(`Line ${i + 1}: Unknown entity '${entityId}'`);
+      }
+    }
+    
+    // Check for lists under entities:
+    if (line.match(/^\s*entities\s*:/)) {
+      inEntitiesList = true;
+      continue;
+    }
+    
+    if (inEntitiesList) {
+      if (line.match(/^\s*-/)) {
+        const listItemMatch = line.match(/^\s*-\s*['"]?([a-z_]+\.[a-z0-9_]+)['"]?/);
+        if (listItemMatch) {
+          const entityId = listItemMatch[1];
+          if (!isValidEntity(entityId)) {
+            errors.push(`Line ${i + 1}: Unknown entity '${entityId}'`);
+          }
+        }
+      } else if (line.trim() !== '' && !line.match(/^\s*#/)) {
+        // Exited the list if indentation is 0
+        if (!line.match(/^\s+/)) {
+          inEntitiesList = false;
+        }
+      }
+    }
+  }
+
+  const isValid = errors.length === 0;
+  
+  if (isValid) {
+    lastValidContent = docText;
+  }
+
+  currentValidationResult = {
+    isValid,
+    errors
+  };
+  
+  // Dispatch custom event for the UI
+  window.dispatchEvent(new CustomEvent('editor-validation', { 
+    detail: currentValidationResult 
+  }));
+}
 
 let editorView: EditorView | null = null;
 const themeCompartment = new Compartment();
@@ -305,6 +403,7 @@ export function createEditor(parent: HTMLElement): EditorView {
         if (update.docChanged) {
           // Notify that content has changed
           window.dispatchEvent(new Event('editor-changed'));
+          validateDocument(update.state);
         }
       }),
     ],
@@ -356,6 +455,8 @@ export function setContent(content: string, skipHistory: boolean = false): void 
        ...changeSpec,
        annotations: Transaction.addToHistory.of(false),
      });
+     // Also reset the last valid content to this new content when loading
+     lastValidContent = content;
    } else {
      editorView.dispatch(changeSpec);
    }
