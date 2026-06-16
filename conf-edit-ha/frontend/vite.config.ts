@@ -5,23 +5,16 @@ export default defineConfig({
   build: {
     outDir: '../static',
     emptyOutDir: true,
-    minify: 'esbuild',
     sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          codemirror: [
-            'codemirror',
-            '@codemirror/autocomplete',
-            '@codemirror/commands',
-            '@codemirror/lang-yaml',
-            '@codemirror/lint',
-            '@codemirror/search',
-            '@codemirror/state',
-            '@codemirror/theme-one-dark',
-            '@codemirror/view'
-          ],
-          yaml: ['yaml'],
+        manualChunks(id) {
+          if (id.includes('node_modules/codemirror') || id.includes('node_modules/@codemirror')) {
+            return 'codemirror';
+          }
+          if (id.includes('node_modules/yaml')) {
+            return 'yaml';
+          }
         },
       },
     },
