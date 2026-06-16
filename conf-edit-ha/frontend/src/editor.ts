@@ -18,9 +18,10 @@ import { syntaxTree } from '@codemirror/language';
 export interface DocumentValidationResult {
   isValid: boolean;
   errors: string[];
+  warnings: string[];
 }
 
-let currentValidationResult: DocumentValidationResult = { isValid: true, errors: [] };
+let currentValidationResult: DocumentValidationResult = { isValid: true, errors: [], warnings: [] };
 let lastValidContent: string | null = null;
 
 export function getValidationResult(): DocumentValidationResult {
@@ -41,6 +42,7 @@ export function restoreLastValidContent(): boolean {
  */
 function validateDocument(state: EditorState): void {
   const errors: string[] = [];
+  const warnings: string[] = [];
   let syntaxErrorCount = 0;
   
   syntaxTree(state).iterate({
@@ -67,7 +69,7 @@ function validateDocument(state: EditorState): void {
     if (entityIdMatch) {
       const entityId = entityIdMatch[1];
       if (!isValidEntity(entityId)) {
-        errors.push(`Line ${i + 1}: Unknown entity '${entityId}'`);
+        warnings.push(`Line ${i + 1}: Unknown entity '${entityId}'`);
       }
     }
     
@@ -83,7 +85,7 @@ function validateDocument(state: EditorState): void {
         if (listItemMatch) {
           const entityId = listItemMatch[1];
           if (!isValidEntity(entityId)) {
-            errors.push(`Line ${i + 1}: Unknown entity '${entityId}'`);
+            warnings.push(`Line ${i + 1}: Unknown entity '${entityId}'`);
           }
         }
       } else if (line.trim() !== '' && !line.match(/^\s*#/)) {
@@ -103,7 +105,8 @@ function validateDocument(state: EditorState): void {
 
   currentValidationResult = {
     isValid,
-    errors
+    errors,
+    warnings
   };
   
   // Dispatch custom event for the UI
