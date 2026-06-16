@@ -292,14 +292,24 @@ async function init(): Promise<void> {
             toggleValidationDetails();
           }
         } else {
-          // If valid now, we clear the validation error
-          if (validationDetails) {
-            clearValidationDetails();
-          }
-          if (isModified) {
-            if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'false');
-            if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'false');
-            updateStatus('Modified', '');
+          // If valid now, check for warnings
+          if (validation.warnings && validation.warnings.length > 0) {
+            setValidationDetails('Configuration Warnings', validation.warnings.join('\n'));
+            if (isModified) {
+              if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'false');
+              if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'false');
+              updateStatus('Modified (Warnings)', 'Click for details', false, false, true);
+            }
+          } else {
+            // No errors and no warnings
+            if (validationDetails) {
+              clearValidationDetails();
+            }
+            if (isModified) {
+              if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'false');
+              if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'false');
+              updateStatus('Modified', '');
+            }
           }
         }
       });
