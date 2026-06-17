@@ -138,7 +138,7 @@ function clearValidationDetails(): void {
 /**
  * Store validation details and update collapsed/expanded display
  */
-function setValidationDetails(title: string, details: string): void {
+function setValidationDetails(title: string, details: string, showRestore: boolean = true): void {
   validationDetailsTitle = title;
   validationDetails = details;
   isValidationDetailsOpen = false;
@@ -147,6 +147,7 @@ function setValidationDetails(title: string, details: string): void {
   statusBarEl.setAttribute('title', details);
   validationDetailsTitleEl.textContent = title;
   validationDetailsContentEl.textContent = details;
+  validationDetailsRestoreEl.style.display = showRestore ? 'inline-block' : 'none';
 }
 
 /**
@@ -294,7 +295,7 @@ async function init(): Promise<void> {
         } else {
           // If valid now, check for warnings
           if (validation.warnings && validation.warnings.length > 0) {
-            setValidationDetails('Configuration Warnings', validation.warnings.join('\n'));
+            setValidationDetails('Configuration Warnings', validation.warnings.join('\n'), false);
             if (isModified) {
               if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'false');
               if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'false');
