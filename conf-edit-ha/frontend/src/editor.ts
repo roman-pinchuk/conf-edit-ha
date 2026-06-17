@@ -64,12 +64,19 @@ function validateDocument(state: EditorState): void {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     
-    // Check for entity_id: xxx
-    const entityIdMatch = line.match(/(?:entity_id|entity)\s*:\s*['"]?([a-z_]+\.[a-z0-9_]+)['"]?/);
+    const entityIdMatch = line.match(/(?:entity_id|entity)\s*:\s*['"]?([^'"\s#]+)['"]?/);
     if (entityIdMatch) {
       const entityId = entityIdMatch[1];
-      if (!isValidEntity(entityId)) {
-        warnings.push(`Line ${i + 1}: Unknown entity '${entityId}'`);
+      // Only check if it looks like an entity ID (has a dot) to avoid false positives on other YAML keys
+      if (entityId.includes('.') && entityId.match(/^[a-z_]+\.[a-z0-9_]+$/)) {
+        if (!isValidEntity(entityId)) {
+          warnings.push(`Line ${i + 1}: Entity '${entityId}' not found (may be disabled or missing)`);
+        }
+      } else if (entityId !== '') {
+        // It matched entity_id: something, but it's not a valid format
+        // We'll add a warning instead of an error to be safe, or we could add an error.
+        // The user asked "Can we determine if there is not valid entity and not existing/disabled?"
+        warnings.push(`Line ${i + 1}: Invalid entity ID format '${entityId}'`);
       }
     }
     
@@ -81,11 +88,17 @@ function validateDocument(state: EditorState): void {
     
     if (inEntitiesList) {
       if (line.match(/^\s*-/)) {
-        const listItemMatch = line.match(/^\s*-\s*['"]?([a-z_]+\.[a-z0-9_]+)['"]?/);
+        // We only want to match plain strings, not object keys like "- entity: ..."
+        // A simple heuristic: no colon in the string
+        const listItemMatch = line.match(/^\s*-\s*['"]?([^'"\s#:]+)['"]?/);
         if (listItemMatch) {
           const entityId = listItemMatch[1];
-          if (!isValidEntity(entityId)) {
-            warnings.push(`Line ${i + 1}: Unknown entity '${entityId}'`);
+          if (entityId.match(/^[a-z_]+\.[a-z0-9_]+$/)) {
+            if (!isValidEntity(entityId)) {
+              warnings.push(`Line ${i + 1}: Entity '${entityId}' not found (may be disabled or missing)`);
+            }
+          } else {
+             warnings.push(`Line ${i + 1}: Invalid entity ID format '${entityId}'`);
           }
         }
       } else if (line.trim() !== '' && !line.match(/^\s*#/)) {
