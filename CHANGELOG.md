@@ -2,6 +2,11 @@
 
 All notable changes to the Configuration Editor project are documented in this file.
 
+## [1.5.6] - 2026-06-18
+
+### Other
+- ci: use ADMIN_PAT to bypass branch protection during release
+
 ## [1.5.2] - 2026-06-01
 
 ### Added
