@@ -219,7 +219,7 @@ jobs:
             --title "$GITHUB_REF_NAME" \
             --notes-file changelog.md
 
-      - name: Bump version in config.yaml on main
+      - name: Bump version and update changelog on main
         env:
           GH_TOKEN: ${{ secrets.ADMIN_PAT }}
         run: |
@@ -228,9 +228,26 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin main
           git checkout main
+          
+          DATE=$(git log -1 --format=%cs "$GITHUB_REF_NAME")
+          sed -i "1s/.*/## [$VERSION] - $DATE/" changelog.md
+          echo "" >> changelog.md
+          
+          awk '
+            /^## \[/ && !inserted {
+              system("cat changelog.md")
+              inserted=1
+            }
+            {print}
+            END {
+              if (!inserted) system("cat changelog.md")
+            }
+          ' CHANGELOG.md > CHANGELOG.tmp
+          mv CHANGELOG.tmp CHANGELOG.md
+          
           sed -i "s/^version:.*/version: \"${VERSION}\"/" conf-edit-ha/config.yaml
-          git add conf-edit-ha/config.yaml
-          git commit -m "chore: bump version to ${VERSION} [skip ci]"
+          git add conf-edit-ha/config.yaml CHANGELOG.md
+          git commit -m "chore: release ${VERSION} [skip ci]"
           git push origin main
 
       - name: Release Summary
