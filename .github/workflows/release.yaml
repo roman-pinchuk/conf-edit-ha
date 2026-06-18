@@ -246,8 +246,11 @@ jobs:
           ' CHANGELOG.md > CHANGELOG.tmp
           mv CHANGELOG.tmp CHANGELOG.md
           
+          # Copy to add-on folder so Home Assistant UI shows the latest changelog
+          cp CHANGELOG.md conf-edit-ha/CHANGELOG.md
+          
           sed -i "s/^version:.*/version: \"${VERSION}\"/" conf-edit-ha/config.yaml
-          git add conf-edit-ha/config.yaml CHANGELOG.md
+          git add conf-edit-ha/config.yaml CHANGELOG.md conf-edit-ha/CHANGELOG.md
           git commit -m "chore: release ${VERSION} [skip ci]"
           git push origin main
 
