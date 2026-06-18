@@ -1,166 +1,38 @@
 # Changelog
 
-All notable changes to Configuration Editor project are documented in this file.
+All notable changes to the Configuration Editor project are documented in this file.
 
-> **Note**: Starting from v1.4.0, release notes are auto-generated from git commits and published on [GitHub Releases](https://github.com/roman-pinchuk/conf-edit-ha/releases). This file is kept for historical reference but is no longer updated manually.
+## [1.5.7] - 2026-06-18
 
-## [1.3.1] - 2026-05-08
+### Maintenance
+- chore: copy changelog to add-on folder for Home Assistant UI
+- chore: release 1.5.6 [skip ci]
 
-### Fixed
-- **Status bar color**: "Saved, checking config..." now uses the standard status color instead of green to avoid confusion.
 
-## [1.3.0] - 2026-05-08
+## [1.5.6] - 2026-06-18
 
-### Added
-- **Home Assistant config validation**: Runs Home Assistant's config check automatically after a successful save.
-- **Validation details UI**: Shows invalid or unavailable validation results in the status bar with click/tap-to-expand details.
-- **Mobile validation panel**: Displays long validation errors in a mobile-friendly bottom sheet.
+### Other
+- ci: use ADMIN_PAT to bypass branch protection during release
 
-## [1.2.1] - 2026-02-13
-
-### Fixed
-- **Desktop UI**: Restored Save and Theme Toggle buttons to the top header for a more traditional desktop experience.
-- **Responsive Logic**: Improved visibility logic to show action buttons in the header on desktop and in the floating toolbar on mobile.
-- **Code Cleanup**: Unified event handling for dual-mode (header/toolbar) action buttons.
-
-## [1.2.0] - 2026-02-13
+## [1.5.2] - 2026-06-01
 
 ### Added
-- **Unified Editor Toolbar**: Consolidated all action buttons (Save, Theme Toggle, Undo/Redo, Indent/Dedent) into a single, modern floating toolbar.
-- **Cross-Platform Experience**: The floating toolbar is now the primary interaction method on both desktop and mobile, providing a consistent Home Assistant-style experience.
-- **Enhanced Save Button**: Added a dedicated save icon and optimized the button layout to be responsive (icon-only on very small screens).
+- **Real-time Client Validation**: The editor now actively validates YAML syntax and Home Assistant entity IDs as you type, instantly blocking the Save action to prevent breaking your configuration.
+- **Restore Valid State**: Added a convenient "Restore Valid State" button to the validation error panel that instantly reverts the editor content to the last known fully valid state, making it easy to recover from configuration mistakes.
 
-### Changed
-- **Header Simplification**: Removed redundant action buttons from the top header to focus on filename and navigation.
-- **Editor Layout**: Improved editor padding to ensure the floating toolbar never overlaps with the code.
-
-## [1.1.16] - 2026-02-13
+## [1.1.5] - 2026-01-24
 
 ### Fixed
-- **iOS Keyboard**: Added `autocomplete="new-password"` and `inputmode="text"` to editor to further discourage the iOS "Form Assistant" bar and autofill icons
-- **Mobile UI**: Refined floating toolbar positioning logic to ensure perfectly consistent vertical spacing regardless of keyboard state
-
-## [1.1.15] - 2026-02-13
-
-### Fixed
-- **Mobile UI**: Repositioned floating toolbar to strictly respect device safe areas (`env(safe-area-inset-bottom)`)
-- **Mobile UI**: Improved keyboard-aware positioning logic to account for safe area offsets when the keyboard is active
-
-## [1.1.14] - 2026-02-13
-
-### Fixed
-- **iOS Keyboard**: Completely hid the iOS "Form Assistant" (arrows/Done bar) by converting buttons to `div role="button"` and disabling global autocorrect/autocomplete
-- **Mobile UI**: Tightened margins for the floating toolbar to maximize screen space
-- **Mobile UI**: Improved toolbar positioning stability when the keyboard is open
-
-## [1.1.13] - 2026-02-13
-
-### Fixed
-- **Mobile Keyboard**: Implemented dynamic toolbar positioning using `VisualViewport` API to keep buttons pinned above the keyboard on iOS/Android
-- **Mobile UI**: Expanded floating toolbar to nearly full-width for better usability
-- **iOS Keyboard**: Added `tabindex="-1"` to all header/toolbar buttons to remove focus arrows from the iOS accessory bar
-
-## [1.1.12] - 2026-02-13
-
-### Fixed
-- **iOS Keyboard**: Added `tabindex="-1"` to all buttons to remove focus arrows from the iOS keyboard accessory bar
-- **iOS Keyboard**: Added `enterkeyhint="enter"` to editor to optimize the "Return" key behavior
-
-## [1.1.11] - 2026-02-13
-
-### Changed
-- **Mobile UI**: Refined floating toolbar to precisely match Home Assistant Energy dashboard card style
-- **Mobile UI**: Repositioned status bar to the top of the editor for better visibility and layout flow
-- **Mobile UI**: Adjusted editor padding for optimal interaction with bottom floating toolbar
-
-## [1.1.10] - 2026-02-13
-
-### Fixed
-- **Mobile UI**: Increased floating toolbar bottom margin for better iPhone home indicator clearance
-- **Mobile UI**: Increased editor bottom padding to prevent toolbar overlap with code
-
-## [1.1.9] - 2026-02-13
-
-### Added
-- **New Mobile UI**: Redesigned mobile experience with a modern "Liquid Glass" aesthetic
-  - Floating bottom toolbar with backdrop blur and frosted glass effect
-  - Moved status bar to the top of the editor for better visibility
-  - Replaced burger menu with a vertical 3-dots icon
-  - Added filename display to both header and mobile toolbar
-- **Mobile Optimization**: 
-  - Implemented dynamic viewport units (`dvh`) for keyboard stability
-  - Added safe-area insets support for modern iPhone and Android displays
-  - Disabled iOS/Android autocorrect, autocapitalize, and spellcheck in editor
-
-### Changed
-- Removed manual "Refresh Entities" button (entities now refresh on page load)
-- Increased sidebar z-index to ensure it appears above all floating elements
-
-## [1.1.8] - 2026-02-13
-
-### Fixed
-- **Dark Theme Flicker**: Eliminated initial theme flicker by synchronizing `localStorage` preference with page load
-  - Implemented inline script in `index.html` to apply theme immediately before rendering
-  - Moved theme icon visibility management to CSS to avoid DOM manipulation delay
-  - Streamlined theme initialization logic in `theme.ts`
-
-## [1.1.7] - 2026-01-25
-
-### Fixed
-- **API Base Path Issue**: Fixed "Failed to load files" error on Home Assistant domain URLs
-  - Root cause: Dynamic API base detection was breaking file tree loading
-  - Solution: Reverted to relative path './api' which works correctly in all environments
-  - Maintains iOS WebView nested file path support with `encodeFilePath()` enhancement
+- **File Tree DOM Fragment Issue**: Fixed file tree folder duplication by improving DOM element extraction
+  - Root cause: `tempDiv.firstChild` was including text nodes (whitespace) that interfered with DOM structure
+  - Solution: Changed to `tempDiv.firstElementChild` to only extract element nodes
+  - Prevents text node contamination and ensures clean DOM insertion during folder toggle
+  - Maintains proper tree structure without duplicate elements
 
 ### Technical Details
-- Removed problematic `getApiBase()` function
-- Kept essential `encodeFilePath()` for iOS WebView compatibility
-- Relative paths work correctly in iOS WebView and Home Assistant add-on environments
-- No breaking changes to API behavior
-
----
-
-## [1.1.6] - 2026-01-25
-
-### Fixed
-- **iOS WebView File Loading**: Fixed "Failed to load includes/climates.yaml" error on iOS app
-  - Root cause: iOS WebView handles relative URLs and path encoding differently than desktop browsers
-  - Solution: Dynamic API base detection and enhanced path encoding for nested files
-  - Maintains full compatibility with macOS web standalone and other platforms
-
-### Technical Details
-- Added `getApiBase()` function to detect proper base URL for iOS WebView environments
-- Implemented `encodeFilePath()` to preserve slashes while encoding path segments correctly
-- Enhanced fetch options with proper CORS mode and credentials for iOS compatibility
-- Removed production debug logging for security and performance
-- Reduced bundle size by ~3kB (16% improvement) by eliminating debug code
-
-### Platform Compatibility
-- **iOS**: Now properly loads nested files like "includes/climates.yaml"
-- **macOS/Desktop**: Unchanged behavior, full backward compatibility
-- **Other Platforms**: Enhanced network resilience and error handling
-
----
-
-## [1.1.5] - 2026-01-25
-
-### Fixed
-- **iOS WebView File Loading**: Fixed "Failed to load includes/climates.yaml" error on iOS app
-  - Root cause: iOS WebView handles relative URLs and path encoding differently than desktop browsers
-  - Solution: Dynamic API base detection and enhanced path encoding for nested files
-  - Maintains full compatibility with macOS web standalone and other platforms
-
-### Technical Details
-- Added `getApiBase()` function to detect proper base URL for iOS WebView environments
-- Implemented `encodeFilePath()` to preserve slashes while encoding path segments correctly
-- Enhanced fetch options with proper CORS mode and credentials for iOS compatibility
-- Removed production debug logging for security and performance
-- Reduced bundle size by ~3kB (16% improvement) by eliminating debug code
-
-### Platform Compatibility
-- **iOS**: Now properly loads nested files like "includes/climates.yaml"
-- **macOS/Desktop**: Unchanged behavior, full backward compatibility
-- **Other Platforms**: Enhanced network resilience and error handling
+- Updated `updateDirectoryToggle()` function to use `firstElementChild` instead of `firstChild`
+- Ensures only HTML elements (not text nodes) are inserted into the file tree DOM
+- Improves reliability of incremental directory updates without full re-render
 
 ---
 

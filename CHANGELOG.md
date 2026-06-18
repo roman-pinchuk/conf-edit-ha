@@ -2,6 +2,13 @@
 
 All notable changes to the Configuration Editor project are documented in this file.
 
+## [1.5.7] - 2026-06-18
+
+### Maintenance
+- chore: copy changelog to add-on folder for Home Assistant UI
+- chore: release 1.5.6 [skip ci]
+
+
 ## [1.5.6] - 2026-06-18
 
 ### Other
