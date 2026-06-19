@@ -2,6 +2,16 @@
 
 All notable changes to the Configuration Editor project are documented in this file.
 
+## [1.5.8] - 2026-06-19
+
+### Maintenance
+- chore: release 1.5.7 [skip ci]
+
+### Other
+- Refactor README to simplify badge layout and improve readability
+- Refactor README to improve badge layout and readability
+- Enhance README with image and security details
+
 ## [1.5.7] - 2026-06-18
 
 ### Maintenance
