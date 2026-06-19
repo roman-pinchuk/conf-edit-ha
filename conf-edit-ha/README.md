@@ -1,17 +1,5 @@
 # Home Assistant Configuration Editor
 
-[![GitHub Release](https://img.shields.io/github/v/release/roman-pinchuk/conf-edit-ha?style=flat-square)](https://github.com/roman-pinchuk/conf-edit-ha/releases)
-[![Builder](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml/badge.svg)](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml)
-[![CodeQL](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/roman-pinchuk/conf-edit-ha/security/code-scanning)
-[![Dependabot](https://img.shields.io/badge/dependabot-enabled-025E8C?logo=Dependabot&style=flat-square)](https://github.com/roman-pinchuk/conf-edit-ha/security/dependabot)
-[![Last commit](https://img.shields.io/github/last-commit/roman-pinchuk/conf-edit-ha?style=flat-square)](https://github.com/roman-pinchuk/conf-edit-ha/commits/main)
-[![License](https://img.shields.io/github/license/roman-pinchuk/conf-edit-ha?style=flat-square)](LICENSE.md)
-[![Python](https://img.shields.io/badge/python-3.11-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![Home Assistant Ingress](https://img.shields.io/badge/Home%20Assistant-Ingress-blue?style=flat-square)](https://developers.home-assistant.io/docs/apps/presentation/#ingress)
-![Supports amd64](https://img.shields.io/badge/amd64-yes-green?style=flat-square)
-![Supports aarch64](https://img.shields.io/badge/aarch64-yes-green?style=flat-square)
-
-<img width="5120" height="2880" alt="ha-edit-conf" src="https://github.com/user-attachments/assets/5ad2a2e6-a28a-49b1-b891-abb6ad7cd1de" />
 
 A lightweight Home Assistant add-on that provides a simple text editor for configuration files with YAML syntax highlighting, entity autocomplete, and Home Assistant config validation after saving.
 
@@ -31,14 +19,6 @@ A lightweight Home Assistant add-on that provides a simple text editor for confi
 - **Ingress support** - runs securely within Home Assistant
 
 ## Installation
-
-### Quick Install
-
-Click the button below to add this repository to your Home Assistant:
-
-[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Froman-pinchuk%2Fconf-edit-ha)
-
-### Manual Installation
 
 1. In Home Assistant, go to **Settings → Add-ons → Add-on Store**
 2. Click the **three dots menu** (top right) → **Repositories**
@@ -76,54 +56,6 @@ theme: auto  # Options: auto, light, dark
 - All file operations are restricted to `/config` directory
 - Automatic backups created before each save
 - No external dependencies or internet access required
-
-## Development
-
-### Quick Start
-
-```bash
-# Build everything and run
-make build run
-
-# Or step by step:
-make build-frontend  # Build frontend
-make build-docker    # Build Docker image
-make run            # Start container
-
-# View logs
-make logs
-
-# Restart after changes
-make restart
-```
-
-### Building for Multiple Architectures
-
-The add-on automatically builds for all supported architectures when published to Home Assistant. For local multi-arch testing:
-
-```bash
-make build-multiarch
-```
-
-See [BUILD.md](BUILD.md) for detailed build instructions.
-
-### Project Structure
-
-```
-conf-edit-ha/
-├── app.py              # Flask backend
-├── frontend/           # TypeScript + Vite frontend
-│   ├── src/
-│   │   ├── main.ts     # App entry point
-│   │   ├── editor.ts   # CodeMirror setup
-│   │   ├── api.ts      # API client
-│   │   └── theme.ts    # Theme management
-│   └── styles.css      # VS Code-style CSS
-├── static/             # Built frontend (generated)
-├── config.yaml         # Add-on configuration
-├── build.yaml          # Multi-arch build config
-└── Dockerfile          # Container definition
-```
 
 ## Support
 
