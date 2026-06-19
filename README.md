@@ -78,6 +78,8 @@ theme: auto  # Options: auto, light, dark
 - Backend: Python + Flask
 - Frontend: TypeScript + CodeMirror 6 + Vite
 - Container: ~50MB total size
+  <img width="1300" height="75" alt="image" src="https://github.com/user-attachments/assets/93946715-9f8c-4892-9556-d94dfc11e9e0" />
+
 
 ## Security
 
