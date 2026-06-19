@@ -1,21 +1,15 @@
-# <img src="icon.png" width="32" height="32" style="vertical-align: middle;"> Home Assistant Configuration Editor
+# Home Assistant Configuration Editor
 
-<table align="center">
-  <tr>
-    <td><a href="https://github.com/roman-pinchuk/conf-edit-ha/releases"><img src="https://img.shields.io/github/v/release/roman-pinchuk/conf-edit-ha?style=flat-square" alt="GitHub Release"></a></td>
-    <td><a href="https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml"><img src="https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml/badge.svg" alt="Builder"></a></td>
-    <td><a href="https://github.com/roman-pinchuk/conf-edit-ha/security/code-scanning"><img src="https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/github-code-scanning/codeql/badge.svg" alt="CodeQL"></a></td>
-    <td><a href="https://github.com/roman-pinchuk/conf-edit-ha/security/dependabot"><img src="https://img.shields.io/badge/dependabot-enabled-025E8C?logo=Dependabot&style=flat-square" alt="Dependabot"></a></td>
-    <td><a href="https://github.com/roman-pinchuk/conf-edit-ha/commits/main"><img src="https://img.shields.io/github/last-commit/roman-pinchuk/conf-edit-ha?style=flat-square" alt="Last commit"></a></td>
-  </tr>
-  <tr>
-    <td><a href="LICENSE.md"><img src="https://img.shields.io/github/license/roman-pinchuk/conf-edit-ha?style=flat-square" alt="License"></a></td>
-    <td><a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11-blue?style=flat-square&logo=python&logoColor=white" alt="Python"></a></td>
-    <td><a href="https://developers.home-assistant.io/docs/apps/presentation/#ingress"><img src="https://img.shields.io/badge/Home%20Assistant-Ingress-blue?style=flat-square" alt="Home Assistant Ingress"></a></td>
-    <td><img src="https://img.shields.io/badge/amd64-yes-green?style=flat-square" alt="Supports amd64"></td>
-    <td><img src="https://img.shields.io/badge/aarch64-yes-green?style=flat-square" alt="Supports aarch64"></td>
-  </tr>
-</table>
+[![GitHub Release](https://img.shields.io/github/v/release/roman-pinchuk/conf-edit-ha?style=flat-square)](https://github.com/roman-pinchuk/conf-edit-ha/releases)
+[![Builder](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml/badge.svg)](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/builder.yaml)
+[![CodeQL](https://github.com/roman-pinchuk/conf-edit-ha/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/roman-pinchuk/conf-edit-ha/security/code-scanning)
+[![Dependabot](https://img.shields.io/badge/dependabot-enabled-025E8C?logo=Dependabot&style=flat-square)](https://github.com/roman-pinchuk/conf-edit-ha/security/dependabot)
+[![Last commit](https://img.shields.io/github/last-commit/roman-pinchuk/conf-edit-ha?style=flat-square)](https://github.com/roman-pinchuk/conf-edit-ha/commits/main)
+[![License](https://img.shields.io/github/license/roman-pinchuk/conf-edit-ha?style=flat-square)](LICENSE.md)
+[![Python](https://img.shields.io/badge/python-3.11-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Home Assistant Ingress](https://img.shields.io/badge/Home%20Assistant-Ingress-blue?style=flat-square)](https://developers.home-assistant.io/docs/apps/presentation/#ingress)
+![Supports amd64](https://img.shields.io/badge/amd64-yes-green?style=flat-square)
+![Supports aarch64](https://img.shields.io/badge/aarch64-yes-green?style=flat-square)
 
 <img width="5120" height="2880" alt="ha-edit-conf" src="https://github.com/user-attachments/assets/4192c6d1-ad33-4ed1-ad06-a3d2dc07272e" />
 
