@@ -2,6 +2,14 @@
 
 All notable changes to the Configuration Editor project are documented in this file.
 
+## [1.5.9] - 2026-06-19
+
+### Maintenance
+- chore: release 1.5.8 [skip ci]
+
+### Other
+- Refactor README to include icon in title and remove unnecessary badges
+
 ## [1.5.8] - 2026-06-19
 
 ### Maintenance
