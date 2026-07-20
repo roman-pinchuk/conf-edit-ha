@@ -2,6 +2,15 @@
 
 All notable changes to the Configuration Editor project are documented in this file.
 
+## [1.6.0] - 2026-07-20
+
+### Features
+- feat: configure indentation guide display
+
+### Maintenance
+- chore: release 1.5.9 [skip ci]
+
+
 ## [1.5.9] - 2026-06-19
 
 ### Maintenance
