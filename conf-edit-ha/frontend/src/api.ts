@@ -30,6 +30,11 @@ export interface ValidationResult {
   errors: string | null;
 }
 
+export interface EditorSettings {
+  indent_style: 'spaces' | 'dotted';
+  indent_opacity: number;
+}
+
 // API base uses relative path for Home Assistant add-on compatibility
 // Works correctly in iOS WebView and all other environments
 const API_BASE = './api';
@@ -70,6 +75,24 @@ export async function fetchEntities(): Promise<Entity[]> {
   } catch (error) {
     throw error;
   }
+}
+
+/**
+ * Fetch editor settings configured in the Home Assistant add-on options.
+ */
+export async function fetchSettings(): Promise<EditorSettings> {
+  const response = await fetch(`${API_BASE}/settings`, {
+    method: 'GET',
+    headers: { 'Accept': 'application/json' },
+    credentials: 'same-origin',
+    mode: 'cors',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch editor settings: ${response.statusText}`);
+  }
+
+  return response.json();
 }
 
 /**

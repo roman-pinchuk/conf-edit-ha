@@ -4,7 +4,7 @@
 
 import { initTheme } from './theme';
 import { createEditor, setContent, getContent, registerSaveShortcut, editorUndo, editorRedo, editorIndent, editorDedent, canEditorUndo, canEditorRedo, restoreLastValidContent } from './editor';
-import { fetchEntities, fetchFiles, readFile, saveFile, validateConfig, type FileInfo } from './api';
+import { fetchEntities, fetchFiles, fetchSettings, readFile, saveFile, validateConfig, type EditorSettings, type FileInfo } from './api';
 import { setEntities } from './autocomplete';
 
 // Application state
@@ -247,8 +247,18 @@ async function init(): Promise<void> {
      // Initialize theme
      initTheme();
 
-     // Create editor
-     createEditor(editorEl);
+      let editorSettings: EditorSettings = {
+        indent_style: 'spaces',
+        indent_opacity: 100,
+      };
+      try {
+        editorSettings = await fetchSettings();
+      } catch (error) {
+        console.warn('Using default editor settings:', error);
+      }
+
+      // Create editor
+      createEditor(editorEl, editorSettings);
 
      // Register save shortcut
      registerSaveShortcut(handleSave);

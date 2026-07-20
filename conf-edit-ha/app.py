@@ -9,6 +9,7 @@ import requests
 import os
 import shutil
 import logging
+import json
 from pathlib import Path
 from datetime import datetime
 
@@ -33,6 +34,12 @@ possible_config_dirs = [
     '/homeassistant'          # alternative path
 ]
 CONFIG_DIR = next((d for d in possible_config_dirs if d and Path(d).exists()), '/config')
+OPTIONS_FILE = Path('/data/options.json')
+
+DEFAULT_SETTINGS = {
+    'indent_style': 'spaces',
+    'indent_opacity': 100,
+}
 
 # Ensure we have the token
 if not TOKEN:
@@ -55,6 +62,27 @@ def serve_assets(filename):
 def health():
     """Health check endpoint"""
     return jsonify({'status': 'ok'}), 200
+
+
+@app.route('/api/settings')
+def get_settings():
+    """Return validated editor settings from Home Assistant add-on options."""
+    settings = DEFAULT_SETTINGS.copy()
+
+    try:
+        with OPTIONS_FILE.open(encoding='utf-8') as options_file:
+            options = json.load(options_file)
+
+        if options.get('indent_style') in ('spaces', 'dotted'):
+            settings['indent_style'] = options['indent_style']
+
+        opacity = options.get('indent_opacity')
+        if isinstance(opacity, int) and not isinstance(opacity, bool):
+            settings['indent_opacity'] = max(0, min(100, opacity))
+    except (OSError, json.JSONDecodeError, AttributeError):
+        logger.info("Using default editor settings")
+
+    return jsonify(settings), 200
 
 
 @app.route('/api/entities')
