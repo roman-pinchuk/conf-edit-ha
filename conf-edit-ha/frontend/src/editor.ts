@@ -14,6 +14,7 @@ import { parse as parseYAML } from 'yaml';
 import { entityCompletions, isValidEntity } from './autocomplete';
 import { isDark } from './theme';
 import { syntaxTree } from '@codemirror/language';
+import type { EditorSettings } from './api';
 
 export interface DocumentValidationResult {
   isValid: boolean;
@@ -131,6 +132,11 @@ function validateDocument(state: EditorState): void {
 let editorView: EditorView | null = null;
 const themeCompartment = new Compartment();
 const rainbowIndentThemeCompartment = new Compartment();
+const defaultEditorSettings: EditorSettings = {
+  indent_style: 'spaces',
+  indent_opacity: 100,
+};
+let editorSettings: EditorSettings = defaultEditorSettings;
 let themeChangeHandler: ((e: Event) => void) | null = null;
 let saveShortcutHandler: ((e: KeyboardEvent) => void) | null = null;
 
@@ -268,64 +274,38 @@ const rainbowBracketsTheme = EditorView.baseTheme({
 });
 
 /**
- * Rainbow indentation theme for LIGHT mode (brighter colors)
+ * Build indentation guide styles while preserving the current light/dark
+ * color strength at 100% opacity.
  */
-const rainbowIndentLightTheme = EditorView.theme({
-  '.indent-rainbow-0': {
-    backgroundColor: 'rgba(255, 215, 0, 0.4)', // Gold - bright for light mode
-    borderRadius: '0',
-    display: 'inline-block',
-    minHeight: '1.2em',
-  },
-  '.indent-rainbow-1': {
-    backgroundColor: 'rgba(218, 112, 214, 0.35)', // Purple - bright for light mode
-    borderRadius: '0',
-    display: 'inline-block',
-    minHeight: '1.2em',
-  },
-  '.indent-rainbow-2': {
-    backgroundColor: 'rgba(135, 206, 250, 0.45)', // Light Blue - bright for light mode
-    borderRadius: '0',
-    display: 'inline-block',
-    minHeight: '1.2em',
-  },
-  '.indent-rainbow-3': {
-    backgroundColor: 'rgba(152, 251, 152, 0.4)', // Light Green - bright for light mode
-    borderRadius: '0',
-    display: 'inline-block',
-    minHeight: '1.2em',
-  },
-}, { dark: false });
+function createIndentTheme(dark: boolean): ReturnType<typeof EditorView.theme> {
+  const colors = [
+    [255, 215, 0, dark ? 0.15 : 0.4],
+    [218, 112, 214, dark ? 0.12 : 0.35],
+    [135, 206, 250, dark ? 0.18 : 0.45],
+    [152, 251, 152, dark ? 0.15 : 0.4],
+  ];
+  const opacity = editorSettings.indent_opacity / 100;
+  const styles: Record<string, Record<string, string>> = {};
 
-/**
- * Rainbow indentation theme for DARK mode (darker/more subtle colors)
- */
-const rainbowIndentDarkTheme = EditorView.theme({
-  '.indent-rainbow-0': {
-    backgroundColor: 'rgba(255, 215, 0, 0.15)', // Gold - darker
-    borderRadius: '0',
-    display: 'inline-block',
-    minHeight: '1.2em',
-  },
-  '.indent-rainbow-1': {
-    backgroundColor: 'rgba(218, 112, 214, 0.12)', // Purple - darker
-    borderRadius: '0',
-    display: 'inline-block',
-    minHeight: '1.2em',
-  },
-  '.indent-rainbow-2': {
-    backgroundColor: 'rgba(135, 206, 250, 0.18)', // Light Blue - darker
-    borderRadius: '0',
-    display: 'inline-block',
-    minHeight: '1.2em',
-  },
-  '.indent-rainbow-3': {
-    backgroundColor: 'rgba(152, 251, 152, 0.15)', // Light Green - darker
-    borderRadius: '0',
-    display: 'inline-block',
-    minHeight: '1.2em',
-  },
-}, { dark: true });
+  colors.forEach(([red, green, blue, baseOpacity], index) => {
+    const color = `rgba(${red}, ${green}, ${blue}, ${baseOpacity * opacity})`;
+    styles[`.indent-rainbow-${index}`] = editorSettings.indent_style === 'dotted'
+      ? {
+          backgroundColor: 'transparent',
+          borderRight: `2px dotted ${color}`,
+          display: 'inline-block',
+          minHeight: '1.2em',
+        }
+      : {
+          backgroundColor: color,
+          borderRadius: '0',
+          display: 'inline-block',
+          minHeight: '1.2em',
+        };
+  });
+
+  return EditorView.theme(styles, { dark });
+}
 
 interface YAMLError {
   linePos?: Array<{ line: number; col: number }>;
@@ -378,7 +358,8 @@ function yamlLinter(view: EditorView): Diagnostic[] {
 /**
  * Create and initialize the editor
  */
-export function createEditor(parent: HTMLElement): EditorView {
+export function createEditor(parent: HTMLElement, settings: EditorSettings = defaultEditorSettings): EditorView {
+  editorSettings = settings;
   const startState = EditorState.create({
     doc: '',
     extensions: [
@@ -413,7 +394,7 @@ export function createEditor(parent: HTMLElement): EditorView {
         autocomplete: "new-password" // More aggressive way to hide iOS autofill bar
       }),
       themeCompartment.of(isDark() ? oneDark : []),
-      rainbowIndentThemeCompartment.of(isDark() ? rainbowIndentDarkTheme : rainbowIndentLightTheme),
+      rainbowIndentThemeCompartment.of(createIndentTheme(isDark())),
       EditorView.lineWrapping,
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
@@ -502,7 +483,7 @@ function updateTheme(isDarkMode?: boolean): void {
    editorView.dispatch({
      effects: [
        themeCompartment.reconfigure(dark ? oneDark : []),
-       rainbowIndentThemeCompartment.reconfigure(dark ? rainbowIndentDarkTheme : rainbowIndentLightTheme),
+        rainbowIndentThemeCompartment.reconfigure(createIndentTheme(dark)),
      ],
    });
 }
