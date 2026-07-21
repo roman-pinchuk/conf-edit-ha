@@ -3,9 +3,10 @@
  */
 
 import { initTheme } from './theme';
-import { createEditor, setContent, getContent, registerSaveShortcut, editorUndo, editorRedo, editorIndent, editorDedent, canEditorUndo, canEditorRedo, restoreLastValidContent } from './editor';
+import { createEditor, setContent, getContent, registerSaveShortcut, editorUndo, editorRedo, editorIndent, editorDedent, canEditorUndo, canEditorRedo, restoreLastValidContent, applyAppearanceSettings } from './editor';
 import { fetchEntities, fetchFiles, fetchSettings, readFile, saveFile, validateConfig, type EditorSettings, type FileInfo } from './api';
 import { setEntities } from './autocomplete';
+import { getAppearanceSettings, initAppearance } from './appearance';
 
 // Application state
 let currentFile: string | null = null;
@@ -256,9 +257,15 @@ async function init(): Promise<void> {
       } catch (error) {
         console.warn('Using default editor settings:', error);
       }
+      initAppearance(editorSettings);
 
       // Create editor
       createEditor(editorEl, editorSettings);
+      applyAppearanceSettings(getAppearanceSettings());
+      window.addEventListener('appearance-changed', (event) => {
+        const settings = (event as CustomEvent<ReturnType<typeof getAppearanceSettings>>).detail;
+        applyAppearanceSettings(settings);
+      });
 
      // Register save shortcut
      registerSaveShortcut(handleSave);

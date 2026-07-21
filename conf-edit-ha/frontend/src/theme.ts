@@ -2,7 +2,7 @@
  * Theme management with system preference detection
  */
 
-type Theme = 'light' | 'dark' | 'auto';
+export type Theme = 'light' | 'dark' | 'auto';
 
 const STORAGE_KEY = 'ha-editor-theme';
 
@@ -68,19 +68,8 @@ export function initTheme(): void {
   // Watch the html element for any attribute changes
   setupDOMMutationObserver();
 
-  // Set up toggle buttons
-  const toggleBtn = document.getElementById('theme-toggle-btn');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', toggleTheme);
-  }
-  
-  const toggleBtnMobile = document.getElementById('theme-toggle-btn-mobile');
-  if (toggleBtnMobile) {
-    toggleBtnMobile.addEventListener('click', toggleTheme);
-  }
-
-  // Apply initial theme
-  applyTheme();
+   // Apply initial theme
+   applyTheme();
 }
 
 /**
@@ -159,70 +148,24 @@ function applyTheme(e?: MediaQueryListEvent | Event): void {
    // Notify editor to update theme
    window.dispatchEvent(new CustomEvent('theme-changed', { detail: { dark: isDark } }));
 
-   // Update icons
-   const autoIcon = document.getElementById('theme-icon-auto');
-   const lightIcon = document.getElementById('theme-icon-light');
-   const darkIcon = document.getElementById('theme-icon-dark');
-   const autoIconHeader = document.getElementById('theme-icon-auto-header');
-   const lightIconHeader = document.getElementById('theme-icon-light-header');
-   const darkIconHeader = document.getElementById('theme-icon-dark-header');
-
-   if (autoIcon) autoIcon.style.display = currentTheme === 'auto' ? 'block' : 'none';
-   if (lightIcon) lightIcon.style.display = currentTheme === 'light' ? 'block' : 'none';
-   if (darkIcon) darkIcon.style.display = currentTheme === 'dark' ? 'block' : 'none';
-   
-   if (autoIconHeader) autoIconHeader.style.display = currentTheme === 'auto' ? 'block' : 'none';
-   if (lightIconHeader) lightIconHeader.style.display = currentTheme === 'light' ? 'block' : 'none';
-   if (darkIconHeader) darkIconHeader.style.display = currentTheme === 'dark' ? 'block' : 'none';
-
-   // Update tooltips
-   let nextThemeName = '';
-   if (currentTheme === 'auto') nextThemeName = 'Light';
-   else if (currentTheme === 'light') nextThemeName = 'Dark';
-   else nextThemeName = 'System';
-
-   const nextTooltip = `Switch to ${nextThemeName} mode`;
-   const toggleBtn = document.getElementById('theme-toggle-btn');
-   const toggleBtnMobile = document.getElementById('theme-toggle-btn-mobile');
-   
-   if (toggleBtn) {
-     toggleBtn.title = nextTooltip;
-     toggleBtn.setAttribute('aria-label', nextTooltip);
-   }
-   if (toggleBtnMobile) {
-     toggleBtnMobile.title = nextTooltip;
-     toggleBtnMobile.setAttribute('aria-label', nextTooltip);
-   }
-}
+ }
 
 /**
  * Toggle between theme modes: auto -> light -> dark -> auto
  */
-function toggleTheme(): void {
-   if (currentTheme === 'auto') {
-     currentTheme = 'light';
-   } else if (currentTheme === 'light') {
-     currentTheme = 'dark';
-   } else {
-     currentTheme = 'auto';
-   }
+/**
+ * Set the selected theme mode and apply it immediately.
+ */
+export function setThemeMode(theme: Theme): void {
+  currentTheme = theme;
+  applyTheme();
+}
 
-    // Save with verification - iOS Safari has issues with localStorage reliability
-    try {
-      localStorage.setItem(STORAGE_KEY, currentTheme);
-      // Verify it was actually saved
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved !== currentTheme) {
-        // Retry with small delay if verification failed
-        setTimeout(() => {
-          localStorage.setItem(STORAGE_KEY, currentTheme);
-        }, 10);
-      }
-    } catch (e) {
-      // Silently fail - theme will be in 'auto' mode on next load
-    }
-   
-   applyTheme();
+/**
+ * Get the selected theme mode, before resolving system preference.
+ */
+export function getThemeMode(): Theme {
+  return currentTheme;
 }
 
 /**

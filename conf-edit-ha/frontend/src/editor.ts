@@ -15,6 +15,7 @@ import { entityCompletions, isValidEntity } from './autocomplete';
 import { isDark } from './theme';
 import { syntaxTree } from '@codemirror/language';
 import type { EditorSettings } from './api';
+import type { AppearanceSettings } from './appearance';
 
 export interface DocumentValidationResult {
   isValid: boolean;
@@ -132,6 +133,8 @@ function validateDocument(state: EditorState): void {
 let editorView: EditorView | null = null;
 const themeCompartment = new Compartment();
 const rainbowIndentThemeCompartment = new Compartment();
+const rainbowBracketsCompartment = new Compartment();
+const lineWrappingCompartment = new Compartment();
 const defaultEditorSettings: EditorSettings = {
   indent_style: 'spaces',
   indent_opacity: 100,
@@ -392,7 +395,7 @@ export function createEditor(parent: HTMLElement, settings: EditorSettings = def
       yaml(),
       linter(yamlLinter),
       indentationGuides,
-      rainbowBrackets,
+      rainbowBracketsCompartment.of(rainbowBrackets),
       rainbowBracketsTheme,
       autocompletion({
         override: [entityCompletions],
@@ -420,7 +423,7 @@ export function createEditor(parent: HTMLElement, settings: EditorSettings = def
       }),
       themeCompartment.of(isDark() ? oneDark : []),
       rainbowIndentThemeCompartment.of(createIndentTheme(isDark())),
-      EditorView.lineWrapping,
+      lineWrappingCompartment.of(EditorView.lineWrapping),
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
           // Notify that content has changed
@@ -433,8 +436,10 @@ export function createEditor(parent: HTMLElement, settings: EditorSettings = def
 
    editorView = new EditorView({
      state: startState,
-     parent,
-   });
+      parent,
+    });
+
+    editorView.dom.style.fontSize = '14px';
 
     // Listen for theme changes (store handler for cleanup)
     themeChangeHandler = (e: Event) => {
@@ -448,6 +453,23 @@ export function createEditor(parent: HTMLElement, settings: EditorSettings = def
     window.addEventListener('theme-changed', themeChangeHandler);
 
     return editorView;
+}
+
+/**
+ * Apply browser appearance settings without recreating the editor.
+ */
+export function applyAppearanceSettings(settings: AppearanceSettings): void {
+  editorSettings = settings;
+  if (!editorView) return;
+
+  editorView.dom.style.fontSize = `${settings.fontSize}px`;
+  editorView.dispatch({
+    effects: [
+      rainbowIndentThemeCompartment.reconfigure(createIndentTheme(isDark())),
+      rainbowBracketsCompartment.reconfigure(settings.rainbowBrackets ? rainbowBrackets : []),
+      lineWrappingCompartment.reconfigure(settings.lineWrapping ? EditorView.lineWrapping : []),
+    ],
+  });
 }
 
 /**

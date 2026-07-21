@@ -124,6 +124,114 @@ body {
   display: none;
 }
 
+#appearance-btn > svg:not(.appearance-gear-icon),
+#appearance-btn-mobile > svg:not(.appearance-gear-icon) {
+  display: none;
+}
+
+.appearance-dialog {
+  width: min(420px, calc(100% - 32px));
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  box-shadow: 0 16px 48px var(--shadow);
+}
+
+.appearance-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.appearance-dialog form {
+  margin: 0;
+}
+
+.appearance-header,
+.appearance-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.appearance-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.appearance-close {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.appearance-close:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.appearance-controls {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.25rem;
+}
+
+.appearance-controls label {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.appearance-controls select,
+.appearance-controls input[type="range"] {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.appearance-controls select {
+  height: 36px;
+  padding: 0 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.appearance-controls output {
+  float: right;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.appearance-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+  color: var(--text-primary) !important;
+  cursor: pointer;
+}
+
+.appearance-checkbox input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-color);
+}
+
+.appearance-footer {
+  justify-content: flex-end;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 0;
+}
+
 .btn:disabled,
 .btn[aria-disabled="true"] {
   opacity: 0.5;
