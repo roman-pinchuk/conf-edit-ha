@@ -2,6 +2,19 @@
 
 All notable changes to the Configuration Editor project are documented in this file.
 
+## [1.6.1] - 2026-07-21
+
+### Features
+- feat: align appearance settings with home assistant
+- feat: add editor appearance settings
+
+### Bug Fixes
+- fix: refresh indentation guides on settings change
+- fix: render indentation guides as lines
+
+### Other
+- refactor: clean up appearance theme integration
+
 ## [1.6.0] - 2026-07-20
 
 ### Features
