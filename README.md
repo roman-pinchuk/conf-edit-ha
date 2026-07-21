@@ -24,7 +24,7 @@ A lightweight Home Assistant add-on that provides a simple text editor for confi
 - **Entity autocomplete** (substring matching from live HA API)
 - **VS Code-style file tree** with expand/collapse and indentation guides
 - **Rainbow indentation** for YAML structure visualization
-- **Configurable indentation guides** with colored spaces or dotted lines and adjustable opacity
+- **Configurable indentation guides** with colored spaces or vertical lines and adjustable opacity
 - **Dark/light theme** with automatic system preference detection
 - **State persistence** - remembers last opened file
 - **Tree browser** with folder navigation
@@ -51,17 +51,7 @@ Click the button below to add this repository to your Home Assistant:
 
 ## Configuration
 
-```yaml
-theme: auto  # Options: auto, light, dark
-indent_style: spaces  # Options: spaces, dotted
-indent_opacity: 100  # 0-100; 100 preserves the default guide strength
-```
-
-- `theme`: Set to `auto` to follow system theme, or manually select `light`/`dark`
-- `indent_style`: Display indentation guides as colored spaces or dotted lines
-- `indent_opacity`: Adjust guide visibility from hidden (`0`) to the default strength (`100`)
-
-Restart the add-on after saving configuration options to apply changes.
+Visual settings are available immediately from the gear button in the editor. Use it to change the theme, indentation guides, guide opacity, font size, line wrapping, and rainbow brackets.
 
 ## Usage
 

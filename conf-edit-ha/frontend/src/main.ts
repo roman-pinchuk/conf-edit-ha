@@ -3,9 +3,10 @@
  */
 
 import { initTheme } from './theme';
-import { createEditor, setContent, getContent, registerSaveShortcut, editorUndo, editorRedo, editorIndent, editorDedent, canEditorUndo, canEditorRedo, restoreLastValidContent } from './editor';
+import { createEditor, setContent, getContent, registerSaveShortcut, editorUndo, editorRedo, editorIndent, editorDedent, canEditorUndo, canEditorRedo, restoreLastValidContent, applyAppearanceSettings } from './editor';
 import { fetchEntities, fetchFiles, fetchSettings, readFile, saveFile, validateConfig, type EditorSettings, type FileInfo } from './api';
 import { setEntities } from './autocomplete';
+import { getAppearanceSettings, initAppearance } from './appearance';
 
 // Application state
 let currentFile: string | null = null;
@@ -60,7 +61,6 @@ const undoBtnEl = document.getElementById('undo-btn') as HTMLElement;
 const redoBtnEl = document.getElementById('redo-btn') as HTMLElement;
 const indentBtnEl = document.getElementById('indent-btn') as HTMLElement;
 const dedentBtnEl = document.getElementById('dedent-btn') as HTMLElement;
-const themeToggleBtnMobileEl = document.getElementById('theme-toggle-btn-mobile') as HTMLElement;
 const sponsorBtnMobileEl = document.getElementById('sponsor-btn-mobile') as HTMLElement;
 
 
@@ -256,9 +256,15 @@ async function init(): Promise<void> {
       } catch (error) {
         console.warn('Using default editor settings:', error);
       }
+      initAppearance(editorSettings);
 
       // Create editor
       createEditor(editorEl, editorSettings);
+      applyAppearanceSettings(getAppearanceSettings());
+      window.addEventListener('appearance-changed', (event) => {
+        const settings = (event as CustomEvent<ReturnType<typeof getAppearanceSettings>>).detail;
+        applyAppearanceSettings(settings);
+      });
 
      // Register save shortcut
      registerSaveShortcut(handleSave);
@@ -368,10 +374,6 @@ async function init(): Promise<void> {
         }
         statusBarEl.addEventListener('click', statusBarHandler);
         validationDetailsCloseEl.addEventListener('click', validationCloseHandler);
-        if (themeToggleBtnMobileEl) {
-          // Both header and mobile theme buttons are handled by theme.ts
-          // but we need to ensure the mobile one also triggers it
-        }
         if (sponsorBtnMobileEl) {
           sponsorBtnMobileEl.addEventListener('click', sponsorHandler);
         }

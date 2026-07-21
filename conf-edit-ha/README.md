@@ -29,17 +29,7 @@ A lightweight Home Assistant add-on that provides a simple text editor for confi
 
 ## Configuration
 
-```yaml
-theme: auto  # Options: auto, light, dark
-indent_style: spaces  # Options: spaces, dotted
-indent_opacity: 100  # 0-100; 100 preserves the default guide strength
-```
-
-- `theme`: Set to `auto` to follow system theme, or manually select `light`/`dark`
-- `indent_style`: Display indentation guides as colored spaces or dotted lines
-- `indent_opacity`: Adjust guide visibility from hidden (`0`) to the default strength (`100`)
-
-Restart the add-on after saving configuration options to apply changes.
+Visual settings are available immediately from the gear button in the editor. Use it to change the theme, indentation guides, guide opacity, font size, line wrapping, and rainbow brackets.
 
 ## Usage
 
