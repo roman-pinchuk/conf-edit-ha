@@ -200,67 +200,87 @@ interface IndentationGuidesValue {
 }
 
 /**
- * Rainbow indentation - colors the background of indentation spaces
+ * Rainbow indentation using colored spaces or non-layout line overlays.
  */
 const indentationGuides = ViewPlugin.fromClass(
-   class {
-     decorations: DecorationSet;
+  class {
+    decorations: DecorationSet;
 
-     constructor(view: EditorView) {
-       this.decorations = this.buildDecorations(view);
-     }
+    constructor(view: EditorView) {
+      this.decorations = this.buildDecorations(view);
+    }
 
-     update(update: ViewUpdate) {
-       if (update.docChanged || update.viewportChanged) {
-         this.decorations = this.buildDecorations(update.view);
-       }
-     }
+    update(update: ViewUpdate) {
+      if (update.docChanged || update.viewportChanged) {
+        this.decorations = this.buildDecorations(update.view);
+      }
+    }
 
-     buildDecorations(view: EditorView): DecorationSet {
-       const builder = new RangeSetBuilder<Decoration>();
+    buildDecorations(view: EditorView): DecorationSet {
+      const builder = new RangeSetBuilder<Decoration>();
 
-       for (const { from, to } of view.visibleRanges) {
-         for (let pos = from; pos <= to; ) {
-           const line = view.state.doc.lineAt(pos);
-           const text = line.text;
+      for (const { from, to } of view.visibleRanges) {
+        for (let pos = from; pos <= to; ) {
+          const line = view.state.doc.lineAt(pos);
+          const text = line.text;
 
-           // Count leading spaces
-           let spaces = 0;
-           for (let i = 0; i < text.length; i++) {
-             if (text[i] === ' ') {
-               spaces++;
-             } else {
-               break;
-             }
-           }
+          // Count leading spaces
+          let spaces = 0;
+          for (let i = 0; i < text.length; i++) {
+            if (text[i] === ' ') {
+              spaces++;
+            } else {
+              break;
+            }
+          }
 
-           // Color each pair of spaces (2-space indent levels)
-           if (spaces > 0) {
-             for (let i = 0; i < spaces; i += 2) {
-               const level = Math.floor(i / 2) % 4; // 4 colors cycling
-               const from = line.from + i;
-               const to = line.from + Math.min(i + 2, spaces);
+          // Render each pair of spaces as one indentation level.
+          if (spaces > 0) {
+            if (editorSettings.indent_style === 'lines') {
+              const guideLayers: string[] = [];
+              for (let i = 0; i < spaces; i += 2) {
+                const level = Math.floor(i / 2) % 4;
+                guideLayers.push(
+                  `linear-gradient(var(--indent-color-${level}), var(--indent-color-${level})) ${i + 0.5}ch 0 / 1px 100% no-repeat`
+                );
+              }
+              builder.add(
+                line.from,
+                line.from,
+                Decoration.line({
+                  class: 'cm-indent-lines',
+                  attributes: {
+                    style: `--indent-guides: ${guideLayers.join(',')}`,
+                  },
+                })
+              );
+            } else {
+              for (let i = 0; i < spaces; i += 2) {
+                const level = Math.floor(i / 2) % 4;
+                const from = line.from + i;
+                const to = line.from + Math.min(i + 2, spaces);
 
-               builder.add(
-                 from,
-                 to,
-                 Decoration.mark({
-                   class: `indent-rainbow-${level}`,
-                 })
-               );
-             }
-           }
+                builder.add(
+                  from,
+                  to,
+                  Decoration.mark({
+                    class: `indent-rainbow-${level}`,
+                  })
+                );
+              }
+            }
+          }
 
-           pos = line.to + 1;
-         }
-       }
+          pos = line.to + 1;
+        }
+      }
 
-       return builder.finish();
-     }
-   },
-   {
-     decorations: (v: IndentationGuidesValue) => v.decorations,
-   }
+      return builder.finish();
+    }
+  },
+  {
+    decorations: (v: IndentationGuidesValue) => v.decorations,
+  }
 );
 
 /**
@@ -285,24 +305,29 @@ function createIndentTheme(dark: boolean): ReturnType<typeof EditorView.theme> {
     [152, 251, 152, dark ? 0.15 : 0.4],
   ];
   const opacity = editorSettings.indent_opacity / 100;
-  const styles: Record<string, Record<string, string>> = {};
+  const styles: Record<string, Record<string, string>> = { '&': {} };
 
   colors.forEach(([red, green, blue, baseOpacity], index) => {
     const color = `rgba(${red}, ${green}, ${blue}, ${baseOpacity * opacity})`;
-    styles[`.indent-rainbow-${index}`] = editorSettings.indent_style === 'dotted'
-      ? {
-          backgroundColor: 'transparent',
-          borderRight: `2px dotted ${color}`,
-          display: 'inline-block',
-          minHeight: '1.2em',
-        }
-      : {
-          backgroundColor: color,
-          borderRadius: '0',
-          display: 'inline-block',
-          minHeight: '1.2em',
-        };
+    styles['&'][`--indent-color-${index}`] = color;
+    styles[`.indent-rainbow-${index}`] = {
+      backgroundColor: color,
+      borderRadius: '0',
+      display: 'inline-block',
+      minHeight: '1.2em',
+    };
   });
+
+  styles['.cm-line'] = {
+    position: 'relative',
+  };
+  styles['.cm-indent-lines::before'] = {
+    content: '""',
+    position: 'absolute',
+    inset: '0',
+    background: 'var(--indent-guides)',
+    pointerEvents: 'none',
+  };
 
   return EditorView.theme(styles, { dark });
 }

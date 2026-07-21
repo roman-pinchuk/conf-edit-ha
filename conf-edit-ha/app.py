@@ -73,8 +73,11 @@ def get_settings():
         with OPTIONS_FILE.open(encoding='utf-8') as options_file:
             options = json.load(options_file)
 
-        if options.get('indent_style') in ('spaces', 'dotted'):
-            settings['indent_style'] = options['indent_style']
+        indent_style = options.get('indent_style')
+        if indent_style in ('spaces', 'lines'):
+            settings['indent_style'] = indent_style
+        elif indent_style == 'dotted':
+            settings['indent_style'] = 'lines'
 
         opacity = options.get('indent_opacity')
         if isinstance(opacity, int) and not isinstance(opacity, bool):
