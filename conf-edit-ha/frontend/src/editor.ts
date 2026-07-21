@@ -215,7 +215,11 @@ const indentationGuides = ViewPlugin.fromClass(
     }
 
     update(update: ViewUpdate) {
-      if (update.docChanged || update.viewportChanged) {
+      if (
+        update.docChanged ||
+        update.viewportChanged ||
+        update.transactions.some((transaction) => transaction.reconfigured)
+      ) {
         this.decorations = this.buildDecorations(update.view);
       }
     }
