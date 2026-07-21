@@ -178,31 +178,29 @@
             <dialog id="appearance-dialog" class="appearance-dialog" aria-labelledby="appearance-title">
               <form method="dialog">
                 <div class="appearance-header">
-                  <h2 id="appearance-title">Appearance</h2>
+                  <div class="appearance-header-content">
+                    <h2 id="appearance-title">Appearance</h2>
+                    <p>Customize the editor to your preference.</p>
+                  </div>
                   <button id="appearance-close" class="appearance-close" type="submit" aria-label="Close appearance settings">x</button>
                 </div>
                 <div class="appearance-controls">
-                  <label for="appearance-theme">Theme</label>
-                  <select id="appearance-theme">
-                    <option value="auto">System</option>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                  </select>
-                  <label for="appearance-indent-style">Indentation guides</label>
-                  <select id="appearance-indent-style">
-                    <option value="spaces">Colored spaces</option>
-                    <option value="lines">Vertical lines</option>
-                  </select>
-                  <label for="appearance-indent-opacity">Guide opacity <output id="appearance-indent-opacity-value">100%</output></label>
-                  <input id="appearance-indent-opacity" type="range" min="0" max="100" step="5" value="100">
-                  <label for="appearance-font-size">Font size <output id="appearance-font-size-value">14px</output></label>
-                  <input id="appearance-font-size" type="range" min="12" max="20" step="1" value="14">
-                  <label class="appearance-checkbox"><input id="appearance-line-wrapping" type="checkbox" checked> Line wrapping</label>
-                  <label class="appearance-checkbox"><input id="appearance-rainbow-brackets" type="checkbox" checked> Rainbow brackets</label>
+                  <section class="appearance-section">
+                    <h3>Color &amp; guides</h3>
+                    <div class="appearance-setting"><label for="appearance-theme">Theme</label><select id="appearance-theme"><option value="auto">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+                    <div class="appearance-setting"><label for="appearance-indent-style">Indentation guides</label><select id="appearance-indent-style"><option value="spaces">Colored spaces</option><option value="lines">Vertical lines</option></select></div>
+                    <div class="appearance-setting appearance-range"><label for="appearance-indent-opacity">Guide opacity <output id="appearance-indent-opacity-value">100%</output></label><input id="appearance-indent-opacity" type="range" min="0" max="100" step="5" value="100"></div>
+                  </section>
+                  <section class="appearance-section">
+                    <h3>Editor</h3>
+                    <div class="appearance-setting appearance-range"><label for="appearance-font-size">Font size <output id="appearance-font-size-value">14px</output></label><input id="appearance-font-size" type="range" min="12" max="20" step="1" value="14"></div>
+                    <label class="appearance-checkbox"><span><strong>Line wrapping</strong><small>Wrap long lines to fit the editor</small></span><input id="appearance-line-wrapping" type="checkbox" checked></label>
+                    <label class="appearance-checkbox"><span><strong>Rainbow brackets</strong><small>Color brackets by nesting level</small></span><input id="appearance-rainbow-brackets" type="checkbox" checked></label>
+                  </section>
                 </div>
                 <div class="appearance-footer">
                   <button id="appearance-reset" class="btn btn-secondary" type="button">Reset defaults</button>
-                  <button class="btn btn-primary" type="submit">Close</button>
+                  <button class="btn btn-primary" type="submit">Done</button>
                 </div>
               </form>
             </dialog>

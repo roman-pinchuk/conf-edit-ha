@@ -118,25 +118,22 @@ body {
   overflow: hidden;
 }
 
-/* Theme Toggle Icons */
-#theme-icon-auto,
-#theme-icon-dark {
-  display: none;
-}
-
 #appearance-btn > svg:not(.appearance-gear-icon),
 #appearance-btn-mobile > svg:not(.appearance-gear-icon) {
   display: none;
 }
 
 .appearance-dialog {
-  width: min(420px, calc(100% - 32px));
+  width: min(580px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  margin: auto;
+  inset: 0;
   padding: 0;
   border: 1px solid var(--border-color);
-  border-radius: 16px;
-  background: var(--bg-primary);
+  border-radius: 24px;
+  background: var(--bg-tertiary);
   color: var(--text-primary);
-  box-shadow: 0 16px 48px var(--shadow);
+  box-shadow: 0 12px 40px var(--shadow);
 }
 
 .appearance-dialog::backdrop {
@@ -144,6 +141,9 @@ body {
 }
 
 .appearance-dialog form {
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
   margin: 0;
 }
 
@@ -153,13 +153,23 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 1.25rem;
+  padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--border-color);
 }
 
+.appearance-header-content {
+  min-width: 0;
+}
+
 .appearance-header h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
+  margin-bottom: 0.25rem;
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+.appearance-header p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
 }
 
 .appearance-close {
@@ -170,6 +180,11 @@ body {
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
+  font-size: 0;
+}
+
+.appearance-close::before {
+  content: 'x';
   font-size: 18px;
 }
 
@@ -179,30 +194,55 @@ body {
 }
 
 .appearance-controls {
+  overflow: auto;
+  padding: 0 1.5rem;
+}
+
+.appearance-section {
+  padding: 1.25rem 0;
+}
+
+.appearance-section + .appearance-section {
+  border-top: 1px solid var(--border-color);
+}
+
+.appearance-section h3 {
+  margin-bottom: 0.25rem;
+  color: var(--accent-color);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.appearance-setting {
   display: grid;
-  gap: 0.5rem;
-  padding: 1.25rem;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 52%);
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 56px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-color) 65%, transparent);
 }
 
-.appearance-controls label {
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-.appearance-controls select,
-.appearance-controls input[type="range"] {
-  width: 100%;
-  margin-bottom: 0.5rem;
+.appearance-setting label {
+  color: var(--text-primary);
+  font-size: 0.95rem;
 }
 
 .appearance-controls select {
-  height: 36px;
-  padding: 0 0.5rem;
+  width: 100%;
+  height: 40px;
+  padding: 0 0.75rem;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--bg-secondary);
   color: var(--text-primary);
+  font: inherit;
+}
+
+.appearance-controls select:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 1px;
 }
 
 .appearance-controls output {
@@ -211,23 +251,85 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.appearance-range {
+  display: block;
+  padding: 0.8rem 0;
+}
+
+.appearance-range label {
+  display: block;
+  margin-bottom: 0.7rem;
+}
+
+.appearance-range input[type="range"] {
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--accent-color);
+  cursor: pointer;
+}
+
 .appearance-checkbox {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  margin-top: 0.25rem;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 64px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-color) 65%, transparent);
   color: var(--text-primary) !important;
   cursor: pointer;
 }
 
+.appearance-checkbox span {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.appearance-checkbox strong {
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+.appearance-checkbox small {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
 .appearance-checkbox input {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--accent-color);
+  position: relative;
+  width: 42px;
+  height: 24px;
+  flex: 0 0 auto;
+  appearance: none;
+  border-radius: 999px;
+  background: var(--border-color);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.appearance-checkbox input::before {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  content: '';
+  transition: transform 0.15s ease;
+}
+
+.appearance-checkbox input:checked {
+  background: var(--accent-color);
+}
+
+.appearance-checkbox input:checked::before {
+  transform: translateX(18px);
 }
 
 .appearance-footer {
   justify-content: flex-end;
+  padding: 1rem 1.5rem 1.25rem;
   border-top: 1px solid var(--border-color);
   border-bottom: 0;
 }
@@ -541,12 +643,6 @@ body {
   box-sizing: border-box;
   transition: bottom 0.1s ease-out, transform 0.1s ease-out, border-radius 0.2s ease, width 0.2s ease, margin 0.2s ease;
   transform: translateY(-8px); 
-}
-
-/* Header theme icons (separate from toolbar icons) */
-#theme-icon-auto-header,
-#theme-icon-dark-header {
-  display: none;
 }
 
 :root.dark .editor-toolbar {
@@ -941,6 +1037,37 @@ body {
    .toolbar-label {
       font-size: 11px;
    }
+}
+
+/* Match Home Assistant's full-screen dialog behavior on phones and short screens. */
+@media (max-width: 450px), (max-height: 500px) {
+  .appearance-dialog {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100dvh;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .appearance-header {
+    padding-top: calc(1rem + env(safe-area-inset-top));
+  }
+
+  .appearance-footer {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+
+  .appearance-setting {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    min-height: 0;
+    padding: 0.75rem 0;
+  }
+
+  .appearance-setting select {
+    min-height: 44px;
+  }
 }
 
 @media (max-width: 480px) {

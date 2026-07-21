@@ -9,8 +9,24 @@ const STORAGE_KEY = 'ha-editor-theme';
 let currentTheme: Theme = 'auto';
 let mediaQuery: MediaQueryList;
 let systemThemeDark = false;
+let parentThemeDark: boolean | null = null;
 let lastObservedDarkState: boolean | null = null;
 let domMutationObserver: MutationObserver | null = null;
+let parentThemeObserver: MutationObserver | null = null;
+
+const HA_THEME_VARIABLES: Record<string, string> = {
+  '--primary-background-color': '--bg-primary',
+  '--secondary-background-color': '--bg-secondary',
+  '--card-background-color': '--bg-tertiary',
+  '--primary-text-color': '--text-primary',
+  '--secondary-text-color': '--text-secondary',
+  '--disabled-text-color': '--text-tertiary',
+  '--divider-color': '--border-color',
+  '--primary-color': '--accent-color',
+  '--dark-primary-color': '--accent-hover',
+  '--error-color': '--error-color',
+  '--warning-color': '--warning-color',
+};
 
 /**
  * Initialize theme system
@@ -26,7 +42,7 @@ export function initTheme(): void {
     } catch (e) {
       // Silently fail - fall back to default theme
     }
-   
+
    if (saved) {
      currentTheme = saved;
    }
@@ -66,7 +82,8 @@ export function initTheme(): void {
   // MutationObserver to detect .dark class changes on html element
   // This is a fallback for iOS WebView where events might not fire
   // Watch the html element for any attribute changes
-  setupDOMMutationObserver();
+   setupDOMMutationObserver();
+   setupParentThemeObserver();
 
    // Apply initial theme
    applyTheme();
@@ -99,14 +116,78 @@ function setupDOMMutationObserver(): void {
 }
 
 /**
+ * Copy the small set of HA theme variables needed by this standalone app.
+ * Ingress currently uses a same-origin iframe, but direct access may not.
+ */
+function syncParentTheme(): void {
+  const root = document.documentElement;
+
+  if (currentTheme !== 'auto' || window.parent === window) {
+    parentThemeDark = null;
+    for (const target of Object.values(HA_THEME_VARIABLES)) {
+      root.style.removeProperty(target);
+    }
+    return;
+  }
+
+  try {
+    const parentRoot = window.parent.document.documentElement;
+    const styles = window.parent.getComputedStyle(parentRoot);
+    let copiedAny = false;
+
+    for (const [source, target] of Object.entries(HA_THEME_VARIABLES)) {
+      const value = styles.getPropertyValue(source).trim();
+      if (value) {
+        root.style.setProperty(target, value);
+        copiedAny = true;
+      }
+    }
+
+    const background = styles.getPropertyValue('--primary-background-color').trim();
+    const rgb = background.match(/rgba?\((\d+)[, ]+(\d+)[, ]+(\d+)/);
+    if (rgb) {
+      const luminance = (0.299 * Number(rgb[1]) + 0.587 * Number(rgb[2]) + 0.114 * Number(rgb[3])) / 255;
+      parentThemeDark = luminance < 0.5;
+    } else {
+      parentThemeDark = null;
+    }
+
+    if (!copiedAny) {
+      parentThemeDark = null;
+    }
+  } catch (error) {
+    parentThemeDark = null;
+  }
+}
+
+/**
+ * Watch Home Assistant's root style changes, which occur when its theme changes.
+ */
+function setupParentThemeObserver(): void {
+  try {
+    parentThemeObserver = new MutationObserver(() => {
+      if (currentTheme === 'auto') applyTheme();
+    });
+    parentThemeObserver.observe(window.parent.document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'style'],
+    });
+  } catch (error) {
+    // Parent access is optional outside the Home Assistant ingress iframe.
+  }
+}
+
+/**
  * Check if system theme changed and apply if needed
  * Used for iOS compatibility
  */
 function checkAndApplyTheme(): void {
   const newSystemThemeDark = mediaQuery.matches;
-  
+  const previousParentThemeDark = parentThemeDark;
+  syncParentTheme();
+
    // Only apply if system theme actually changed
-   if (newSystemThemeDark !== systemThemeDark) {
+   if (newSystemThemeDark !== systemThemeDark || previousParentThemeDark !== parentThemeDark) {
      systemThemeDark = newSystemThemeDark;
      applyTheme();
    }
@@ -116,6 +197,7 @@ function checkAndApplyTheme(): void {
  * Apply the current theme
  */
 function applyTheme(e?: MediaQueryListEvent | Event): void {
+   syncParentTheme();
    // Update system theme state if event provides it
    if (e && 'matches' in e) {
      systemThemeDark = (e as MediaQueryListEvent).matches;
@@ -128,7 +210,7 @@ function applyTheme(e?: MediaQueryListEvent | Event): void {
    let isDark = false;
 
    if (currentTheme === 'auto') {
-     isDark = systemThemeDark;
+      isDark = parentThemeDark ?? systemThemeDark;
    } else {
      isDark = currentTheme === 'dark';
    }

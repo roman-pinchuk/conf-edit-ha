@@ -61,7 +61,6 @@ const undoBtnEl = document.getElementById('undo-btn') as HTMLElement;
 const redoBtnEl = document.getElementById('redo-btn') as HTMLElement;
 const indentBtnEl = document.getElementById('indent-btn') as HTMLElement;
 const dedentBtnEl = document.getElementById('dedent-btn') as HTMLElement;
-const themeToggleBtnMobileEl = document.getElementById('theme-toggle-btn-mobile') as HTMLElement;
 const sponsorBtnMobileEl = document.getElementById('sponsor-btn-mobile') as HTMLElement;
 
 
@@ -375,10 +374,6 @@ async function init(): Promise<void> {
         }
         statusBarEl.addEventListener('click', statusBarHandler);
         validationDetailsCloseEl.addEventListener('click', validationCloseHandler);
-        if (themeToggleBtnMobileEl) {
-          // Both header and mobile theme buttons are handled by theme.ts
-          // but we need to ensure the mobile one also triggers it
-        }
         if (sponsorBtnMobileEl) {
           sponsorBtnMobileEl.addEventListener('click', sponsorHandler);
         }
