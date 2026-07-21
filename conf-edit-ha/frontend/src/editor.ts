@@ -133,6 +133,7 @@ function validateDocument(state: EditorState): void {
 let editorView: EditorView | null = null;
 const themeCompartment = new Compartment();
 const rainbowIndentThemeCompartment = new Compartment();
+const indentationGuidesCompartment = new Compartment();
 const rainbowBracketsCompartment = new Compartment();
 const lineWrappingCompartment = new Compartment();
 const defaultEditorSettings: EditorSettings = {
@@ -394,7 +395,7 @@ export function createEditor(parent: HTMLElement, settings: EditorSettings = def
       basicSetup,
       yaml(),
       linter(yamlLinter),
-      indentationGuides,
+      indentationGuidesCompartment.of(indentationGuides),
       rainbowBracketsCompartment.of(rainbowBrackets),
       rainbowBracketsTheme,
       autocompletion({
@@ -466,6 +467,7 @@ export function applyAppearanceSettings(settings: AppearanceSettings): void {
   editorView.dispatch({
     effects: [
       rainbowIndentThemeCompartment.reconfigure(createIndentTheme(isDark())),
+      indentationGuidesCompartment.reconfigure(indentationGuides),
       rainbowBracketsCompartment.reconfigure(settings.rainbowBrackets ? rainbowBrackets : []),
       lineWrappingCompartment.reconfigure(settings.lineWrapping ? EditorView.lineWrapping : []),
     ],

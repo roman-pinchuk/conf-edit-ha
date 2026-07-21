@@ -978,65 +978,19 @@ body {
  }
  
  /* Extra small screens (480px and below) */
- @media (max-width: 480px) {
-  /* Extra small screens */
-  .header-left h1 {
-    font-size: 0.9rem;
-  }
-
-  .btn {
-    padding: 6px 10px;
-    min-width: 32px;
-    height: 32px;
-  }
-
-  .btn-icon-only {
-    padding: 6px;
-  }
-
-  .btn svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .mobile-menu-toggle {
-    padding: 6px;
-    min-width: 32px;
-    height: 32px;
-  }
-
-  .mobile-menu-toggle svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .sidebar {
-    width: 260px;
-  }
-
-  .cm-editor {
-    font-size: 12px;
-  }
-
-  .status-bar {
-    font-size: 0.65rem;
-  }
-
-   /* Mobile toolbar for very small screens */
-   .editor-toolbar {
-     margin: 12px 16px;
-     height: 52px;
-     border-radius: 16px;
-   }
-
-   .toolbar-icon-button {
-      width: 40px;
-      height: 40px;
-   }
-
-   .toolbar-label {
-      font-size: 11px;
-   }
+@media (max-width: 480px) {
+  .header-left h1 { font-size: 0.9rem; }
+  .btn { min-width: 32px; height: 32px; padding: 6px 10px; }
+  .btn-icon-only { padding: 6px; }
+  .btn svg { width: 16px; height: 16px; }
+  .mobile-menu-toggle { min-width: 32px; height: 32px; padding: 6px; }
+  .mobile-menu-toggle svg { width: 18px; height: 18px; }
+  .sidebar { width: 260px; }
+  .cm-editor { font-size: 12px; }
+  .status-bar { font-size: 0.65rem; }
+  .editor-toolbar { margin: 12px 16px; height: 52px; border-radius: 16px; }
+  .toolbar-icon-button { width: 40px; height: 40px; }
+  .toolbar-label { font-size: 11px; }
 }
 
 /* Match Home Assistant's full-screen dialog behavior on phones and short screens. */
@@ -1067,50 +1021,5 @@ body {
 
   .appearance-setting select {
     min-height: 44px;
-  }
-}
-
-@media (max-width: 480px) {
-  /* Extra small screens */
-  .header-left h1 {
-    font-size: 0.9rem;
-  }
-
-  .btn {
-    padding: 6px 10px;
-    min-width: 32px;
-    height: 32px;
-  }
-
-  .btn-icon-only {
-    padding: 6px;
-  }
-
-  .btn svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .mobile-menu-toggle {
-    padding: 6px;
-    min-width: 32px;
-    height: 32px;
-  }
-
-  .mobile-menu-toggle svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .sidebar {
-    width: 260px;
-  }
-
-  .cm-editor {
-    font-size: 12px;
-  }
-
-  .status-bar {
-    font-size: 0.65rem;
   }
 }
