@@ -3,7 +3,7 @@
  */
 
 import { initTheme } from './theme';
-import { createEditor, setContent, getContent, registerSaveShortcut, editorUndo, editorRedo, editorIndent, editorDedent, canEditorUndo, canEditorRedo, restoreLastValidContent, applyAppearanceSettings } from './editor';
+import { createEditor, setContent, getContent, registerSaveShortcut, editorUndo, editorRedo, editorIndent, editorDedent, canEditorUndo, canEditorRedo, restoreLastValidContent, applyAppearanceSettings, scrollEditorSelectionIntoView, configureEditorForFile, getEditorFileType, validateCurrentDocument } from './editor';
 import { fetchEntities, fetchFiles, fetchSettings, readFile, saveFile, validateConfig, type EditorSettings, type FileInfo } from './api';
 import { setEntities } from './autocomplete';
 import { getAppearanceSettings, initAppearance } from './appearance';
@@ -37,6 +37,10 @@ let sponsorHandler: (() => void) | null = null;
 const STORAGE_KEY_CURRENT_FILE = 'conf-edit-ha:current-file';
 const STORAGE_KEY_EXPANDED_DIRS = 'conf-edit-ha:expanded-dirs';
 
+function isYamlFile(filename: string): boolean {
+  return getEditorFileType(filename) === 'yaml';
+}
+
 // DOM elements
 const fileListEl = document.getElementById('file-list')!;
 const currentFilenameEl = document.getElementById('current-filename')!;
@@ -62,6 +66,7 @@ const redoBtnEl = document.getElementById('redo-btn') as HTMLElement;
 const indentBtnEl = document.getElementById('indent-btn') as HTMLElement;
 const dedentBtnEl = document.getElementById('dedent-btn') as HTMLElement;
 const sponsorBtnMobileEl = document.getElementById('sponsor-btn-mobile') as HTMLElement;
+const editorToolbarEl = document.getElementById('editor-toolbar') as HTMLElement;
 
 
 
@@ -196,47 +201,112 @@ function restoreState(): void {
 }
 
 /**
- * Set up logic to keep the toolbar pinned above the keyboard on mobile
+ * Keep the mobile toolbar above the visible viewport while the editor is focused.
  */
-function setupKeyboardAwareToolbar(): void {
+function setupEditingToolbar(onPositionChange?: () => void): void {
   const toolbar = document.querySelector('.editor-toolbar') as HTMLElement;
-  if (!window.visualViewport || !toolbar) return;
+  const editor = document.querySelector('.cm-editor') as HTMLElement;
+  if (!toolbar || !editor) return;
+
+  let editorFocused = false;
+  let updateFrame: number | null = null;
+  let selectionScrollScheduled = false;
+  let keyboardInset: number | null = null;
+
+  const getViewport = (): VisualViewport | null => {
+    if (window.parent !== window) {
+      try {
+        return window.parent.visualViewport || null;
+      } catch {
+        // Parent access is unavailable outside same-origin ingress.
+      }
+    }
+    return window.visualViewport || null;
+  };
+
+  const resetToolbarPosition = () => {
+    toolbar.classList.remove('keyboard-docked');
+    toolbar.style.removeProperty('--keyboard-inset');
+  };
 
   const updateToolbarPosition = () => {
-    const viewport = window.visualViewport!;
-    const height = window.innerHeight;
-    const offset = height - viewport.height - viewport.offsetTop;
-    
-    if (offset > 20) {
-      // Keyboard is open - Dock it to the top of the keyboard/accessory bar
-      toolbar.style.bottom = `${offset}px`;
-      toolbar.style.transform = 'translateY(0)';
-      toolbar.style.margin = '0';
-      toolbar.style.width = '100%';
-      toolbar.style.maxWidth = '100%';
-      toolbar.style.borderRadius = '0'; // Square bottom to dock perfectly
-      toolbar.style.boxShadow = 'none';
-      toolbar.style.borderLeft = 'none';
-      toolbar.style.borderRight = 'none';
+    updateFrame = null;
+    const viewport = getViewport();
+    if (!viewport) return;
+
+    if (!editorFocused) {
+      keyboardInset = null;
+      resetToolbarPosition();
+      return;
+    }
+
+    let overlap = 0;
+    if (window.parent !== window) {
+      try {
+        const frame = window.frameElement;
+        if (frame) {
+          const frameRect = frame.getBoundingClientRect();
+          const visibleBottom = viewport.offsetTop + viewport.height;
+          overlap = frameRect.bottom - visibleBottom;
+        }
+      } catch {
+        // Fall back to the local viewport when the frame is inaccessible.
+      }
     } else {
-      // Keyboard is closed - Return to floating "Energy card" style
-      toolbar.style.bottom = 'env(safe-area-inset-bottom)';
-      toolbar.style.transform = 'translateY(-8px)';
-      toolbar.style.margin = '0 auto';
-      toolbar.style.width = ''; // Restore from CSS
-      toolbar.style.maxWidth = 'calc(100% - 16px)';
-      toolbar.style.borderRadius = '20px';
-      toolbar.style.boxShadow = ''; // Restore from CSS
-      toolbar.style.borderLeft = '';
-      toolbar.style.borderRight = '';
+      overlap = window.innerHeight - viewport.height - viewport.offsetTop;
+    }
+
+    if (overlap <= 80) {
+      if (keyboardInset !== null) {
+        keyboardInset = null;
+        resetToolbarPosition();
+        onPositionChange?.();
+      }
+      return;
+    }
+
+    const nextInset = Math.min(600, Math.max(0, overlap));
+    if (keyboardInset !== null && Math.abs(keyboardInset - nextInset) < 1) return;
+
+    keyboardInset = nextInset;
+    toolbar.classList.add('keyboard-docked');
+    toolbar.style.setProperty('--keyboard-inset', `${keyboardInset}px`);
+
+    if (!selectionScrollScheduled) {
+      selectionScrollScheduled = true;
+      window.setTimeout(() => {
+        selectionScrollScheduled = false;
+        if (editorFocused) onPositionChange?.();
+      }, 200);
     }
   };
 
-  window.visualViewport.addEventListener('resize', updateToolbarPosition);
-  window.visualViewport.addEventListener('scroll', updateToolbarPosition);
-  
-  // Initial position
-  updateToolbarPosition();
+  const scheduleUpdate = () => {
+    if (updateFrame === null) updateFrame = requestAnimationFrame(updateToolbarPosition);
+  };
+
+  const viewport = getViewport();
+  viewport?.addEventListener('resize', scheduleUpdate);
+  viewport?.addEventListener('scroll', scheduleUpdate);
+  window.addEventListener('resize', scheduleUpdate);
+  window.addEventListener('orientationchange', scheduleUpdate);
+
+  editor.addEventListener('focusin', () => {
+    editorFocused = true;
+    keyboardInset = null;
+    selectionScrollScheduled = false;
+    scheduleUpdate();
+  });
+  editor.addEventListener('focusout', () => {
+    window.setTimeout(() => {
+      if (!editor.contains(document.activeElement)) {
+        editorFocused = false;
+        resetToolbarPosition();
+        keyboardInset = null;
+        onPositionChange?.();
+      }
+    }, 100);
+  });
 }
 
 /**
@@ -304,10 +374,12 @@ async function init(): Promise<void> {
           setValidationDetails('Invalid Configuration', validation.errors.join('\n'));
           updateStatus('Invalid config', 'Cannot save', true);
           
-          // Open details automatically if not open
-          if (!isValidationDetailsOpen) {
-            toggleValidationDetails();
-          }
+           // Keep transient mobile editing errors collapsed so they do not cover the editor.
+           const editorFocused = document.querySelector('.cm-editor')?.contains(document.activeElement) ?? false;
+           const keepCollapsed = editorFocused && window.matchMedia('(pointer: coarse)').matches;
+           if (!keepCollapsed && !isValidationDetailsOpen) {
+             toggleValidationDetails();
+           }
         } else {
           // If valid now, check for warnings
           if (validation.warnings && validation.warnings.length > 0) {
@@ -374,15 +446,24 @@ async function init(): Promise<void> {
         }
         statusBarEl.addEventListener('click', statusBarHandler);
         validationDetailsCloseEl.addEventListener('click', validationCloseHandler);
-        if (sponsorBtnMobileEl) {
-          sponsorBtnMobileEl.addEventListener('click', sponsorHandler);
-        }
+         if (sponsorBtnMobileEl) {
+           sponsorBtnMobileEl.addEventListener('click', sponsorHandler);
+         }
+         editorToolbarEl.addEventListener('pointerdown', (event) => {
+           const target = (event.target as HTMLElement).closest(
+             '#undo-btn, #redo-btn, #indent-btn, #dedent-btn, #save-btn-mobile',
+           ) as HTMLElement | null;
+           if (!target) return;
+
+           // Keep CodeMirror focused so iOS does not dismiss the keyboard.
+           event.preventDefault();
+         });
       
       // Initialize toolbar button states
       updateToolbarButtonStates();
 
-      // Set up keyboard-aware toolbar positioning
-      setupKeyboardAwareToolbar();
+       // Keep the editing toolbar above the keyboard
+       setupEditingToolbar(scrollEditorSelectionIntoView);
 
     // Restore state
     restoreState();
@@ -522,8 +603,8 @@ function renderTreeNode(node: FileInfo, level: number = 0): string {
  * Render file list
  */
 function renderFileList(): void {
-   if (files.length === 0) {
-     fileListEl.innerHTML = '<div class="loading">No YAML files found</div>';
+    if (files.length === 0) {
+      fileListEl.innerHTML = '<div class="loading">No supported files found</div>';
      return;
    }
 
@@ -710,9 +791,12 @@ async function loadFile(filename: string): Promise<void> {
     if (saveBtnEl) saveBtnEl.setAttribute('aria-disabled', 'true');
     if (saveBtnMobileEl) saveBtnMobileEl.setAttribute('aria-disabled', 'true');
 
-    setContent(fileContent.content, true); // Skip adding to history
+     await configureEditorForFile(filename);
+     setContent(fileContent.content, true); // Skip adding to history
 
-    isLoadingFile = false;
+     isLoadingFile = false;
+     isDocumentValid = true;
+     validateCurrentDocument();
     currentFilenameEl.textContent = filename;
     if (mobileFilenameEl) {
       // Show only the filename (not the full path) in the small toolbar label
@@ -749,7 +833,7 @@ async function handleSave(): Promise<void> {
     return;
   }
 
-  if (!isDocumentValid) {
+   if (isYamlFile(currentFile) && !isDocumentValid) {
     updateStatus('Cannot save invalid configuration', '', true);
     // Expand the validation details to show the user what's wrong
     if (validationDetails) {
@@ -771,7 +855,12 @@ async function handleSave(): Promise<void> {
       isModified = false;
       updateStatus('Saved, checking config...', 'Running Home Assistant validation');
 
-      const validation = await validateConfig();
+       if (!isYamlFile(currentFile)) {
+         updateStatus('Saved', '');
+         return;
+       }
+
+       const validation = await validateConfig();
 
       if (validation.result === 'valid') {
         updateStatus('Saved, config valid', 'HA validation passed', false, true);

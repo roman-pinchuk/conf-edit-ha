@@ -622,7 +622,7 @@ body {
 .editor-toolbar {
   display: none; /* Hidden on desktop */
   position: fixed;
-  bottom: env(safe-area-inset-bottom);
+  bottom: max(8px, env(safe-area-inset-bottom));
   left: 8px;
   right: 8px;
   margin: 0 auto;
@@ -641,8 +641,14 @@ body {
   height: 56px;
   z-index: 100;
   box-sizing: border-box;
-  transition: bottom 0.1s ease-out, transform 0.1s ease-out, border-radius 0.2s ease, width 0.2s ease, margin 0.2s ease;
+  transition: bottom 0.1s ease-out, transform 0.1s ease-out;
   transform: translateY(-8px); 
+}
+
+.editor-toolbar.keyboard-docked {
+  transition: none;
+  bottom: calc(max(8px, env(safe-area-inset-bottom)) + var(--keyboard-inset, 0px));
+  transform: none;
 }
 
 :root.dark .editor-toolbar {
@@ -656,7 +662,8 @@ body {
   gap: 4px;
 }
 
-.toolbar-section #save-btn {
+.toolbar-section #save-btn,
+.toolbar-section #save-btn-mobile {
   margin-left: 4px;
 }
 
@@ -668,7 +675,8 @@ body {
   .btn-text {
     display: none;
   }
-  .toolbar-section #save-btn {
+  .toolbar-section #save-btn,
+  .toolbar-section #save-btn-mobile {
     min-width: 44px;
     padding: 0;
   }
@@ -681,6 +689,7 @@ body {
   letter-spacing: 0.02em;
   color: var(--text-primary);
   flex: 1;
+  min-width: 0;
   text-align: center;
   pointer-events: none;
   opacity: 0.8;
@@ -916,7 +925,7 @@ body {
     padding: 0.25rem 0.5rem;
     font-size: 0.7rem;
     height: 28px;
-    order: -1; /* Move to top of flex container */
+    order: -3; /* Move to top of flex container */
     border-top: none;
     border-bottom: 1px solid var(--border-color);
     background-color: var(--bg-primary);
@@ -924,15 +933,14 @@ body {
   }
 
   .validation-details {
-    position: fixed;
-    left: 8px;
-    right: 8px;
-    bottom: 76px;
-    max-height: 50vh;
+    order: -2;
+    flex: 0 0 auto;
+    width: 100%;
+    max-height: 30vh;
     border: 1px solid var(--border-color);
     border-left: 4px solid var(--warning-color);
-    border-radius: 16px;
-    z-index: 120;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .validation-details-header {
@@ -944,9 +952,9 @@ body {
     font-size: 11px;
   }
 
-  /* Smaller CodeMirror font on mobile */
+  /* Keep editable text large enough to prevent iOS focus zoom. */
   .cm-editor {
-    font-size: 13px;
+    font-size: 16px;
   }
 
   /* Add padding to the bottom of the editor so floating toolbar doesn't overlap text */
@@ -986,9 +994,9 @@ body {
   .mobile-menu-toggle { min-width: 32px; height: 32px; padding: 6px; }
   .mobile-menu-toggle svg { width: 18px; height: 18px; }
   .sidebar { width: 260px; }
-  .cm-editor { font-size: 12px; }
+   .cm-editor { font-size: 16px; }
   .status-bar { font-size: 0.65rem; }
-  .editor-toolbar { margin: 12px 16px; height: 52px; border-radius: 16px; }
+   .editor-toolbar { margin: 0 auto; height: 52px; border-radius: 16px; }
   .toolbar-icon-button { width: 40px; height: 40px; }
   .toolbar-label { font-size: 11px; }
 }

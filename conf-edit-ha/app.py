@@ -40,6 +40,7 @@ DEFAULT_SETTINGS = {
     'indent_style': 'spaces',
     'indent_opacity': 100,
 }
+SUPPORTED_FILE_EXTENSIONS = {'.yaml', '.yml', '.py', '.sh'}
 
 # Ensure we have the token
 if not TOKEN:
@@ -197,6 +198,11 @@ def build_file_tree(root_path, current_path=None):
                 continue
 
             relative_path = str(item.relative_to(root_path))
+            resolved_item = item.resolve()
+            try:
+                resolved_item.relative_to(root_path.resolve())
+            except ValueError:
+                continue
 
             if item.is_dir():
                 # It's a directory
@@ -207,8 +213,8 @@ def build_file_tree(root_path, current_path=None):
                     'children': build_file_tree(root_path, item)
                 }
                 tree.append(node)
-            elif item.suffix.lower() in ['.yaml', '.yml']:
-                # It's a YAML file
+            elif item.is_file() and item.suffix.lower() in SUPPORTED_FILE_EXTENSIONS:
+                # It's a supported text file
                 node = {
                     'name': item.name,
                     'path': relative_path,
@@ -225,7 +231,7 @@ def build_file_tree(root_path, current_path=None):
 
 @app.route('/api/files')
 def list_files():
-    """List all YAML files in the config directory as a tree structure"""
+    """List supported text files in the config directory as a tree structure"""
     try:
         config_path = Path(CONFIG_DIR)
 
@@ -247,19 +253,20 @@ def list_files():
 def read_file(filename):
     """Read the content of a specific file"""
     try:
-        resolved = os.path.normpath(os.path.join(CONFIG_DIR, filename))
-        if not resolved.startswith(CONFIG_DIR + os.sep) and resolved != CONFIG_DIR:
+        resolved = Path(CONFIG_DIR, filename).resolve()
+        config_root = Path(CONFIG_DIR).resolve()
+        if config_root not in resolved.parents or resolved.suffix.lower() not in SUPPORTED_FILE_EXTENSIONS:
             logger.warning("Path validation failed for: %s", filename)
             return jsonify({'error': 'Access denied'}), 403
 
-        with open(resolved, 'r', encoding='utf-8') as f:
+        with resolved.open('r', encoding='utf-8') as f:
             content = f.read()
 
         return jsonify({
             'filename': filename,
             'content': content,
-            'size': os.path.getsize(resolved),
-            'modified': datetime.fromtimestamp(os.path.getmtime(resolved)).isoformat()
+            'size': resolved.stat().st_size,
+            'modified': datetime.fromtimestamp(resolved.stat().st_mtime).isoformat()
         }), 200
 
     except FileNotFoundError:
@@ -278,8 +285,9 @@ def read_file(filename):
 def write_file(filename):
     """Write content to a specific file (creates backup first)"""
     try:
-        resolved = os.path.normpath(os.path.join(CONFIG_DIR, filename))
-        if not resolved.startswith(CONFIG_DIR + os.sep) and resolved != CONFIG_DIR:
+        resolved = Path(CONFIG_DIR, filename).resolve()
+        config_root = Path(CONFIG_DIR).resolve()
+        if config_root not in resolved.parents or resolved.suffix.lower() not in SUPPORTED_FILE_EXTENSIONS:
             return jsonify({'error': 'Access denied'}), 403
 
         # Get content from request
@@ -290,9 +298,9 @@ def write_file(filename):
         content = data['content']
 
         # Create backup if file exists
-        if os.path.exists(resolved):
+        if resolved.exists():
             try:
-                backup_path = resolved + '.backup'
+                backup_path = Path(f'{resolved}.backup')
                 shutil.copy2(resolved, backup_path)
                 logger.info("Created backup: %s", backup_path)
             except (OSError, IOError) as e:
@@ -300,7 +308,7 @@ def write_file(filename):
                 # Continue without backup
 
         # Write new content
-        with open(resolved, 'w', encoding='utf-8') as f:
+        with resolved.open('w', encoding='utf-8') as f:
             f.write(content)
 
         logger.info("Saved file: %s", resolved)
@@ -308,7 +316,7 @@ def write_file(filename):
         return jsonify({
             'success': True,
             'filename': filename,
-            'size': os.path.getsize(resolved)
+            'size': resolved.stat().st_size
         }), 200
 
     except PermissionError:

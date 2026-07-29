@@ -3,13 +3,14 @@
  */
 
 import { EditorView, basicSetup } from 'codemirror';
-import { EditorState, Compartment, RangeSetBuilder, Transaction } from '@codemirror/state';
-import { Decoration, DecorationSet, ViewPlugin, ViewUpdate, keymap } from '@codemirror/view';
+import { EditorState, Compartment, RangeSetBuilder, Transaction, type Extension } from '@codemirror/state';
+import { Decoration, DecorationSet, ViewPlugin, ViewUpdate, keymap, scrollPastEnd } from '@codemirror/view';
 import { yaml } from '@codemirror/lang-yaml';
 import { autocompletion } from '@codemirror/autocomplete';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { linter, Diagnostic } from '@codemirror/lint';
-import { indentLess, insertTab, undo, redo, undoDepth, redoDepth } from '@codemirror/commands';
+import { indentLess, indentMore, undo, redo, undoDepth, redoDepth } from '@codemirror/commands';
+import { indentUnit, StreamLanguage } from '@codemirror/language';
 import { parse as parseYAML } from 'yaml';
 import { entityCompletions, isValidEntity } from './autocomplete';
 import { isDark } from './theme';
@@ -131,7 +132,13 @@ function validateDocument(state: EditorState): void {
 }
 
 let editorView: EditorView | null = null;
+type EditorFileType = 'yaml' | 'python' | 'shell';
+let currentFileType: EditorFileType = 'yaml';
 const themeCompartment = new Compartment();
+const languageCompartment = new Compartment();
+const indentationCompartment = new Compartment();
+const linterCompartment = new Compartment();
+const autocompleteCompartment = new Compartment();
 const rainbowIndentThemeCompartment = new Compartment();
 const indentationGuidesCompartment = new Compartment();
 const rainbowBracketsCompartment = new Compartment();
@@ -140,9 +147,60 @@ const defaultEditorSettings: EditorSettings = {
   indent_style: 'spaces',
   indent_opacity: 100,
 };
+
+/** Return the editor language selected from a supported filename. */
+export function getEditorFileType(filename: string): EditorFileType {
+  const extension = filename.toLowerCase().split('.').pop();
+  if (extension === 'py') return 'python';
+  if (extension === 'sh') return 'shell';
+  return 'yaml';
+}
+
+async function loadLanguageExtension(fileType: EditorFileType): Promise<Extension> {
+  if (fileType === 'python') {
+    const { python } = await import('@codemirror/lang-python');
+    return python();
+  }
+  if (fileType === 'shell') {
+    const { shell } = await import('@codemirror/legacy-modes/mode/shell');
+    return StreamLanguage.define(shell);
+  }
+  return yaml();
+}
+
+function indentationExtension(fileType: EditorFileType) {
+  const spaces = fileType === 'python' ? '    ' : '  ';
+  const size = spaces.length;
+  return [
+    indentUnit.of(spaces),
+    EditorState.tabSize.of(size),
+    EditorView.theme({ '&': { tabSize: size } }),
+  ];
+}
 let editorSettings: EditorSettings = defaultEditorSettings;
 let themeChangeHandler: ((e: Event) => void) | null = null;
 let saveShortcutHandler: ((e: KeyboardEvent) => void) | null = null;
+
+/**
+ * iOS WebKit zooms focused editable text smaller than 16px.
+ */
+function getEffectiveFontSize(fontSize: number): number {
+  return window.matchMedia('(pointer: coarse)').matches
+    ? Math.max(16, fontSize)
+    : fontSize;
+}
+
+const toolbarScrollMargins = EditorView.scrollMargins.of((view) => {
+  const toolbar = document.getElementById('editor-toolbar');
+  if (!toolbar || getComputedStyle(toolbar).display === 'none') return null;
+  if (getComputedStyle(toolbar).position !== 'fixed') return null;
+
+  const editorRect = view.dom.getBoundingClientRect();
+  const toolbarRect = toolbar.getBoundingClientRect();
+  return {
+    bottom: Math.max(0, editorRect.bottom - toolbarRect.top + 8),
+  };
+});
 
 /**
  * Rainbow brackets extension
@@ -397,27 +455,22 @@ export function createEditor(parent: HTMLElement, settings: EditorSettings = def
     doc: '',
     extensions: [
       basicSetup,
-      yaml(),
-      linter(yamlLinter),
+      ...(window.matchMedia('(pointer: coarse)').matches ? [scrollPastEnd()] : []),
+       languageCompartment.of(yaml()),
+       linterCompartment.of(linter(yamlLinter)),
       indentationGuidesCompartment.of(indentationGuides),
       rainbowBracketsCompartment.of(rainbowBrackets),
       rainbowBracketsTheme,
-      autocompletion({
-        override: [entityCompletions],
-        activateOnTyping: true,
-      }),
-      // Tab inserts 2 spaces, Shift+Tab unindents
-      keymap.of([
-        { key: 'Tab', run: insertTab },
-        { key: 'Shift-Tab', run: indentLess }
-      ]),
-      EditorState.tabSize.of(2),
-      EditorView.theme({
-        '&': {
-          // Ensure tab renders as 2 spaces visually
-          tabSize: 2,
-        },
-      }),
+       autocompleteCompartment.of(autocompletion({
+         override: [entityCompletions],
+         activateOnTyping: true,
+       })),
+       // Increase/decrease indentation using the active language's whitespace unit.
+       keymap.of([
+         { key: 'Tab', run: indentMore },
+         { key: 'Shift-Tab', run: indentLess }
+       ]),
+       indentationCompartment.of(indentationExtension('yaml')),
       EditorView.contentAttributes.of({
         autocorrect: "off",
         autocapitalize: "off",
@@ -426,16 +479,17 @@ export function createEditor(parent: HTMLElement, settings: EditorSettings = def
         inputmode: "text",
         autocomplete: "new-password" // More aggressive way to hide iOS autofill bar
       }),
+      toolbarScrollMargins,
       themeCompartment.of(isDark() ? oneDark : []),
       rainbowIndentThemeCompartment.of(createIndentTheme(isDark())),
       lineWrappingCompartment.of(EditorView.lineWrapping),
-      EditorView.updateListener.of((update) => {
-        if (update.docChanged) {
-          // Notify that content has changed
-          window.dispatchEvent(new Event('editor-changed'));
-          validateDocument(update.state);
-        }
-      }),
+       EditorView.updateListener.of((update) => {
+         if (update.docChanged) {
+           // Notify that content has changed
+           window.dispatchEvent(new Event('editor-changed'));
+           if (currentFileType === 'yaml') validateDocument(update.state);
+         }
+       }),
     ],
   });
 
@@ -444,7 +498,7 @@ export function createEditor(parent: HTMLElement, settings: EditorSettings = def
       parent,
     });
 
-    editorView.dom.style.fontSize = '14px';
+    editorView.dom.style.fontSize = `${getEffectiveFontSize(14)}px`;
 
     // Listen for theme changes (store handler for cleanup)
     themeChangeHandler = (e: Event) => {
@@ -457,7 +511,44 @@ export function createEditor(parent: HTMLElement, settings: EditorSettings = def
     };
     window.addEventListener('theme-changed', themeChangeHandler);
 
-    return editorView;
+     return editorView;
+}
+
+/** Reconfigure syntax, indentation, validation, and autocomplete for a file. */
+export async function configureEditorForFile(filename: string): Promise<void> {
+  if (!editorView) return;
+
+  const fileType = getEditorFileType(filename);
+  currentFileType = fileType;
+  const isYaml = fileType === 'yaml';
+  const language = await loadLanguageExtension(fileType);
+
+  // A newer selection may have started while the parser was loading.
+  if (currentFileType !== fileType || !editorView) return;
+
+  editorView.dispatch({
+    effects: [
+      languageCompartment.reconfigure(language),
+      indentationCompartment.reconfigure(indentationExtension(fileType)),
+      linterCompartment.reconfigure(isYaml ? linter(yamlLinter) : []),
+      autocompleteCompartment.reconfigure(isYaml ? autocompletion({
+        override: [entityCompletions],
+        activateOnTyping: true,
+      }) : []),
+    ],
+  });
+
+  if (!isYaml) {
+    currentValidationResult = { isValid: true, errors: [], warnings: [] };
+    window.dispatchEvent(new CustomEvent('editor-validation', {
+      detail: currentValidationResult,
+    }));
+  }
+}
+
+/** Re-run the active file type's local validation after loading content. */
+export function validateCurrentDocument(): void {
+  if (editorView && currentFileType === 'yaml') validateDocument(editorView.state);
 }
 
 /**
@@ -467,7 +558,7 @@ export function applyAppearanceSettings(settings: AppearanceSettings): void {
   editorSettings = settings;
   if (!editorView) return;
 
-  editorView.dom.style.fontSize = `${settings.fontSize}px`;
+  editorView.dom.style.fontSize = `${getEffectiveFontSize(settings.fontSize)}px`;
   editorView.dispatch({
     effects: [
       rainbowIndentThemeCompartment.reconfigure(createIndentTheme(isDark())),
@@ -551,6 +642,17 @@ export function focusEditor(): void {
 }
 
 /**
+ * Keep the current selection visible when an overlay toolbar moves above it.
+ */
+export function scrollEditorSelectionIntoView(): void {
+  if (!editorView) return;
+
+  editorView.dispatch({
+    effects: EditorView.scrollIntoView(editorView.state.selection.main.head),
+  });
+}
+
+/**
  * Register save shortcut (Ctrl+S / Cmd+S)
  */
 export function registerSaveShortcut(callback: () => void): void {
@@ -593,7 +695,7 @@ export function editorRedo(): boolean {
  */
 export function editorIndent(): boolean {
   if (!editorView) return false;
-  return insertTab(editorView);
+  return indentMore(editorView);
 }
 
 /**
