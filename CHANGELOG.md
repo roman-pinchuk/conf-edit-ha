@@ -2,6 +2,16 @@
 
 All notable changes to the Configuration Editor project are documented in this file.
 
+## [1.6.2] - 2026-07-29
+
+### Features
+- feat: support editing Python and shell files
+
+### Maintenance
+- chore: release 1.6.1 [skip ci]
+- chore: release 1.6.0 [skip ci]
+
+
 ## [1.6.1] - 2026-07-21
 
 ### Features
