@@ -833,7 +833,8 @@ async function handleSave(): Promise<void> {
     return;
   }
 
-   if (isYamlFile(currentFile) && !isDocumentValid) {
+   const localValidation = isYamlFile(currentFile) ? validateCurrentDocument() : null;
+   if (localValidation && !localValidation.isValid) {
     updateStatus('Cannot save invalid configuration', '', true);
     // Expand the validation details to show the user what's wrong
     if (validationDetails) {

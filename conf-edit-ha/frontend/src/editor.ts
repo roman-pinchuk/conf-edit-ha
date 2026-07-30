@@ -3,7 +3,7 @@
  */
 
 import { EditorView, basicSetup } from 'codemirror';
-import { EditorState, Compartment, RangeSetBuilder, Transaction, type Extension } from '@codemirror/state';
+import { EditorState, Compartment, RangeSetBuilder, Transaction, type Extension, type Text } from '@codemirror/state';
 import { Decoration, DecorationSet, ViewPlugin, ViewUpdate, keymap, scrollPastEnd } from '@codemirror/view';
 import { yaml } from '@codemirror/lang-yaml';
 import { autocompletion } from '@codemirror/autocomplete';
@@ -11,10 +11,9 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { linter, Diagnostic } from '@codemirror/lint';
 import { indentLess, indentMore, undo, redo, undoDepth, redoDepth } from '@codemirror/commands';
 import { indentUnit, StreamLanguage } from '@codemirror/language';
-import { parse as parseYAML } from 'yaml';
+import { parseDocument, type YAMLError as YAMLParserError } from 'yaml';
 import { entityCompletions, isValidEntity } from './autocomplete';
 import { isDark } from './theme';
-import { syntaxTree } from '@codemirror/language';
 import type { EditorSettings } from './api';
 import type { AppearanceSettings } from './appearance';
 
@@ -26,6 +25,8 @@ export interface DocumentValidationResult {
 
 let currentValidationResult: DocumentValidationResult = { isValid: true, errors: [], warnings: [] };
 let lastValidContent: string | null = null;
+let cachedValidationDoc: Text | null = null;
+let cachedValidation: { result: DocumentValidationResult; diagnostics: Diagnostic[] } | null = null;
 
 export function getValidationResult(): DocumentValidationResult {
   return currentValidationResult;
@@ -43,24 +44,40 @@ export function restoreLastValidContent(): boolean {
 /**
  * Validate document syntax and entities
  */
-function validateDocument(state: EditorState): void {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-  let syntaxErrorCount = 0;
-  
-  syntaxTree(state).iterate({
-    enter: (node) => {
-      if (node.type.isError) {
-        syntaxErrorCount++;
-      }
-    }
-  });
+function formatYamlError(error: YAMLParserError): string {
+  return error.message;
+}
 
-  if (syntaxErrorCount > 0) {
-    errors.push(`Found YAML syntax error(s).`);
+function yamlErrorDiagnostic(error: YAMLParserError, docLength: number): Diagnostic {
+  const from = Math.min(error.pos[0], docLength);
+  const to = Math.min(Math.max(error.pos[1], from), docLength);
+
+  return {
+    from,
+    to,
+    severity: 'error',
+    message: formatYamlError(error),
+  };
+}
+
+/** Validate the full document and cache the result for the immutable editor text. */
+function validateDocument(state: EditorState): { result: DocumentValidationResult; diagnostics: Diagnostic[] } {
+  if (cachedValidationDoc === state.doc && cachedValidation) {
+    currentValidationResult = cachedValidation.result;
+    return cachedValidation;
   }
 
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const diagnostics: Diagnostic[] = [];
   const docText = state.doc.toString();
+  const parsedDocument = parseDocument(docText, { strict: true });
+
+  for (const error of parsedDocument.errors) {
+    errors.push(formatYamlError(error));
+    diagnostics.push(yamlErrorDiagnostic(error, state.doc.length));
+  }
+
   const lines = docText.split('\n');
   let inEntitiesList = false;
   
@@ -119,16 +136,22 @@ function validateDocument(state: EditorState): void {
     lastValidContent = docText;
   }
 
-  currentValidationResult = {
+  const result = {
     isValid,
     errors,
     warnings
   };
-  
+
+  currentValidationResult = result;
+  cachedValidationDoc = state.doc;
+  cachedValidation = { result, diagnostics };
+
   // Dispatch custom event for the UI
   window.dispatchEvent(new CustomEvent('editor-validation', { 
-    detail: currentValidationResult 
+    detail: result
   }));
+
+  return cachedValidation;
 }
 
 let editorView: EditorView | null = null;
@@ -398,52 +421,11 @@ function createIndentTheme(dark: boolean): ReturnType<typeof EditorView.theme> {
   return EditorView.theme(styles, { dark });
 }
 
-interface YAMLError {
-  linePos?: Array<{ line: number; col: number }>;
-  message?: string;
-}
-
 /**
  * YAML linter that validates YAML syntax
  */
 function yamlLinter(view: EditorView): Diagnostic[] {
-   const diagnostics: Diagnostic[] = [];
-   const doc = view.state.doc.toString();
-
-   try {
-     // Try to parse the YAML
-     parseYAML(doc, { strict: true });
-   } catch (error) {
-     // YAML parsing error found
-     const yamlError = error as YAMLError;
-     if (yamlError && yamlError.linePos) {
-       // Calculate position in the document
-       const line = yamlError.linePos[0].line - 1; // linePos is 1-indexed
-       const col = yamlError.linePos[0].col - 1;
-
-       const lineInfo = view.state.doc.line(line + 1);
-       const from = lineInfo.from + col;
-       const to = Math.min(from + 10, lineInfo.to); // Highlight ~10 chars or to end of line
-
-       diagnostics.push({
-         from,
-         to,
-         severity: 'error',
-         message: yamlError.message || 'YAML syntax error',
-       });
-     } else {
-       // Generic error without position info
-       const errorMessage = error instanceof Error ? error.message : 'YAML syntax error';
-       diagnostics.push({
-         from: 0,
-         to: Math.min(10, doc.length),
-         severity: 'error',
-         message: errorMessage,
-       });
-     }
-   }
-
-   return diagnostics;
+  return validateDocument(view.state).diagnostics;
 }
 
 /**
@@ -487,8 +469,7 @@ export function createEditor(parent: HTMLElement, settings: EditorSettings = def
          if (update.docChanged) {
            // Notify that content has changed
            window.dispatchEvent(new Event('editor-changed'));
-           if (currentFileType === 'yaml') validateDocument(update.state);
-         }
+          }
        }),
     ],
   });
@@ -520,6 +501,8 @@ export async function configureEditorForFile(filename: string): Promise<void> {
 
   const fileType = getEditorFileType(filename);
   currentFileType = fileType;
+  cachedValidationDoc = null;
+  cachedValidation = null;
   const isYaml = fileType === 'yaml';
   const language = await loadLanguageExtension(fileType);
 
@@ -546,9 +529,12 @@ export async function configureEditorForFile(filename: string): Promise<void> {
   }
 }
 
-/** Re-run the active file type's local validation after loading content. */
-export function validateCurrentDocument(): void {
-  if (editorView && currentFileType === 'yaml') validateDocument(editorView.state);
+/** Re-run the active file type's local validation after loading or before saving. */
+export function validateCurrentDocument(): DocumentValidationResult {
+  if (editorView && currentFileType === 'yaml') {
+    return validateDocument(editorView.state).result;
+  }
+  return currentValidationResult;
 }
 
 /**
