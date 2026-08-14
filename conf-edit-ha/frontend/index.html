@@ -89,14 +89,14 @@
         <div class="sidebar-header">
           <h2>Files</h2>
         </div>
-        <div id="file-list" class="file-list" role="tree" aria-label="YAML files">
+        <div id="file-list" class="file-list" role="tree" aria-label="Supported files">
           <div class="loading" aria-live="polite">Loading files...</div>
         </div>
       </aside>
 
       <!-- Editor Container -->
       <main class="editor-container" aria-label="Code editor">
-        <div id="editor" class="editor" role="textbox" aria-label="YAML file editor" aria-multiline="true"></div>
+        <div id="editor" class="editor" role="textbox" aria-label="Configuration file editor" aria-multiline="true"></div>
 
         <nav class="editor-toolbar" id="editor-toolbar" aria-label="Editor editing tools">
           <div class="toolbar-section">
@@ -213,6 +213,7 @@
                       editor</small></span><input id="appearance-line-wrapping" type="checkbox" checked></label>
                 <label class="appearance-checkbox"><span><strong>Rainbow brackets</strong><small>Color brackets by
                       nesting level</small></span><input id="appearance-rainbow-brackets" type="checkbox" checked></label>
+                <label class="appearance-checkbox"><span><strong>Format YAML and JSON on save</strong><small>Apply Prettier formatting before saving</small></span><input id="appearance-format-on-save" type="checkbox"></label>
                 </section>
                 </div>
                 <div class="appearance-footer">

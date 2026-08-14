@@ -10,6 +10,7 @@ export interface AppearanceSettings extends EditorSettings {
   fontSize: number;
   lineWrapping: boolean;
   rainbowBrackets: boolean;
+  formatOnSave: boolean;
 }
 
 const STORAGE_KEY = 'ha-editor-appearance';
@@ -22,6 +23,7 @@ const DEFAULT_SETTINGS: AppearanceSettings = {
   fontSize: 14,
   lineWrapping: true,
   rainbowBrackets: true,
+  formatOnSave: false,
 };
 
 let currentSettings = { ...DEFAULT_SETTINGS };
@@ -50,6 +52,7 @@ function readSavedSettings(serverSettings: EditorSettings): AppearanceSettings {
       }
       if (typeof parsed.lineWrapping === 'boolean') settings.lineWrapping = parsed.lineWrapping;
       if (typeof parsed.rainbowBrackets === 'boolean') settings.rainbowBrackets = parsed.rainbowBrackets;
+      if (typeof parsed.formatOnSave === 'boolean') settings.formatOnSave = parsed.formatOnSave;
       return settings;
     }
 
@@ -79,6 +82,7 @@ function updateControls(): void {
   const fontSizeValue = document.getElementById('appearance-font-size-value');
   const wrapping = document.getElementById('appearance-line-wrapping') as HTMLInputElement | null;
   const brackets = document.getElementById('appearance-rainbow-brackets') as HTMLInputElement | null;
+  const formatOnSave = document.getElementById('appearance-format-on-save') as HTMLInputElement | null;
 
   if (theme) theme.value = currentSettings.theme;
   if (indentStyle) indentStyle.value = currentSettings.indent_style;
@@ -88,6 +92,7 @@ function updateControls(): void {
   if (fontSizeValue) fontSizeValue.textContent = `${currentSettings.fontSize}px`;
   if (wrapping) wrapping.checked = currentSettings.lineWrapping;
   if (brackets) brackets.checked = currentSettings.rainbowBrackets;
+  if (formatOnSave) formatOnSave.checked = currentSettings.formatOnSave;
 }
 
 function emitSettingsChanged(): void {
@@ -157,6 +162,9 @@ export function initAppearance(serverSettings: EditorSettings): void {
   });
   document.getElementById('appearance-rainbow-brackets')?.addEventListener('change', (event) => {
     changeSetting('rainbowBrackets', (event.target as HTMLInputElement).checked);
+  });
+  document.getElementById('appearance-format-on-save')?.addEventListener('change', (event) => {
+    changeSetting('formatOnSave', (event.target as HTMLInputElement).checked);
   });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && dialog?.open) dialog.close();

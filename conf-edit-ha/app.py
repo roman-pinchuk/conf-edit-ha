@@ -40,7 +40,7 @@ DEFAULT_SETTINGS = {
     'indent_style': 'spaces',
     'indent_opacity': 100,
 }
-SUPPORTED_FILE_EXTENSIONS = {'.yaml', '.yml', '.py', '.sh'}
+SUPPORTED_FILE_EXTENSIONS = {'.yaml', '.yml', '.json', '.py', '.sh'}
 
 # Ensure we have the token
 if not TOKEN:

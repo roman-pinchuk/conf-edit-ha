@@ -3,5 +3,5 @@ build_from:
   amd64: "ghcr.io/home-assistant/amd64-base-python:3.11-alpine3.18"
 labels:
   org.opencontainers.image.title: "Configuration Editor"
-  org.opencontainers.image.description: "Lightweight YAML editor for Home Assistant"
+  org.opencontainers.image.description: "Lightweight YAML and JSON editor for Home Assistant"
   org.opencontainers.image.source: "https://github.com/roman-pinchuk/conf-edit-ha"

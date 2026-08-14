@@ -4,19 +4,22 @@ A lightweight text editor for editing Home Assistant configuration files directl
 
 ## Features
 
-- **YAML Syntax Highlighting**: Easy-to-read color-coded YAML
+- **YAML and JSON Syntax Highlighting**: Easy-to-read color-coded configuration files
 - **Entity Autocomplete**: Type to get suggestions for entity IDs from your Home Assistant instance
 - **Theme Support**: Automatically follows your system theme (light/dark) or manually override
 - **Auto-Backup**: Every save creates a backup file (`.backup` extension)
-- **File Browser**: Easy navigation of YAML files in your `/config` directory
+- **Optional Prettier Formatting**: Format YAML and JSON before saving
+- **File Browser**: Easy navigation of supported files in your `/config` directory
 
 ## How to Use
 
 1. **Access the Editor**: Click on "Config Editor" in your Home Assistant sidebar
-2. **Select a File**: Choose a YAML file from the file list on the left
+2. **Select a File**: Choose a YAML, JSON, Python, or shell file from the file list on the left
 3. **Edit**: Make your changes with full syntax highlighting
 4. **Autocomplete**: Start typing and press `Ctrl+Space` to trigger entity suggestions
 5. **Save**: Click the "Save" button or press `Ctrl+S` (backup created automatically)
+
+Prettier formatting is disabled by default. Enable **Format YAML and JSON on save** in Appearance settings when desired.
 
 ## Configuration Options
 

@@ -1,0 +1,14 @@
+{
+  "name": "Configuration Editor",
+  "enabled": true,
+  "version": 1,
+  "features": [
+    "yaml",
+    "json",
+    "prettier"
+  ],
+  "settings": {
+    "theme": "auto",
+    "lineWrapping": true
+  }
+}

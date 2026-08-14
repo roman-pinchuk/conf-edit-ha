@@ -7,6 +7,7 @@ import { createEditor, setContent, getContent, registerSaveShortcut, editorUndo,
 import { fetchEntities, fetchFiles, fetchSettings, readFile, saveFile, validateConfig, type EditorSettings, type FileInfo } from './api';
 import { setEntities } from './autocomplete';
 import { getAppearanceSettings, initAppearance } from './appearance';
+import { formatDocument } from './formatter';
 
 // Application state
 let currentFile: string | null = null;
@@ -39,6 +40,11 @@ const STORAGE_KEY_EXPANDED_DIRS = 'conf-edit-ha:expanded-dirs';
 
 function isYamlFile(filename: string): boolean {
   return getEditorFileType(filename) === 'yaml';
+}
+
+function isStructuredFile(filename: string): boolean {
+  const fileType = getEditorFileType(filename);
+  return fileType === 'yaml' || fileType === 'json';
 }
 
 // DOM elements
@@ -833,8 +839,8 @@ async function handleSave(): Promise<void> {
     return;
   }
 
-   const localValidation = isYamlFile(currentFile) ? validateCurrentDocument() : null;
-   if (localValidation && !localValidation.isValid) {
+  let localValidation = isStructuredFile(currentFile) ? validateCurrentDocument() : null;
+  if (localValidation && !localValidation.isValid) {
     updateStatus('Cannot save invalid configuration', '', true);
     // Expand the validation details to show the user what's wrong
     if (validationDetails) {
@@ -842,6 +848,26 @@ async function handleSave(): Promise<void> {
       toggleValidationDetails();
     }
     return;
+  }
+
+  if (getAppearanceSettings().formatOnSave && localValidation && isStructuredFile(currentFile)) {
+    try {
+      updateStatus('Formatting...', 'Applying Prettier formatting');
+      const fileType = getEditorFileType(currentFile);
+      const formattedContent = await formatDocument(getContent(), fileType);
+      if (formattedContent !== getContent()) {
+        setContent(formattedContent);
+      }
+      localValidation = validateCurrentDocument();
+      if (!localValidation.isValid) {
+        updateStatus('Cannot save formatted configuration', '', true);
+        return;
+      }
+    } catch (error) {
+      console.error('Error formatting file:', error);
+      updateStatus('Cannot format configuration', 'Prettier could not parse this file', true);
+      return;
+    }
   }
 
     try {

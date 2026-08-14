@@ -1,5 +1,5 @@
 /**
- * CodeMirror 6 editor setup with YAML support
+ * CodeMirror 6 editor setup with YAML and JSON support
  */
 
 import { EditorView, basicSetup } from 'codemirror';
@@ -60,6 +60,18 @@ function yamlErrorDiagnostic(error: YAMLParserError, docLength: number): Diagnos
   };
 }
 
+function jsonErrorDiagnostic(error: SyntaxError, docLength: number): Diagnostic {
+  const position = error.message.match(/position (\d+)/i);
+  const from = Math.min(position ? Number(position[1]) : 0, docLength);
+
+  return {
+    from,
+    to: Math.min(from + 1, docLength),
+    severity: 'error',
+    message: error.message,
+  };
+}
+
 /** Validate the full document and cache the result for the immutable editor text. */
 function validateDocument(state: EditorState): { result: DocumentValidationResult; diagnostics: Diagnostic[] } {
   if (cachedValidationDoc === state.doc && cachedValidation) {
@@ -71,14 +83,24 @@ function validateDocument(state: EditorState): { result: DocumentValidationResul
   const warnings: string[] = [];
   const diagnostics: Diagnostic[] = [];
   const docText = state.doc.toString();
-  const parsedDocument = parseDocument(docText, { strict: true });
+  if (currentFileType === 'json') {
+    try {
+      JSON.parse(docText);
+    } catch (error) {
+      const jsonError = error instanceof SyntaxError ? error : new SyntaxError(String(error));
+      errors.push(jsonError.message);
+      diagnostics.push(jsonErrorDiagnostic(jsonError, state.doc.length));
+    }
+  } else {
+    const parsedDocument = parseDocument(docText, { strict: true });
 
-  for (const error of parsedDocument.errors) {
-    errors.push(formatYamlError(error));
-    diagnostics.push(yamlErrorDiagnostic(error, state.doc.length));
+    for (const error of parsedDocument.errors) {
+      errors.push(formatYamlError(error));
+      diagnostics.push(yamlErrorDiagnostic(error, state.doc.length));
+    }
   }
 
-  const lines = docText.split('\n');
+  const lines = currentFileType === 'yaml' ? docText.split('\n') : [];
   let inEntitiesList = false;
   
   for (let i = 0; i < lines.length; i++) {
@@ -155,7 +177,7 @@ function validateDocument(state: EditorState): { result: DocumentValidationResul
 }
 
 let editorView: EditorView | null = null;
-type EditorFileType = 'yaml' | 'python' | 'shell';
+export type EditorFileType = 'yaml' | 'json' | 'python' | 'shell';
 let currentFileType: EditorFileType = 'yaml';
 const themeCompartment = new Compartment();
 const languageCompartment = new Compartment();
@@ -174,12 +196,17 @@ const defaultEditorSettings: EditorSettings = {
 /** Return the editor language selected from a supported filename. */
 export function getEditorFileType(filename: string): EditorFileType {
   const extension = filename.toLowerCase().split('.').pop();
+  if (extension === 'json') return 'json';
   if (extension === 'py') return 'python';
   if (extension === 'sh') return 'shell';
   return 'yaml';
 }
 
 async function loadLanguageExtension(fileType: EditorFileType): Promise<Extension> {
+  if (fileType === 'json') {
+    const { json } = await import('@codemirror/lang-json');
+    return json();
+  }
   if (fileType === 'python') {
     const { python } = await import('@codemirror/lang-python');
     return python();
@@ -503,7 +530,7 @@ export async function configureEditorForFile(filename: string): Promise<void> {
   currentFileType = fileType;
   cachedValidationDoc = null;
   cachedValidation = null;
-  const isYaml = fileType === 'yaml';
+  const isStructuredDocument = fileType === 'yaml' || fileType === 'json';
   const language = await loadLanguageExtension(fileType);
 
   // A newer selection may have started while the parser was loading.
@@ -513,15 +540,15 @@ export async function configureEditorForFile(filename: string): Promise<void> {
     effects: [
       languageCompartment.reconfigure(language),
       indentationCompartment.reconfigure(indentationExtension(fileType)),
-      linterCompartment.reconfigure(isYaml ? linter(yamlLinter) : []),
-      autocompleteCompartment.reconfigure(isYaml ? autocompletion({
+      linterCompartment.reconfigure(isStructuredDocument ? linter(yamlLinter) : []),
+      autocompleteCompartment.reconfigure(fileType === 'yaml' ? autocompletion({
         override: [entityCompletions],
         activateOnTyping: true,
       }) : []),
     ],
   });
 
-  if (!isYaml) {
+  if (!isStructuredDocument) {
     currentValidationResult = { isValid: true, errors: [], warnings: [] };
     window.dispatchEvent(new CustomEvent('editor-validation', {
       detail: currentValidationResult,
@@ -531,7 +558,7 @@ export async function configureEditorForFile(filename: string): Promise<void> {
 
 /** Re-run the active file type's local validation after loading or before saving. */
 export function validateCurrentDocument(): DocumentValidationResult {
-  if (editorView && currentFileType === 'yaml') {
+  if (editorView && (currentFileType === 'yaml' || currentFileType === 'json')) {
     return validateDocument(editorView.state).result;
   }
   return currentValidationResult;

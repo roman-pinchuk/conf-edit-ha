@@ -1,17 +1,18 @@
 # Home Assistant Configuration Editor
 
 
-A lightweight Home Assistant add-on that provides a simple text editor for configuration files with YAML syntax highlighting, entity autocomplete, and Home Assistant config validation after saving.
+A lightweight Home Assistant add-on that provides a simple text editor for configuration files with YAML and JSON syntax highlighting, entity autocomplete, and Home Assistant config validation after saving.
 
 ## Features
 
 - **Lightweight CodeMirror 6 editor** (~1MB, 10x smaller than Monaco)
-- **YAML syntax highlighting** with real-time validation
+- **YAML and JSON syntax highlighting** with real-time validation
 - **Home Assistant config validation** after save using the same config check API as Developer Tools
 - **Entity autocomplete** (substring matching from live HA API)
 - **VS Code-style file tree** with expand/collapse and indentation guides
 - **Rainbow indentation** for YAML structure visualization
 - **Dark/light theme** with automatic system preference detection
+- **Optional Prettier formatting** for YAML and JSON when saving
 - **State persistence** - remembers last opened file
 - **Tree browser** with folder navigation
 - **Auto-backup** on every save (creates `.backup` files)
@@ -31,10 +32,12 @@ A lightweight Home Assistant add-on that provides a simple text editor for confi
 
 Visual settings are available immediately from the gear button in the editor. Use it to change the theme, indentation guides, guide opacity, font size, line wrapping, and rainbow brackets.
 
+Enable **Format YAML and JSON on save** in the appearance settings to apply Prettier formatting before saving. It is disabled by default.
+
 ## Usage
 
 1. Open the add-on from the Home Assistant sidebar
-2. Select a YAML file from the file browser
+2. Select a YAML, JSON, Python, or shell file from the file browser
 3. Edit the file with syntax highlighting
 4. Type to get entity autocomplete suggestions
 5. Click "Save" to save changes (creates automatic backup)
