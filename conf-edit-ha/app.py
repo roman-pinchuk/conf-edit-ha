@@ -193,8 +193,9 @@ def build_file_tree(root_path, current_path=None):
         items = sorted(current_path.iterdir(), key=lambda x: (not x.is_dir(), x.name))
 
         for item in items:
-            # Skip hidden files and common ignored directories
-            if item.name.startswith('.') or item.name in ['__pycache__', 'node_modules']:
+            # Keep hidden configuration entries visible, but skip directories
+            # that are not useful to edit and may contain large build metadata.
+            if item.name in ['.git', '__pycache__', 'node_modules']:
                 continue
 
             relative_path = str(item.relative_to(root_path))
