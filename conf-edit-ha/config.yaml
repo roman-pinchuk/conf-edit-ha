@@ -29,5 +29,5 @@ options:
   indent_opacity: 100
 schema:
   theme: list(auto|light|dark)
-  indent_style: list(spaces|lines)
+  indent_style: list(spaces|lines|dotted)
   indent_opacity: int(0,100)
