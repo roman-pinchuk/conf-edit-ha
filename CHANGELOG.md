@@ -6,6 +6,20 @@ All notable changes to the Configuration Editor project are documented in this f
 - feat: support editing JSON files with syntax highlighting and validation
 - feat: optionally format YAML and JSON with Prettier when saving
 
+## [1.7.0] - 2026-11-06
+
+### Features
+- feat: add JSON support and optional formatting
+
+### Bug Fixes
+- fix: show hidden configuration folders (#31)
+
+### Maintenance
+- chore(deps-dev): bump vite in /conf-edit-ha/frontend (#29)
+- chore(deps-dev): bump source-map-js in /conf-edit-ha/frontend (#28)
+- chore: release 1.6.3 [skip ci]
+
+
 ## [1.6.3] - 2026-07-30
 
 ### Bug Fixes
