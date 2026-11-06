@@ -31,6 +31,7 @@ export interface ValidationResult {
 }
 
 export interface EditorSettings {
+  theme?: 'light' | 'dark' | 'auto';
   indent_style: 'spaces' | 'lines';
   indent_opacity: number;
 }
