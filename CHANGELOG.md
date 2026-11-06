@@ -6,6 +6,15 @@ All notable changes to the Configuration Editor project are documented in this f
 - feat: support editing JSON files with syntax highlighting and validation
 - feat: optionally format YAML and JSON with Prettier when saving
 
+## [1.7.2] - 2026-11-06
+
+### Bug Fixes
+- fix: accept legacy dotted indent setting (#33)
+
+### Maintenance
+- chore: release 1.7.1 [skip ci]
+
+
 ## [1.7.1] - 2026-11-06
 
 ### Maintenance
