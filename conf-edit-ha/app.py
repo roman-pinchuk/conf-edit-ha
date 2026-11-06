@@ -37,6 +37,7 @@ CONFIG_DIR = next((d for d in possible_config_dirs if d and Path(d).exists()), '
 OPTIONS_FILE = Path('/data/options.json')
 
 DEFAULT_SETTINGS = {
+    'theme': 'auto',
     'indent_style': 'spaces',
     'indent_opacity': 100,
 }
@@ -73,6 +74,10 @@ def get_settings():
     try:
         with OPTIONS_FILE.open(encoding='utf-8') as options_file:
             options = json.load(options_file)
+
+        theme = options.get('theme')
+        if theme in ('auto', 'light', 'dark'):
+            settings['theme'] = theme
 
         indent_style = options.get('indent_style')
         if indent_style in ('spaces', 'lines'):

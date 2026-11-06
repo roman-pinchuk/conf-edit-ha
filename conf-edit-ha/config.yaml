@@ -21,7 +21,13 @@ hassio_role: manager
 homeassistant_api: true
 auth_api: true
 map:
-  - homeassistant_config:rw
-  - ssl:ro
-  - addons:ro
-  - backup:ro
+  - type: homeassistant_config
+    read_only: false
+options:
+  theme: "auto"
+  indent_style: "spaces"
+  indent_opacity: 100
+schema:
+  theme: list(auto|light|dark)
+  indent_style: list(spaces|lines)
+  indent_opacity: int(0,100)
